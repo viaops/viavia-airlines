@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Viavia Airlines</title>
 
     <style>
@@ -13,46 +14,64 @@
             color: #24142f;
         }
 
+        /* HEADER */
         header {
-            background: #5b247a;
-            color: white;
-            padding: 25px 50px;
+            background: #ffffff;
+            padding: 18px 50px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid #e5dff0;
         }
 
         .logo img {
-            height: 45px;
+            height: 55px;
             width: auto;
             display: block;
         }
 
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
         nav a {
-            color: white;
+            color: #3d2857;
             text-decoration: none;
-            margin-left: 25px;
+            margin-left: 30px;
             font-weight: bold;
         }
 
+        nav a:hover {
+            color: #6d4a91;
+        }
+
+        .pilot-button {
+            background: #5b247a;
+            color: white !important;
+            padding: 12px 20px;
+            border-radius: 7px;
+        }
+
+        /* HERO */
         .hero {
-            background: linear-gradient(135deg, #6d2b91, #3d1557);
+            background: linear-gradient(135deg, #6d4a91, #3d2857);
             color: white;
             text-align: center;
-            padding: 110px 20px;
+            padding: 120px 20px;
         }
 
         .hero h1 {
-            font-size: 56px;
+            font-size: 58px;
             margin: 0 0 15px;
         }
 
         .hero p {
-            font-size: 24px;
+            font-size: 23px;
             margin-bottom: 35px;
         }
 
-        .button {
+        .hero-button {
             display: inline-block;
             background: white;
             color: #5b247a;
@@ -62,21 +81,30 @@
             font-weight: bold;
         }
 
+        /* SECTIONS */
         .section {
-            padding: 60px 10%;
+            padding: 70px 10%;
             text-align: center;
         }
 
         .section h2 {
-            font-size: 34px;
+            font-size: 36px;
+            margin-bottom: 15px;
         }
 
+        .section-intro {
+            max-width: 750px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* CARDS */
         .cards {
             display: flex;
             justify-content: center;
             gap: 25px;
             flex-wrap: wrap;
-            margin-top: 35px;
+            margin-top: 40px;
         }
 
         .card {
@@ -87,70 +115,139 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
 
+        .card h3 {
+            color: #5b247a;
+            font-size: 22px;
+        }
+
+        .card p {
+            line-height: 1.6;
+        }
+
+        /* FOOTER */
         footer {
             background: #24142f;
             color: white;
             text-align: center;
-            padding: 30px;
+            padding: 35px;
+        }
+
+        footer p {
+            margin: 6px;
         }
     </style>
 </head>
 
 <body>
 
-<header>
-    <div class="logo">
-        <img src="viavia-logo.png" alt="Viavia Airlines">
-    </div>
+    <!-- HEADER -->
+    <header>
 
-    <nav>
-        <a href="#">Home</a>
-        <a href="#">Destinations</a>
-        <a href="#">Fleet</a>
-        <a href="#">Pilot Center</a>
-    </nav>
-</header>
-
-<section class="hero">
-    <h1>Your destination, via us!</h1>
-    <p>Welcome aboard Viavia Airlines.</p>
-
-    <a href="#" class="button">Pilot Center</a>
-</section>
-
-<section class="section">
-    <h2>Welcome to Viavia</h2>
-
-    <p>
-        Viavia Airlines is a virtual airline built for flight simulation
-        enthusiasts. Join our pilots, explore our network, and experience
-        airline operations from the cockpit.
-    </p>
-
-    <div class="cards">
-
-        <div class="card">
-            <h3>Our Fleet</h3>
-            <p>Fly our Airbus A319, A320, A320neo and A321 fleet.</p>
+        <div class="logo">
+            <img src="viavia-logo.png" alt="Viavia Airlines">
         </div>
 
-        <div class="card">
-            <h3>Our Network</h3>
-            <p>Explore Viavia destinations across the United States and beyond.</p>
+        <nav>
+            <a href="#">Home</a>
+            <a href="#">Destinations</a>
+            <a href="#">Fleet</a>
+            <a href="#">About</a>
+            <a href="#" class="pilot-button">Pilot Center</a>
+        </nav>
+
+    </header>
+
+
+    <!-- HERO -->
+    <section class="hero">
+
+        <h1>Your destination, via us!</h1>
+
+        <p>
+            Welcome aboard Viavia Airlines.
+        </p>
+
+        <a href="#" class="hero-button">
+            Explore Viavia
+        </a>
+
+    </section>
+
+
+    <!-- WELCOME -->
+    <section class="section">
+
+        <h2>Welcome to Viavia</h2>
+
+        <p class="section-intro">
+            Viavia Airlines is a virtual airline built for flight simulation
+            enthusiasts. Join our pilots, explore our network, and experience
+            airline operations from the cockpit.
+        </p>
+
+
+        <div class="cards">
+
+            <div class="card">
+                <h3>Our Fleet</h3>
+
+                <p>
+                    Fly our Airbus A319, A320, A320neo and A321 fleet.
+                </p>
+            </div>
+
+
+            <div class="card">
+                <h3>Our Network</h3>
+
+                <p>
+                    Explore Viavia destinations across the United States
+                    and beyond.
+                </p>
+            </div>
+
+
+            <div class="card">
+                <h3>Become a Pilot</h3>
+
+                <p>
+                    Join Viavia and start building your virtual airline
+                    career.
+                </p>
+            </div>
+
         </div>
 
-        <div class="card">
-            <h3>Become a Pilot</h3>
-            <p>Join Viavia and start building your virtual airline career.</p>
-        </div>
+    </section>
 
-    </div>
-</section>
 
-<footer>
-    <p>© 2026 Viavia Airlines</p>
-    <p>Your destination, via us!</p>
-</footer>
+    <!-- PILOT CENTER -->
+    <section class="section">
+
+        <h2>Ready for departure?</h2>
+
+        <p class="section-intro">
+            Join Viavia Airlines and take your flight simulation experience
+            to the next level.
+        </p>
+
+        <br>
+
+        <a href="#" class="hero-button">
+            Join Viavia
+        </a>
+
+    </section>
+
+
+    <!-- FOOTER -->
+    <footer>
+
+        <p>© 2026 Viavia Airlines</p>
+
+        <p>Your destination, via us!</p>
+
+    </footer>
 
 </body>
 </html>
