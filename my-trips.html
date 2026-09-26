@@ -286,17 +286,51 @@ nav a.active{
     font-weight:700;
 }
 
-.gate{
+.gates{
     margin-top:14px;
-    padding:11px 13px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.gate{
+    padding:12px 14px;
     background:#f7f3fa;
     border-radius:8px;
     color:#6e6175;
     font-size:12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
 }
 
 .gate strong{
     color:#5b247a;
+}
+
+.gate-number{
+    color:#5b247a;
+    font-size:15px;
+    font-weight:800;
+}
+
+.gate-pending{
+    color:#8a6500;
+    background:#fff7dc;
+}
+
+.gate-assigned{
+    color:#27713b;
+    background:#e8f4ea;
+}
+
+.gate-status{
+    font-size:11px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.03em;
 }
 
 .actions{
@@ -520,6 +554,13 @@ View trips that have been awarded to you by Viavia Crew Scheduling.
 Only trips that have been awarded by Crew Scheduling appear here.
 Submitting a bid does not place a trip in My Trips.
 
+<br><br>
+
+<strong>Gate Assignment:</strong>
+Gates are not assigned until at least 12 hours before the aircraft's
+scheduled departure. Before that window, the gate displays
+<strong>TBD — Gate assignment pending</strong>.
+
 </div>
 
 
@@ -541,6 +582,8 @@ Viavia Airlines · Pilot Operations · My Trips
    VIAVIA MY TRIPS
    Awarded trips only.
    Crew Scheduling is the authority for trip assignment.
+   Gate information is read from the shared gate assignment
+   database used by Flight Planning.
 ============================================================ */
 
 
@@ -574,6 +617,41 @@ function getViaviaBids(){
         );
 
         return [];
+
+    }
+
+}
+
+
+function getGateAssignments(){
+
+    try{
+
+        const stored =
+            localStorage.getItem(
+                "viaviaGateAssignments"
+            );
+
+        if(!stored){
+            return {};
+        }
+
+        const parsed =
+            JSON.parse(stored);
+
+        return parsed &&
+            typeof parsed === "object"
+                ? parsed
+                : {};
+
+    }catch(error){
+
+        console.error(
+            "Unable to read gate assignments:",
+            error
+        );
+
+        return {};
 
     }
 
@@ -654,18 +732,15 @@ function findPairingForBid(bid){
     }
 
 
-    /*
-     * If an older bid does not contain a valid
-     * pairing ID, match using its flight numbers.
-     */
-
     const bidFlights =
         Array.isArray(bid.flightNumbers)
             ? bid.flightNumbers
             : Array.isArray(bid.flights)
                 ? bid.flights.map(
                     flight =>
-                        flight.flightNumber
+                        typeof flight === "object"
+                            ? flight.flightNumber
+                            : flight
                 )
                 : [];
 
@@ -716,11 +791,6 @@ function isAwardedTrip(bid){
         ).toLowerCase();
 
 
-    /*
-     * Crew Scheduling marks awarded trips with
-     * status = awarded and/or assignmentStatus = assigned.
-     */
-
     return (
         status === "awarded" ||
         assignmentStatus === "assigned" ||
@@ -731,7 +801,7 @@ function isAwardedTrip(bid){
 
 
 /* ------------------------------------------------------------
-   Get the flights to display
+   Get flights
 ------------------------------------------------------------ */
 
 function getFlightsForTrip(
@@ -779,17 +849,20 @@ function getAircraft(
     flights.forEach(
         flight => {
 
-            if(
+            const type =
                 flight &&
-                flight.aircraft &&
-                !aircraft.includes(
-                    flight.aircraft
-                )
+                (
+                    flight.aircraft ||
+                    flight.aircraftType
+                );
+
+
+            if(
+                type &&
+                !aircraft.includes(type)
             ){
 
-                aircraft.push(
-                    flight.aircraft
-                );
+                aircraft.push(type);
 
             }
 
@@ -797,12 +870,8 @@ function getAircraft(
     );
 
 
-    if(
-        aircraft.length
-    ){
-
+    if(aircraft.length){
         return aircraft.join(" / ");
-
     }
 
 
@@ -811,9 +880,7 @@ function getAircraft(
         Array.isArray(pairing.aircraft)
     ){
 
-        return pairing.aircraft.join(
-            " / "
-        );
+        return pairing.aircraft.join(" / ");
 
     }
 
@@ -882,12 +949,8 @@ function calculateTripDuration(
     flights
 ){
 
-    if(
-        !flights.length
-    ){
-
+    if(!flights.length){
         return "—";
-
     }
 
     const first =
@@ -920,12 +983,8 @@ function calculateTripDuration(
     }
 
 
-    while(
-        end < start
-    ){
-
+    while(end < start){
         end += 1440;
-
     }
 
 
@@ -942,9 +1001,7 @@ function calculateTripDuration(
 
 
     if(hours === 0){
-
         return `${minutes} min`;
-
     }
 
 
@@ -971,12 +1028,8 @@ function getTripRoute(
 
     }
 
-    if(
-        !flights.length
-    ){
-
+    if(!flights.length){
         return "Route unavailable";
-
     }
 
 
@@ -990,9 +1043,7 @@ function getTripRoute(
         ];
 
 
-    return route.join(
-        " → "
-    );
+    return route.join(" → ");
 
 }
 
@@ -1031,7 +1082,134 @@ function escapeHtml(value){
 
 
 /* ------------------------------------------------------------
-   Render a flight leg
+   Gate status
+------------------------------------------------------------ */
+
+function getGateForFlight(
+    flight
+){
+
+    if(!flight){
+        return {
+            assigned:false,
+            gate:null
+        };
+    }
+
+
+    const assignments =
+        getGateAssignments();
+
+
+    const assignment =
+        assignments[
+            flight.flightNumber
+        ];
+
+
+    if(
+        assignment &&
+        assignment.gate
+    ){
+
+        return {
+            assigned:true,
+            gate:assignment.gate,
+            assignedAt:
+                assignment.assignedAt || null
+        };
+
+    }
+
+
+    return {
+        assigned:false,
+        gate:null
+    };
+
+}
+
+
+/* ------------------------------------------------------------
+   Render gate for a flight
+------------------------------------------------------------ */
+
+function renderGate(
+    flight
+){
+
+    const gate =
+        getGateForFlight(
+            flight
+        );
+
+
+    if(gate.assigned){
+
+        return `
+
+            <div class="gate gate-assigned">
+
+                <div>
+
+                    <strong>
+                        ${escapeHtml(
+                            flight.flightNumber
+                        )}
+                        Gate:
+                    </strong>
+
+                    <span class="gate-number">
+                        ${escapeHtml(
+                            gate.gate
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="gate-status">
+                    Assigned
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+
+    return `
+
+        <div class="gate gate-pending">
+
+            <div>
+
+                <strong>
+                    ${escapeHtml(
+                        flight.flightNumber
+                    )}
+                    Gate:
+                </strong>
+
+                <span>
+                    TBD — Gate assignment pending
+                </span>
+
+            </div>
+
+            <div class="gate-status">
+                Pending
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* ------------------------------------------------------------
+   Render flight leg
 ------------------------------------------------------------ */
 
 function renderLeg(
@@ -1078,6 +1256,7 @@ function renderLeg(
             <div class="leg-aircraft">
                 ${escapeHtml(
                     flight.aircraft ||
+                    flight.aircraftType ||
                     "—"
                 )}
             </div>
@@ -1105,12 +1284,8 @@ function renderTrip(
         );
 
 
-    if(
-        !flights.length
-    ){
-
+    if(!flights.length){
         return "";
-
     }
 
 
@@ -1170,6 +1345,12 @@ function renderTrip(
             .join("");
 
 
+    const gateBlocks =
+        flights
+            .map(renderGate)
+            .join("");
+
+
     const firstFlightPlanning =
         first.flightNumber
             ?
@@ -1183,10 +1364,6 @@ function renderTrip(
     let tripDetailsButton =
         "";
 
-
-    /*
-     * Trip 001 has a dedicated trip-details page.
-     */
 
     if(
         String(tripNumber).toUpperCase()
@@ -1258,7 +1435,6 @@ function renderTrip(
                         ${escapeHtml(
                             first.departure
                         )}
-
                     </div>
 
                 </div>
@@ -1379,18 +1555,13 @@ function renderTrip(
             </div>
 
 
-            <div class="gate">
+            <div class="gates">
 
-                <strong>Gate:</strong>
+                <div class="legs-title">
+                    Gate Assignments
+                </div>
 
-                ${escapeHtml(
-                    bid.gateStatus ||
-                    (
-                        pairing &&
-                        pairing.gateStatus
-                    ) ||
-                    "TBD — Gate assignment pending"
-                )}
+                ${gateBlocks}
 
             </div>
 
@@ -1466,13 +1637,6 @@ function renderMyTrips(){
                 );
 
 
-            /*
-             * Avoid duplicate rendering if
-             * Crew Scheduling has written both
-             * an awarded record and an assignment
-             * record for the same pairing.
-             */
-
             const tripId =
                 getBidPairingId(
                     bid
@@ -1505,17 +1669,13 @@ function renderMyTrips(){
                     tripId ||
                     String(
                         bid.bidId ||
-                        Math.random()
+                        Date.now()
                     )
             });
 
         }
     );
 
-
-    /*
-     * Sort by scheduled first-leg departure.
-     */
 
     trips.sort(
         (a,b) => {
@@ -1554,10 +1714,6 @@ function renderMyTrips(){
         }
     );
 
-
-    /* --------------------------------------------------------
-       Statistics
-    -------------------------------------------------------- */
 
     document.getElementById(
         "tripCount"
@@ -1614,10 +1770,6 @@ function renderMyTrips(){
                 : "—";
 
 
-    /* --------------------------------------------------------
-       Empty state
-    -------------------------------------------------------- */
-
     if(!trips.length){
 
         container.innerHTML = `
@@ -1655,10 +1807,6 @@ function renderMyTrips(){
 
     }
 
-
-    /* --------------------------------------------------------
-       Render trips
-    -------------------------------------------------------- */
 
     const html =
         trips
@@ -1706,7 +1854,9 @@ window.addEventListener(
 
         if(
             event.key ===
-            "viaviaBids"
+            "viaviaBids" ||
+            event.key ===
+            "viaviaGateAssignments"
         ){
 
             renderMyTrips();
