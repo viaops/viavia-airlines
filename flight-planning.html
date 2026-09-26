@@ -346,7 +346,7 @@
 
     .leg {
       display: grid;
-      grid-template-columns: 95px 1fr 130px;
+      grid-template-columns: 95px 1fr 150px;
       gap: 14px;
       align-items: center;
       padding: 12px 0;
@@ -370,6 +370,20 @@
     .leg-aircraft {
       color: var(--muted);
       font-size: 13px;
+    }
+
+    .leg-gate {
+      margin-top: 5px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .gate-pending-text {
+      color: var(--yellow);
+    }
+
+    .gate-assigned-text {
+      color: var(--green);
     }
 
     .crew-box {
@@ -470,7 +484,9 @@
 
   <section class="hero">
     <h1>Flight Planning</h1>
-    <p>Flight, pairing, crew and gate assignment information for Viavia Airlines operations.</p>
+    <p>
+      Flight, pairing, crew and gate assignment information for Viavia Airlines operations.
+    </p>
   </section>
 
   <div class="notice">
@@ -487,6 +503,7 @@
   <section class="search-panel">
 
     <div class="search-row">
+
       <input
         id="flightSearch"
         type="text"
@@ -501,9 +518,11 @@
       <button class="btn-secondary" onclick="clearFlight()">
         Clear
       </button>
+
     </div>
 
     <div class="quick-links">
+
       <button class="btn-secondary" onclick="loadFlight('VIA1757')">
         VIA1757
       </button>
@@ -515,6 +534,7 @@
       <button class="btn-secondary" onclick="loadTrip('TRIP-001')">
         Trip 001
       </button>
+
     </div>
 
   </section>
@@ -532,22 +552,12 @@
 <script>
 
 /* =========================================================
-   VIAVIA GATE DATABASE
-   =========================================================
+   VIAVIA APPROVED GATE DATABASE
 
-   This is Viavia's internal approved gate pool.
+   These are Viavia internal gate identifiers.
 
-   IMPORTANT:
-   The master flight schedule does not contain gate data.
-   Therefore this section is intentionally isolated so that
-   airport gate pools can be changed without touching the
-   master schedule.
-
-   Add/remove gates here as Viavia establishes its approved
-   airport gate database.
-
-   The system will ONLY assign a gate that appears in this
-   database.
+   They are intentionally separated from the master schedule
+   so the gate database can be changed independently.
 ========================================================= */
 
 const VIAVIA_GATE_DATABASE = {
@@ -759,7 +769,11 @@ function getGateAssignments() {
 
   } catch (error) {
 
-    console.error("Unable to read gate assignments:", error);
+    console.error(
+      "Unable to read gate assignments:",
+      error
+    );
+
     return {};
 
   }
@@ -778,7 +792,7 @@ function saveGateAssignments(assignments) {
 
 
 /* =========================================================
-   BASIC SCHEDULE HELPERS
+   MASTER SCHEDULE
 ========================================================= */
 
 function getScheduleFlights() {
@@ -797,9 +811,7 @@ function getScheduleFlights() {
 
 function getFlight(flightNumber) {
 
-  const flights = getScheduleFlights();
-
-  return flights.find(
+  return getScheduleFlights().find(
     flight =>
       String(flight.flightNumber).toUpperCase() ===
       String(flightNumber).toUpperCase()
@@ -807,6 +819,10 @@ function getFlight(flightNumber) {
 
 }
 
+
+/* =========================================================
+   PAIRINGS
+========================================================= */
 
 function getPairings() {
 
@@ -848,20 +864,22 @@ function getPairingForFlight(flightNumber) {
 
 
 /* =========================================================
-   BID / CREW HELPERS
+   CREW / BID DATA
 ========================================================= */
 
 function getBids() {
 
   try {
 
-    const raw = localStorage.getItem(BID_STORAGE_KEY);
+    const raw =
+      localStorage.getItem(BID_STORAGE_KEY);
 
     if (!raw) {
       return [];
     }
 
-    const parsed = JSON.parse(raw);
+    const parsed =
+      JSON.parse(raw);
 
     return Array.isArray(parsed)
       ? parsed
@@ -869,7 +887,11 @@ function getBids() {
 
   } catch (error) {
 
-    console.error("Unable to read bids:", error);
+    console.error(
+      "Unable to read bids:",
+      error
+    );
+
     return [];
 
   }
@@ -883,18 +905,18 @@ function findBidForPairing(pairing) {
     return null;
   }
 
-  const bids = getBids();
+  const targetId =
+    String(pairing.pairingId || "").toUpperCase();
 
-  return bids.find(bid => {
+  return getBids().find(bid => {
 
-    const bidPairingId =
+    const bidId =
       bid.pairingId ||
       bid.tripId ||
       bid.tripNumber ||
       bid.pairing;
 
-    return String(bidPairingId || "").toUpperCase() ===
-      String(pairing.pairingId || "").toUpperCase();
+    return String(bidId || "").toUpperCase() === targetId;
 
   }) || null;
 
@@ -917,7 +939,7 @@ function bidIsAwarded(bid) {
 
 
 /* =========================================================
-   TIME FUNCTIONS
+   TIME HELPERS
 ========================================================= */
 
 function timeToMinutes(value) {
@@ -930,116 +952,32 @@ function timeToMinutes(value) {
     return null;
   }
 
-  const text = String(value).trim();
-
-  const match = text.match(/(\d{1,2}):(\d{2})/);
+  const match =
+    String(value)
+      .trim()
+      .match(/(\d{1,2}):(\d{2})/);
 
   if (!match) {
     return null;
   }
 
-  let hours = Number(match[1]);
-  const minutes = Number(match[2]);
+  let hours =
+    Number(match[1]);
+
+  const minutes =
+    Number(match[2]);
 
   if (hours === 24) {
     hours = 0;
   }
 
-  return hours * 60 + minutes;
-
-}
-
-
-function normalizeTimeRange(departure, arrival) {
-
-  let dep = timeToMinutes(departure);
-  let arr = timeToMinutes(arrival);
-
-  if (dep === null || arr === null) {
-    return {
-      departure: null,
-      arrival: null
-    };
-  }
-
-  if (arr < dep) {
-    arr += 1440;
-  }
-
-  return {
-    departure: dep,
-    arrival: arr
-  };
-
-}
-
-
-/*
-  Convert today's current time into minutes.
-
-  This is used because the current master schedule contains
-  scheduled clock times but does not currently contain a
-  calendar date for each flight.
-*/
-
-function getCurrentMinutes() {
-
-  const now = new Date();
-
   return (
-    now.getHours() * 60 +
-    now.getMinutes()
+    hours * 60 +
+    minutes
   );
 
 }
 
-
-/* =========================================================
-   12-HOUR GATE RULE
-========================================================= */
-
-function isWithinGateAssignmentWindow(flight) {
-
-  if (!flight) {
-    return false;
-  }
-
-  const departureValue =
-    flight.departure ||
-    flight.departureTime ||
-    flight.depTime;
-
-  const departureMinutes =
-    timeToMinutes(departureValue);
-
-  if (departureMinutes === null) {
-    return false;
-  }
-
-  const nowMinutes = getCurrentMinutes();
-
-  let difference =
-    departureMinutes - nowMinutes;
-
-  /*
-    Handle flights occurring after midnight.
-
-    If the departure appears to be earlier than the current
-    clock time, treat it as the next occurrence.
-  */
-
-  if (difference < 0) {
-    difference += 1440;
-  }
-
-  return difference <= 720;
-
-}
-
-
-/* =========================================================
-   GATE CONFLICT DETECTION
-========================================================= */
 
 function getFlightDepartureMinutes(flight) {
 
@@ -1063,11 +1001,7 @@ function getFlightArrivalMinutes(flight) {
   }
 
   const departure =
-    timeToMinutes(
-      flight.departure ||
-      flight.departureTime ||
-      flight.depTime
-    );
+    getFlightDepartureMinutes(flight);
 
   let arrival =
     timeToMinutes(
@@ -1091,6 +1025,59 @@ function getFlightArrivalMinutes(flight) {
 
 }
 
+
+function getCurrentMinutes() {
+
+  const now =
+    new Date();
+
+  return (
+    now.getHours() * 60 +
+    now.getMinutes()
+  );
+
+}
+
+
+/* =========================================================
+   12-HOUR ASSIGNMENT WINDOW
+
+   Gates remain pending until the scheduled departure is
+   12 hours away or less.
+========================================================= */
+
+function isWithinGateAssignmentWindow(flight) {
+
+  const departure =
+    getFlightDepartureMinutes(flight);
+
+  if (departure === null) {
+    return false;
+  }
+
+  const now =
+    getCurrentMinutes();
+
+  let difference =
+    departure - now;
+
+  /*
+    If today's scheduled time has already passed,
+    treat the next occurrence as tomorrow.
+  */
+
+  if (difference < 0) {
+    difference += 1440;
+  }
+
+  return difference <= 720;
+
+}
+
+
+/* =========================================================
+   GATE CONFLICT CHECKING
+========================================================= */
 
 function rangesOverlap(
   startA,
@@ -1122,14 +1109,22 @@ function gateIsOccupied(
   assignments
 ) {
 
+  if (!targetFlight) {
+    return false;
+  }
+
   const targetAirport =
     targetFlight.origin;
 
   const targetStart =
-    getFlightDepartureMinutes(targetFlight);
+    getFlightDepartureMinutes(
+      targetFlight
+    );
 
   const targetEnd =
-    getFlightArrivalMinutes(targetFlight);
+    getFlightArrivalMinutes(
+      targetFlight
+    );
 
   if (
     targetStart === null ||
@@ -1138,16 +1133,17 @@ function gateIsOccupied(
     return false;
   }
 
-  for (const flightNumber in assignments) {
+  for (
+    const flightNumber in assignments
+  ) {
 
     const assignment =
       assignments[flightNumber];
 
-    if (!assignment) {
-      continue;
-    }
-
-    if (assignment.gate !== gate) {
+    if (
+      !assignment ||
+      assignment.gate !== gate
+    ) {
       continue;
     }
 
@@ -1158,15 +1154,26 @@ function gateIsOccupied(
       continue;
     }
 
-    if (otherFlight.origin !== targetAirport) {
+    /*
+      Gates are airport-specific.
+    */
+
+    if (
+      otherFlight.origin !==
+      targetAirport
+    ) {
       continue;
     }
 
     const otherStart =
-      getFlightDepartureMinutes(otherFlight);
+      getFlightDepartureMinutes(
+        otherFlight
+      );
 
     const otherEnd =
-      getFlightArrivalMinutes(otherFlight);
+      getFlightArrivalMinutes(
+        otherFlight
+      );
 
     if (
       rangesOverlap(
@@ -1187,16 +1194,18 @@ function gateIsOccupied(
 
 
 /* =========================================================
-   GATE ASSIGNMENT
+   ASSIGN GATE
 ========================================================= */
 
 function assignGate(flight) {
 
   if (!flight) {
+
     return {
       status: "pending",
       gate: null
     };
+
   }
 
   const flightNumber =
@@ -1206,28 +1215,34 @@ function assignGate(flight) {
     getGateAssignments();
 
   /*
-    Existing assignment takes priority.
+    Never replace an existing assignment.
   */
 
+  const existing =
+    assignments[flightNumber];
+
   if (
-    assignments[flightNumber] &&
-    assignments[flightNumber].gate
+    existing &&
+    existing.gate
   ) {
 
     return {
       status: "assigned",
-      gate: assignments[flightNumber].gate,
-      assignedAt:
-        assignments[flightNumber].assignedAt
+      gate: existing.gate,
+      assignedAt: existing.assignedAt
     };
 
   }
 
   /*
-    Enforce the 12-hour rule.
+    The 12-hour rule is mandatory.
   */
 
-  if (!isWithinGateAssignmentWindow(flight)) {
+  if (
+    !isWithinGateAssignmentWindow(
+      flight
+    )
+  ) {
 
     return {
       status: "pending",
@@ -1237,7 +1252,9 @@ function assignGate(flight) {
   }
 
   const airport =
-    flight.origin;
+    String(
+      flight.origin || ""
+    ).toUpperCase();
 
   const availableGates =
     VIAVIA_GATE_DATABASE[airport] || [];
@@ -1251,12 +1268,7 @@ function assignGate(flight) {
 
   }
 
-  /*
-    Find the first gate that is not occupied by an
-    overlapping Viavia departure at the same airport.
-  */
-
-  const availableGate =
+  const selectedGate =
     availableGates.find(
       gate =>
         !gateIsOccupied(
@@ -1266,7 +1278,7 @@ function assignGate(flight) {
         )
     );
 
-  if (!availableGate) {
+  if (!selectedGate) {
 
     return {
       status: "no-gates",
@@ -1275,9 +1287,9 @@ function assignGate(flight) {
 
   }
 
-  assignments[flightNumber] = {
+  const assignment = {
 
-    gate: availableGate,
+    gate: selectedGate,
 
     airport: airport,
 
@@ -1291,20 +1303,29 @@ function assignGate(flight) {
 
   };
 
-  saveGateAssignments(assignments);
+  assignments[flightNumber] =
+    assignment;
+
+  saveGateAssignments(
+    assignments
+  );
+
+  /*
+    Notify other Viavia pages in this browser tab/window
+    through the storage event in other tabs/windows.
+  */
 
   return {
     status: "assigned",
-    gate: availableGate,
-    assignedAt:
-      assignments[flightNumber].assignedAt
+    gate: selectedGate,
+    assignedAt: assignment.assignedAt
   };
 
 }
 
 
 /* =========================================================
-   GATE STATUS
+   GET GATE STATUS
 ========================================================= */
 
 function getGateStatusForFlight(flight) {
@@ -1322,7 +1343,9 @@ function getGateStatusForFlight(flight) {
     getGateAssignments();
 
   const existing =
-    assignments[flight.flightNumber];
+    assignments[
+      flight.flightNumber
+    ];
 
   if (
     existing &&
@@ -1338,7 +1361,9 @@ function getGateStatusForFlight(flight) {
   }
 
   if (
-    !isWithinGateAssignmentWindow(flight)
+    !isWithinGateAssignmentWindow(
+      flight
+    )
   ) {
 
     return {
@@ -1348,26 +1373,76 @@ function getGateStatusForFlight(flight) {
 
   }
 
-  return assignGate(flight);
+  return assignGate(
+    flight
+  );
 
 }
 
 
 /* =========================================================
-   RENDER GATE
+   RENDER SMALL GATE STATUS
+========================================================= */
+
+function renderSmallGateStatus(flight) {
+
+  const status =
+    getGateStatusForFlight(
+      flight
+    );
+
+  if (
+    status.status === "assigned"
+  ) {
+
+    return `
+      <div class="leg-gate gate-assigned-text">
+        Gate: ${escapeHtml(status.gate)}
+      </div>
+    `;
+
+  }
+
+  if (
+    status.status === "no-gates"
+  ) {
+
+    return `
+      <div class="leg-gate gate-pending-text">
+        Gate: NO GATE AVAILABLE
+      </div>
+    `;
+
+  }
+
+  return `
+    <div class="leg-gate gate-pending-text">
+      Gate: TBD — Gate assignment pending
+    </div>
+  `;
+
+}
+
+
+/* =========================================================
+   RENDER MAIN GATE PANEL
 ========================================================= */
 
 function renderGatePanel(flight) {
 
-  const gateStatus =
-    getGateStatusForFlight(flight);
+  const status =
+    getGateStatusForFlight(
+      flight
+    );
 
-  if (gateStatus.status === "assigned") {
+  if (
+    status.status === "assigned"
+  ) {
 
     const assignedText =
-      gateStatus.assignedAt
+      status.assignedAt
         ? new Date(
-            gateStatus.assignedAt
+            status.assignedAt
           ).toLocaleString()
         : "Assignment time unavailable";
 
@@ -1386,13 +1461,15 @@ function renderGatePanel(flight) {
         <div class="gate-assignment">
 
           <div>
+
             <div class="gate-name">
-              ${escapeHtml(gateStatus.gate)}
+              ${escapeHtml(status.gate)}
             </div>
 
             <div class="gate-time">
               Assigned ${escapeHtml(assignedText)}
             </div>
+
           </div>
 
           <span class="badge badge-assigned">
@@ -1408,7 +1485,9 @@ function renderGatePanel(flight) {
   }
 
 
-  if (gateStatus.status === "no-gates") {
+  if (
+    status.status === "no-gates"
+  ) {
 
     return `
 
@@ -1427,6 +1506,7 @@ function renderGatePanel(flight) {
         <div class="gate-assignment">
 
           <div>
+
             <div class="gate-name">
               TBD
             </div>
@@ -1434,6 +1514,7 @@ function renderGatePanel(flight) {
             <div class="gate-time">
               Awaiting gate availability
             </div>
+
           </div>
 
           <span class="badge badge-error">
@@ -1458,13 +1539,14 @@ function renderGatePanel(flight) {
       </div>
 
       <div class="gate-description">
-        Gate assignments are released no earlier than 12 hours
-        before the scheduled departure.
+        Gate assignments are released no earlier than
+        12 hours before the scheduled departure.
       </div>
 
       <div class="gate-assignment">
 
         <div>
+
           <div class="gate-name">
             TBD
           </div>
@@ -1472,6 +1554,7 @@ function renderGatePanel(flight) {
           <div class="gate-time">
             TBD — Gate assignment pending
           </div>
+
         </div>
 
         <span class="badge badge-pending">
@@ -1488,14 +1571,16 @@ function renderGatePanel(flight) {
 
 
 /* =========================================================
-   FLIGHT RENDERING
+   RENDER FLIGHT
 ========================================================= */
 
 function renderFlight(flight) {
 
   if (!flight) {
 
-    document.getElementById("results").innerHTML = `
+    document.getElementById(
+      "results"
+    ).innerHTML = `
 
       <div class="empty">
 
@@ -1546,6 +1631,11 @@ function renderFlight(flight) {
   const route =
     `${flight.origin} → ${flight.destination}`;
 
+
+  /* -------------------------------------------------------
+     PAIRING
+  ------------------------------------------------------- */
+
   let pairingHtml = "";
 
   if (pairing) {
@@ -1560,7 +1650,9 @@ function renderFlight(flight) {
       <div class="pairing">
 
         <h3>
-          Pairing ${escapeHtml(pairing.pairingId || "—")}
+          Pairing ${escapeHtml(
+            pairing.pairingId || "—"
+          )}
         </h3>
 
         ${
@@ -1590,22 +1682,23 @@ function renderFlight(flight) {
                   <div>
 
                     <div class="leg-route">
+
                       ${escapeHtml(
-                        leg.flightNumber ||
-                        "—"
+                        leg.flightNumber || "—"
                       )}
 
                       &nbsp;&nbsp;
 
                       ${escapeHtml(
-                        leg.origin ||
-                        "—"
+                        leg.origin || "—"
                       )}
+
                       →
+
                       ${escapeHtml(
-                        leg.destination ||
-                        "—"
+                        leg.destination || "—"
                       )}
+
                     </div>
 
                     <div class="leg-time">
@@ -1618,14 +1711,18 @@ function renderFlight(flight) {
                       )}
                     </div>
 
+                    ${renderSmallGateStatus(leg)}
+
                   </div>
 
                   <div class="leg-aircraft">
+
                     ${escapeHtml(
                       leg.aircraft ||
                       leg.aircraftType ||
                       "—"
                     )}
+
                   </div>
 
                 </div>
@@ -1643,49 +1740,70 @@ function renderFlight(flight) {
   }
 
 
-  const crewHtml = pairing && bid
-    ? `
+  /* -------------------------------------------------------
+     CREW
+  ------------------------------------------------------- */
 
-      <div class="crew-box">
+  const crewHtml =
+    pairing && bid
+      ? `
 
-        <h3>Crew Assignment</h3>
+        <div class="crew-box">
 
-        <p>
-          <strong>Pairing:</strong>
-          ${escapeHtml(
-            pairing.pairingId || "—"
-          )}
-        </p>
+          <h3>
+            Crew Assignment
+          </h3>
 
-        <p>
-          <strong>Status:</strong>
+          <p>
+            <strong>Pairing:</strong>
+            ${escapeHtml(
+              pairing.pairingId || "—"
+            )}
+          </p>
+
+          <p>
+            <strong>Status:</strong>
+            ${
+              assigned
+                ? "Awarded / Assigned"
+                : "Bid submitted — awaiting Crew Scheduling"
+            }
+          </p>
+
           ${
             assigned
-              ? "Awarded / Assigned"
-              : "Bid submitted — awaiting Crew Scheduling"
+              ? `
+
+                <p>
+
+                  <strong>
+                    Assigned by:
+                  </strong>
+
+                  ${escapeHtml(
+                    bid.awardedBy ||
+                    "Crew Scheduling"
+                  )}
+
+                </p>
+
+              `
+              : ""
           }
-        </p>
 
-        ${
-          assigned
-            ? `
-              <p>
-                <strong>Assigned by:</strong>
-                ${escapeHtml(
-                  bid.awardedBy ||
-                  "Crew Scheduling"
-                )}
-              </p>
-            `
-            : ""
-        }
+        </div>
 
-      </div>
+      `
+      : "";
 
-    `
-    : "";
 
-  document.getElementById("results").innerHTML = `
+  /* -------------------------------------------------------
+     MAIN CARD
+  ------------------------------------------------------- */
+
+  document.getElementById(
+    "results"
+  ).innerHTML = `
 
     <section class="status-card">
 
@@ -1695,8 +1813,7 @@ function renderFlight(flight) {
 
           <div class="flight-number">
             ${escapeHtml(
-              flight.flightNumber ||
-              "—"
+              flight.flightNumber || "—"
             )}
           </div>
 
@@ -1713,14 +1830,18 @@ function renderFlight(flight) {
         ${
           assigned
             ? `
+
               <span class="badge badge-assigned">
                 CREW ASSIGNED
               </span>
+
             `
             : `
+
               <span class="badge badge-pending">
                 FLIGHT PLANNING
               </span>
+
             `
         }
 
@@ -1812,15 +1933,21 @@ function searchFlight() {
     );
 
   const query =
-    input.value.trim().toUpperCase();
+    input.value
+      .trim()
+      .toUpperCase();
 
   if (!query) {
 
-    document.getElementById("results").innerHTML = `
+    document.getElementById(
+      "results"
+    ).innerHTML = `
 
       <div class="empty">
 
-        <h2>Search for a Flight</h2>
+        <h2>
+          Search for a Flight
+        </h2>
 
         <p>
           Enter a Viavia flight number such as VIA1757.
@@ -1837,6 +1964,9 @@ function searchFlight() {
   const flights =
     getScheduleFlights();
 
+
+  /* Exact flight number */
+
   const exact =
     flights.find(
       flight =>
@@ -1852,35 +1982,49 @@ function searchFlight() {
 
   }
 
+
+  /* Partial search */
+
   const matches =
-    flights.filter(flight => {
+    flights.filter(
+      flight => {
 
-      const searchable = [
+        const searchable = [
 
-        flight.flightNumber,
-        flight.origin,
-        flight.destination,
-        `${flight.origin}-${flight.destination}`
+          flight.flightNumber,
+          flight.origin,
+          flight.destination,
+          `${flight.origin}-${flight.destination}`
 
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toUpperCase();
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toUpperCase();
 
-      return searchable.includes(query);
+        return searchable.includes(
+          query
+        );
 
-    });
+      }
+    );
+
 
   if (matches.length === 1) {
 
-    renderFlight(matches[0]);
+    renderFlight(
+      matches[0]
+    );
+
     return;
 
   }
 
+
   if (matches.length > 1) {
 
-    document.getElementById("results").innerHTML = `
+    document.getElementById(
+      "results"
+    ).innerHTML = `
 
       <div class="status-card">
 
@@ -1899,17 +2043,23 @@ function searchFlight() {
                   flight.flightNumber
                 )}')"
               >
+
                 ${escapeHtml(
                   flight.flightNumber
                 )}
+
                 —
+
                 ${escapeHtml(
                   flight.origin
                 )}
+
                 →
+
                 ${escapeHtml(
                   flight.destination
                 )}
+
               </button>
 
             `
@@ -1924,6 +2074,7 @@ function searchFlight() {
 
   }
 
+
   renderFlight(null);
 
 }
@@ -1936,34 +2087,44 @@ function searchFlight() {
 function loadFlight(flightNumber) {
 
   const flight =
-    getFlight(flightNumber);
+    getFlight(
+      flightNumber
+    );
 
   document.getElementById(
     "flightSearch"
   ).value =
     flightNumber;
 
-  renderFlight(flight);
+  renderFlight(
+    flight
+  );
 
 }
 
 
 /* =========================================================
-   LOAD PAIRING
+   LOAD TRIP
 ========================================================= */
 
 function loadTrip(pairingId) {
 
   const pairing =
-    getPairingById(pairingId);
+    getPairingById(
+      pairingId
+    );
 
   if (!pairing) {
 
-    document.getElementById("results").innerHTML = `
+    document.getElementById(
+      "results"
+    ).innerHTML = `
 
       <div class="empty">
 
-        <h2>Trip Not Found</h2>
+        <h2>
+          Trip Not Found
+        </h2>
 
         <p>
           ${escapeHtml(pairingId)}
@@ -1979,8 +2140,11 @@ function loadTrip(pairingId) {
   }
 
   const firstFlightNumber =
-    pairing.flightNumbers &&
-    pairing.flightNumbers[0];
+    Array.isArray(
+      pairing.flightNumbers
+    )
+      ? pairing.flightNumbers[0]
+      : null;
 
   if (!firstFlightNumber) {
 
@@ -1989,7 +2153,9 @@ function loadTrip(pairingId) {
 
   }
 
-  loadFlight(firstFlightNumber);
+  loadFlight(
+    firstFlightNumber
+  );
 
 }
 
@@ -2017,16 +2183,34 @@ function clearFlight() {
 
 function escapeHtml(value) {
 
-  if (value === null || value === undefined) {
+  if (
+    value === null ||
+    value === undefined
+  ) {
     return "";
   }
 
   return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+    .replace(
+      /</g,
+      "&lt;"
+    )
+    .replace(
+      />/g,
+      "&gt;"
+    )
+    .replace(
+      /"/g,
+      "&quot;"
+    )
+    .replace(
+      /'/g,
+      "&#039;"
+    );
 
 }
 
@@ -2048,6 +2232,7 @@ function initializeFlightPlanning() {
   const trip =
     params.get("trip");
 
+
   if (flight) {
 
     loadFlight(
@@ -2057,6 +2242,7 @@ function initializeFlightPlanning() {
     return;
 
   }
+
 
   if (trip) {
 
@@ -2080,8 +2266,10 @@ window.addEventListener(
   function(event) {
 
     if (
-      event.key === BID_STORAGE_KEY ||
-      event.key === GATE_STORAGE_KEY
+      event.key ===
+        BID_STORAGE_KEY ||
+      event.key ===
+        GATE_STORAGE_KEY
     ) {
 
       const params =
@@ -2092,10 +2280,27 @@ window.addEventListener(
       const flight =
         params.get("flight");
 
+      const trip =
+        params.get("trip");
+
+
       if (flight) {
+
         loadFlight(
           flight.toUpperCase()
         );
+
+        return;
+
+      }
+
+
+      if (trip) {
+
+        loadTrip(
+          trip.toUpperCase()
+        );
+
       }
 
     }
