@@ -1,1 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>Viavia Pilot Center</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f7f4fa;
+            color: #24142f;
+        }
+
+        header {
+            background: #c6b4d9;
+            padding: 18px 50px;
+            border-bottom: 1px solid #e5dff0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        header img {
+            height: 75px;
+        }
+
+        nav a {
+            color: #24142f;
+            text-decoration: none;
+            margin-left: 25px;
+            font-weight: bold;
+        }
+
+        nav a:hover {
+            color: #5b247a;
+        }
+
+        .hero {
+            background: #5b247a;
+            color: white;
+            padding: 60px 8%;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .dashboard {
+            padding: 50px 8%;
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        .welcome {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .welcome h2 {
+            margin-top: 0;
+        }
+
+        .pilot-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .pilot-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .pilot-card h3 {
+            margin-top: 0;
+            color: #5b247a;
+        }
+
+        .pilot-card a {
+            display: inline-block;
+            margin-top: 10px;
+            background: #5b247a;
+            color: white;
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+        }
+
+        .pilot-card a:hover {
+            background: #43205c;
+        }
+
+        footer {
+            background: #24142f;
+            color: white;
+            text-align: center;
+            padding: 25px;
+            margin-top: 50px;
+        }
+
+        @media (max-width: 800px) {
+            .pilot-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            nav a {
+                margin: 0 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+
+    <img src="viavia-logo.png" alt="Viavia Airlines">
+
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="destinations.html">Destinations</a>
+        <a href="pilot-center.html">Pilot Center</a>
+    </nav>
+
+</header>
+
+<section class="hero">
+    <h1>Viavia Pilot Center</h1>
+    <p>Your crew operations hub.</p>
+</section>
+
+<section class="dashboard">
+
+    <div class="welcome">
+        <h2>Welcome, Captain</h2>
+        <p>
+            Manage your trips, bids, flight history, and pilot information
+            through the Viavia Pilot Center.
+        </p>
+    </div>
+
+    <div class="pilot-grid">
+
+        <div class="pilot-card">
+            <h3>✈️ Crew Bidding</h3>
+            <p>View available trips and submit your bids.</p>
+            <a href="#">Open Bidding</a>
+        </div>
+
+        <div class="pilot-card">
+            <h3>📅 My Trips</h3>
+            <p>View your awarded and upcoming trips.</p>
+            <a href="#">View Trips</a>
+        </div>
+
+        <div class="pilot-card">
+            <h3>👨‍✈️ Pilot Profile</h3>
+            <p>View your position, seniority, hours, and aircraft qualifications.</p>
+            <a href="#">View Profile</a>
+        </div>
+
+        <div class="pilot-card">
+            <h3>💰 Pay & Hours</h3>
+            <p>Track payable hours, trip earnings, and accumulated pay.</p>
+            <a href="#">View Pay</a>
+        </div>
+
+        <div class="pilot-card">
+            <h3>🏨 Crew Hotels</h3>
+            <p>View hotels and transportation for your upcoming overnights.</p>
+            <a href="#">View Hotels</a>
+        </div>
+
+        <div class="pilot-card">
+            <h3>📋 Flight History</h3>
+            <p>Review your completed Viavia flights and flight time.</p>
+            <a href="#">View History</a>
+        </div>
+
+    </div>
+
+</section>
+
+<footer>
+    <p>© 2026 Viavia Airlines — Your destination, via us!</p>
+</footer>
+
+</body>
+</html>
