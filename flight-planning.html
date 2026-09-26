@@ -1,1 +1,2351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
 
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Viavia Airlines — Flight Planning</title>
+
+    <style>
+        :root {
+            --purple: #5b247a;
+            --purple-dark: #3d1557;
+            --purple-light: #eee4f5;
+            --lavender: #e6d6f5;
+            --background: #f7f4fa;
+            --white: #ffffff;
+            --text: #24142f;
+            --muted: #6f6475;
+            --border: #e2dce7;
+            --green: #2e7d52;
+            --green-light: #e7f5ec;
+            --orange: #b66a16;
+            --orange-light: #fff1df;
+            --red: #a83232;
+            --red-light: #fdeaea;
+            --shadow: 0 4px 14px rgba(60, 30, 80, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+            background: var(--background);
+            color: var(--text);
+        }
+
+        header {
+            background: var(--purple);
+            color: white;
+            padding: 16px 28px;
+            box-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.12);
+        }
+
+        .header-inner {
+            max-width: 1250px;
+            margin: 0 auto;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            gap: 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            font-weight: 700;
+            font-size: 21px;
+        }
+
+        .brand img {
+            height: 42px;
+            width: auto;
+            display: block;
+        }
+
+        nav {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+
+            padding: 9px 12px;
+            border-radius: 7px;
+
+            font-size: 14px;
+        }
+
+        nav a:hover,
+        nav a.active {
+            background:
+                rgba(255, 255, 255, 0.15);
+        }
+
+        main {
+            max-width: 1250px;
+            margin: 0 auto;
+
+            padding:
+                30px 20px 60px;
+        }
+
+        .page-heading {
+            margin-bottom: 22px;
+        }
+
+        .page-heading h1 {
+            margin:
+                0 0 6px;
+
+            font-size: 32px;
+            color: var(--purple-dark);
+        }
+
+        .page-heading p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .search-panel {
+            background: var(--white);
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 12px;
+
+            padding: 18px;
+
+            box-shadow: var(--shadow);
+
+            margin-bottom: 20px;
+        }
+
+        .search-row {
+            display: grid;
+
+            grid-template-columns:
+                minmax(0, 1fr)
+                auto;
+
+            gap: 10px;
+        }
+
+        .search-input {
+            width: 100%;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 8px;
+
+            padding:
+                12px 14px;
+
+            font-size: 15px;
+
+            color: var(--text);
+
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color:
+                var(--purple);
+        }
+
+        .primary-button {
+            border: none;
+
+            background:
+                var(--purple);
+
+            color: white;
+
+            padding:
+                0 20px;
+
+            border-radius: 8px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+        }
+
+        .primary-button:hover {
+            background:
+                var(--purple-dark);
+        }
+
+        .quick-links {
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 8px;
+
+            margin-top: 12px;
+        }
+
+        .quick-button {
+            border:
+                1px solid var(--border);
+
+            background:
+                var(--purple-light);
+
+            color:
+                var(--purple-dark);
+
+            padding:
+                7px 10px;
+
+            border-radius: 7px;
+
+            cursor: pointer;
+
+            font-size: 12px;
+
+            font-weight: 700;
+        }
+
+        .quick-button:hover {
+            background:
+                var(--lavender);
+        }
+
+        .result-area {
+            display: grid;
+
+            grid-template-columns:
+                minmax(0, 1fr);
+
+            gap: 18px;
+        }
+
+        .flight-card {
+            background:
+                var(--white);
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 12px;
+
+            box-shadow:
+                var(--shadow);
+
+            overflow: hidden;
+        }
+
+        .flight-card-header {
+            background:
+                #fbf9fc;
+
+            border-bottom:
+                1px solid var(--border);
+
+            padding:
+                18px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 15px;
+        }
+
+        .flight-title {
+            margin: 0 0 5px;
+
+            color:
+                var(--purple-dark);
+
+            font-size: 23px;
+        }
+
+        .flight-subtitle {
+            margin: 0;
+
+            color:
+                var(--muted);
+
+            font-size: 13px;
+        }
+
+        .flight-status {
+            background:
+                var(--green-light);
+
+            color:
+                var(--green);
+
+            border-radius:
+                999px;
+
+            padding:
+                7px 11px;
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+            white-space: nowrap;
+        }
+
+        .flight-main {
+            padding: 20px;
+        }
+
+        .route-display {
+            display: grid;
+
+            grid-template-columns:
+                1fr
+                auto
+                1fr;
+
+            align-items: center;
+
+            gap: 18px;
+
+            margin-bottom: 22px;
+        }
+
+        .airport-block {
+            text-align: center;
+        }
+
+        .airport-code {
+            color:
+                var(--purple-dark);
+
+            font-size: 36px;
+
+            font-weight: 800;
+
+            letter-spacing:
+                0.02em;
+        }
+
+        .airport-label {
+            color:
+                var(--muted);
+
+            font-size: 12px;
+
+            margin-top: 4px;
+        }
+
+        .airport-time {
+            color:
+                var(--text);
+
+            font-size: 18px;
+
+            font-weight: 700;
+
+            margin-top: 7px;
+        }
+
+        .route-arrow {
+            text-align: center;
+
+            color:
+                var(--purple);
+
+            font-size: 26px;
+        }
+
+        .route-line {
+            width: 110px;
+
+            height: 2px;
+
+            background:
+                var(--lavender);
+
+            margin:
+                5px auto;
+        }
+
+        .details-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    4,
+                    minmax(0, 1fr)
+                );
+
+            gap: 12px;
+
+            margin-bottom: 20px;
+        }
+
+        .detail-box {
+            border:
+                1px solid var(--border);
+
+            border-radius: 9px;
+
+            padding: 12px;
+        }
+
+        .detail-box span {
+            display: block;
+
+            color:
+                var(--muted);
+
+            font-size: 11px;
+
+            text-transform:
+                uppercase;
+
+            letter-spacing:
+                0.04em;
+
+            margin-bottom: 5px;
+        }
+
+        .detail-box strong {
+            color:
+                var(--purple-dark);
+
+            font-size: 15px;
+        }
+
+        .section-title {
+            margin:
+                20px 0 10px;
+
+            color:
+                var(--purple-dark);
+
+            font-size: 18px;
+        }
+
+        .gate-box {
+            border:
+                1px solid #e4c994;
+
+            background:
+                var(--orange-light);
+
+            border-radius:
+                9px;
+
+            padding:
+                14px;
+
+            color:
+                #875014;
+        }
+
+        .gate-box strong {
+            display: block;
+
+            margin-bottom: 4px;
+        }
+
+        .gate-box span {
+            font-size: 13px;
+        }
+
+        .planning-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    2,
+                    minmax(0, 1fr)
+                );
+
+            gap: 14px;
+
+            margin-top: 20px;
+        }
+
+        .planning-card {
+            border:
+                1px solid var(--border);
+
+            border-radius: 10px;
+
+            padding: 15px;
+
+            background:
+                #fdfcff;
+        }
+
+        .planning-card h3 {
+            margin:
+                0 0 6px;
+
+            color:
+                var(--purple-dark);
+
+            font-size: 15px;
+        }
+
+        .planning-card p {
+            margin: 0;
+
+            color:
+                var(--muted);
+
+            font-size: 13px;
+
+            line-height: 1.5;
+        }
+
+        .pairing-card {
+            background:
+                var(--white);
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 12px;
+
+            box-shadow:
+                var(--shadow);
+
+            overflow: hidden;
+
+            margin-top: 18px;
+        }
+
+        .pairing-header {
+            padding:
+                15px 18px;
+
+            background:
+                var(--purple-light);
+
+            border-bottom:
+                1px solid var(--border);
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 15px;
+        }
+
+        .pairing-header h2 {
+            margin: 0;
+
+            color:
+                var(--purple-dark);
+
+            font-size: 18px;
+        }
+
+        .pairing-header span {
+            color:
+                var(--muted);
+
+            font-size: 12px;
+        }
+
+        .pairing-body {
+            padding: 16px 18px;
+        }
+
+        .pairing-flight {
+            display: grid;
+
+            grid-template-columns:
+                100px
+                1fr
+                1fr
+                90px;
+
+            align-items: center;
+
+            gap: 12px;
+
+            padding:
+                10px 0;
+
+            border-bottom:
+                1px solid #eee9f0;
+        }
+
+        .pairing-flight:last-child {
+            border-bottom: none;
+        }
+
+        .pairing-flight strong {
+            color:
+                var(--purple);
+
+            font-size: 13px;
+        }
+
+        .pairing-flight span {
+            font-size: 13px;
+        }
+
+        .empty-state {
+            background:
+                var(--white);
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 12px;
+
+            box-shadow:
+                var(--shadow);
+
+            text-align: center;
+
+            padding:
+                55px 20px;
+        }
+
+        .empty-state .icon {
+            font-size: 38px;
+            margin-bottom: 10px;
+        }
+
+        .empty-state h2 {
+            margin:
+                0 0 7px;
+
+            color:
+                var(--purple-dark);
+        }
+
+        .empty-state p {
+            margin: 0;
+
+            color:
+                var(--muted);
+        }
+
+        .info-banner {
+            background:
+                var(--purple-light);
+
+            border:
+                1px solid #dac9e5;
+
+            border-radius:
+                10px;
+
+            padding:
+                13px 15px;
+
+            margin-bottom:
+                18px;
+
+            color:
+                var(--purple-dark);
+
+            font-size: 13px;
+
+            line-height: 1.5;
+        }
+
+        .error-box {
+            background:
+                var(--red-light);
+
+            border:
+                1px solid #e3bcbc;
+
+            color:
+                var(--red);
+
+            border-radius:
+                10px;
+
+            padding:
+                20px;
+
+            text-align:
+                center;
+        }
+
+        @media (max-width: 900px) {
+
+            .details-grid {
+                grid-template-columns:
+                    repeat(
+                        2,
+                        minmax(0, 1fr)
+                    );
+            }
+
+            .planning-grid {
+                grid-template-columns:
+                    1fr;
+            }
+
+            .pairing-flight {
+                grid-template-columns:
+                    90px
+                    1fr
+                    1fr;
+            }
+
+            .pairing-flight > :last-child {
+                grid-column:
+                    2 / -1;
+            }
+
+        }
+
+        @media (max-width: 650px) {
+
+            main {
+                padding:
+                    22px 12px 45px;
+            }
+
+            .header-inner {
+                align-items:
+                    flex-start;
+
+                flex-direction:
+                    column;
+            }
+
+            nav {
+                justify-content:
+                    flex-start;
+            }
+
+            .search-row {
+                grid-template-columns:
+                    1fr;
+            }
+
+            .primary-button {
+                padding:
+                    12px 20px;
+            }
+
+            .route-display {
+                grid-template-columns:
+                    1fr;
+            }
+
+            .route-arrow {
+                transform:
+                    rotate(90deg);
+            }
+
+            .details-grid {
+                grid-template-columns:
+                    1fr;
+            }
+
+            .flight-card-header {
+                align-items:
+                    flex-start;
+
+                flex-direction:
+                    column;
+            }
+
+            .airport-code {
+                font-size:
+                    31px;
+            }
+
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+
+    <div class="header-inner">
+
+        <div class="brand">
+
+            <img
+                src="viavia-logo.png"
+                alt="Viavia Airlines"
+            >
+
+            <span>
+                Flight Planning
+            </span>
+
+        </div>
+
+
+        <nav>
+
+            <a href="pilot-center.html">
+                Pilot Center
+            </a>
+
+            <a href="available-bids.html">
+                Available Bids
+            </a>
+
+            <a href="crew-calendar.html">
+                Crew Calendar
+            </a>
+
+            <a
+                href="flight-planning.html"
+                class="active"
+            >
+                Flight Planning
+            </a>
+
+            <a href="index.html">
+                Home
+            </a>
+
+        </nav>
+
+    </div>
+
+</header>
+
+
+<main>
+
+    <div class="page-heading">
+
+        <h1>
+            Flight Planning
+        </h1>
+
+        <p>
+            Search the Viavia master schedule
+            and review operational flight information.
+        </p>
+
+    </div>
+
+
+    <div class="info-banner">
+
+        <strong>
+            Gate Assignment Rule:
+        </strong>
+
+        Gates are not considered assigned until
+        at least 12 hours before the scheduled
+        aircraft departure.
+
+        Before that point, the system displays:
+
+        <strong>
+            TBD — Gate assignment pending
+        </strong>
+
+    </div>
+
+
+    <section class="search-panel">
+
+        <div class="search-row">
+
+            <input
+                type="text"
+                id="flightSearch"
+                class="search-input"
+                placeholder="Search flight number, route, or airport — e.g. VIA1757, RSW-MDE, MDE"
+                autocomplete="off"
+            >
+
+
+            <button
+                type="button"
+                class="primary-button"
+                id="searchButton"
+            >
+                Search Flight
+            </button>
+
+        </div>
+
+
+        <div class="quick-links">
+
+            <button
+                type="button"
+                class="quick-button"
+                data-flight="VIA1757"
+            >
+                VIA1757
+            </button>
+
+            <button
+                type="button"
+                class="quick-button"
+                data-flight="VIA1758"
+            >
+                VIA1758
+            </button>
+
+            <button
+                type="button"
+                class="quick-button"
+                data-flight="VIA1776"
+            >
+                VIA1776
+            </button>
+
+            <button
+                type="button"
+                class="quick-button"
+                data-flight="VIA2213"
+            >
+                VIA2213
+            </button>
+
+            <button
+                type="button"
+                class="quick-button"
+                data-flight="VIA743"
+            >
+                VIA743
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <section
+        id="resultArea"
+        class="result-area"
+    >
+
+        <div class="empty-state">
+
+            <div class="icon">
+                ✈
+            </div>
+
+            <h2>
+                Search for a Flight
+            </h2>
+
+            <p>
+                Enter a Viavia flight number,
+                route, or airport above.
+            </p>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script src="viavia-schedule.js"></script>
+
+
+<script>
+/* ============================================================
+   VIAVIA AIRLINES — FLIGHT PLANNING
+   Uses viavia-schedule.js as the single source of truth.
+
+   IMPORTANT:
+   - No invented flights.
+   - No local schedule.
+   - No local pairing generation.
+   - Flight information comes from VIAVIA_SCHEDULE.
+   - Gate status follows the master 12-hour rule.
+============================================================ */
+
+
+let scheduleFlights = [];
+
+let currentFlight = null;
+
+
+/* ============================================================
+   INITIALIZATION
+============================================================ */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        initializeFlightPlanning();
+
+    }
+);
+
+
+function initializeFlightPlanning() {
+
+    if (
+        typeof VIAVIA_SCHEDULE ===
+        "undefined"
+    ) {
+
+        showError(
+            "The Viavia master schedule could not be loaded."
+        );
+
+        return;
+
+    }
+
+
+    scheduleFlights =
+        Array.isArray(
+            VIAVIA_SCHEDULE.flights
+        )
+            ? VIAVIA_SCHEDULE.flights
+            : [];
+
+
+    setupSearch();
+
+    setupQuickButtons();
+
+
+    /*
+     * If the URL contains ?flight=VIA1757,
+     * automatically open that flight.
+     */
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+
+    const urlFlight =
+        params.get(
+            "flight"
+        );
+
+
+    if (
+        urlFlight
+    ) {
+
+        searchFlight(
+            urlFlight
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   SEARCH SETUP
+============================================================ */
+
+function setupSearch() {
+
+    const input =
+        document.getElementById(
+            "flightSearch"
+        );
+
+
+    const button =
+        document.getElementById(
+            "searchButton"
+        );
+
+
+    if (button) {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                searchFlight(
+                    input?.value || ""
+                );
+
+            }
+        );
+
+    }
+
+
+    if (input) {
+
+        input.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key ===
+                    "Enter"
+                ) {
+
+                    searchFlight(
+                        input.value
+                    );
+
+                }
+
+            }
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   QUICK BUTTONS
+============================================================ */
+
+function setupQuickButtons() {
+
+    const buttons =
+        document.querySelectorAll(
+            ".quick-button"
+        );
+
+
+    buttons.forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const flightNumber =
+                        button.dataset.flight;
+
+
+                    const input =
+                        document.getElementById(
+                            "flightSearch"
+                        );
+
+
+                    if (input) {
+
+                        input.value =
+                            flightNumber;
+
+                    }
+
+
+                    searchFlight(
+                        flightNumber
+                    );
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+/* ============================================================
+   SEARCH FLIGHT
+============================================================ */
+
+function searchFlight(
+    searchValue
+) {
+
+    const search =
+        String(
+            searchValue || ""
+        )
+            .trim()
+            .toUpperCase();
+
+
+    if (!search) {
+
+        showEmptyState();
+
+        return;
+
+    }
+
+
+    /*
+     * First attempt:
+     * exact flight number.
+     */
+
+    let matches =
+        scheduleFlights.filter(
+            flight =>
+                String(
+                    flight.flightNumber
+                )
+                    .toUpperCase() ===
+                search
+        );
+
+
+    /*
+     * If no exact flight number exists,
+     * search routes and airports.
+     */
+
+    if (
+        matches.length === 0
+    ) {
+
+        matches =
+            scheduleFlights.filter(
+                flight => {
+
+                    const route =
+                        `${flight.origin}-${flight.destination}`
+                            .toUpperCase();
+
+
+                    const reverseRoute =
+                        `${flight.destination}-${flight.origin}`
+                            .toUpperCase();
+
+
+                    const text =
+                        [
+                            flight.flightNumber,
+                            flight.origin,
+                            flight.destination,
+                            route
+                        ]
+                            .join(" ")
+                            .toUpperCase();
+
+
+                    return (
+                        text.includes(
+                            search
+                        ) ||
+                        route.includes(
+                            search
+                        ) ||
+                        reverseRoute.includes(
+                            search
+                        )
+                    );
+
+                }
+            );
+
+    }
+
+
+    if (
+        matches.length === 0
+    ) {
+
+        showNoFlight(
+            search
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Exact flight numbers should display
+     * the individual flight immediately.
+     *
+     * Route/airport searches may return
+     * multiple flights.
+     */
+
+    if (
+        matches.length === 1
+    ) {
+
+        currentFlight =
+            matches[0];
+
+        renderFlight(
+            currentFlight
+        );
+
+        return;
+
+    }
+
+
+    renderMultipleFlights(
+        matches
+    );
+
+}
+
+
+/* ============================================================
+   RENDER MULTIPLE RESULTS
+============================================================ */
+
+function renderMultipleFlights(
+    flights
+) {
+
+    const resultArea =
+        document.getElementById(
+            "resultArea"
+        );
+
+
+    if (!resultArea) {
+
+        return;
+
+    }
+
+
+    resultArea.innerHTML = `
+
+        <div class="flight-card">
+
+            <div class="flight-card-header">
+
+                <div>
+
+                    <h2 class="flight-title">
+                        Flight Search Results
+                    </h2>
+
+                    <p class="flight-subtitle">
+
+                        ${
+                            flights.length
+                        }
+
+                        flights found in the
+                        Viavia master schedule.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="flight-main">
+
+                ${flights
+                    .map(
+                        flight =>
+                            createSearchResult(
+                                flight
+                            )
+                    )
+                    .join("")}
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    /*
+     * Add click handlers after rendering.
+     */
+
+    resultArea
+        .querySelectorAll(
+            "[data-open-flight]"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        searchFlight(
+                            button.dataset.openFlight
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+/* ============================================================
+   SEARCH RESULT CARD
+============================================================ */
+
+function createSearchResult(
+    flight
+) {
+
+    const gateStatus =
+        getGateStatus(
+            flight
+        );
+
+
+    return `
+
+        <div
+            class="planning-card"
+            style="margin-bottom: 12px;"
+        >
+
+            <h3>
+
+                ${escapeHtml(
+                    flight.flightNumber
+                )}
+
+                ·
+
+                ${escapeHtml(
+                    flight.origin
+                )}
+
+                →
+
+                ${escapeHtml(
+                    flight.destination
+                )}
+
+            </h3>
+
+
+            <p>
+
+                ${escapeHtml(
+                    flight.departure
+                )}
+
+                →
+
+                ${escapeHtml(
+                    formatArrival(
+                        flight
+                    )
+                )}
+
+                ·
+
+                ${escapeHtml(
+                    flight.aircraft
+                )}
+
+                ·
+
+                Gate:
+
+                ${escapeHtml(
+                    gateStatus.text
+                )}
+
+            </p>
+
+
+            <button
+                type="button"
+                class="quick-button"
+                style="margin-top: 10px;"
+                data-open-flight="${escapeHtml(
+                    flight.flightNumber
+                )}"
+            >
+                Open Flight
+            </button>
+
+        </div>
+
+    `;
+
+}
+
+
+/* ============================================================
+   RENDER FLIGHT
+============================================================ */
+
+function renderFlight(
+    flight
+) {
+
+    const resultArea =
+        document.getElementById(
+            "resultArea"
+        );
+
+
+    if (!resultArea) {
+
+        return;
+
+    }
+
+
+    const gate =
+        getGateStatus(
+            flight
+        );
+
+
+    const pairing =
+        findPairingForFlight(
+            flight.flightNumber
+        );
+
+
+    resultArea.innerHTML = `
+
+        <article class="flight-card">
+
+            <div class="flight-card-header">
+
+                <div>
+
+                    <h2 class="flight-title">
+
+                        ${escapeHtml(
+                            flight.flightNumber
+                        )}
+
+                    </h2>
+
+                    <p class="flight-subtitle">
+
+                        Viavia Airlines
+                        · Nexus
+                        · ICAO VIA
+                        · IATA V1
+
+                    </p>
+
+                </div>
+
+
+                <div class="flight-status">
+
+                    Scheduled
+
+                </div>
+
+            </div>
+
+
+            <div class="flight-main">
+
+
+                <div class="route-display">
+
+                    <div class="airport-block">
+
+                        <div class="airport-code">
+
+                            ${escapeHtml(
+                                flight.origin
+                            )}
+
+                        </div>
+
+
+                        <div class="airport-label">
+
+                            Departure
+
+                        </div>
+
+
+                        <div class="airport-time">
+
+                            ${escapeHtml(
+                                flight.departure
+                            )}
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="route-arrow">
+
+                        ✈
+
+                        <div class="route-line"></div>
+
+                    </div>
+
+
+                    <div class="airport-block">
+
+                        <div class="airport-code">
+
+                            ${escapeHtml(
+                                flight.destination
+                            )}
+
+                        </div>
+
+
+                        <div class="airport-label">
+
+                            Arrival
+
+                        </div>
+
+
+                        <div class="airport-time">
+
+                            ${escapeHtml(
+                                formatArrival(
+                                    flight
+                                )
+                            )}
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="details-grid">
+
+
+                    <div class="detail-box">
+
+                        <span>
+                            Flight
+                        </span>
+
+                        <strong>
+
+                            ${escapeHtml(
+                                flight.flightNumber
+                            )}
+
+                        </strong>
+
+                    </div>
+
+
+                    <div class="detail-box">
+
+                        <span>
+                            Aircraft
+                        </span>
+
+                        <strong>
+
+                            ${escapeHtml(
+                                flight.aircraft
+                            )}
+
+                        </strong>
+
+                    </div>
+
+
+                    <div class="detail-box">
+
+                        <span>
+                            Operating Base
+                        </span>
+
+                        <strong>
+
+                            ${escapeHtml(
+                                flight.base
+                            )}
+
+                        </strong>
+
+                    </div>
+
+
+                    <div class="detail-box">
+
+                        <span>
+                            Route
+                        </span>
+
+                        <strong>
+
+                            ${escapeHtml(
+                                flight.origin
+                            )}
+
+                            →
+
+                            ${escapeHtml(
+                                flight.destination
+                            )}
+
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <h3 class="section-title">
+
+                    Gate Assignment
+
+                </h3>
+
+
+                <div class="gate-box">
+
+                    <strong>
+
+                        ${escapeHtml(
+                            gate.title
+                        )}
+
+                    </strong>
+
+
+                    <span>
+
+                        ${escapeHtml(
+                            gate.text
+                        )}
+
+                    </span>
+
+                </div>
+
+
+                <div class="planning-grid">
+
+
+                    <div class="planning-card">
+
+                        <h3>
+                            Flight Documents
+                        </h3>
+
+                        <p>
+
+                            EFB is the primary source
+                            for charts, manuals,
+                            flight documents, and
+                            operational flight plans.
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="planning-card">
+
+                        <h3>
+                            Operational Flight Plan
+                        </h3>
+
+                        <p>
+
+                            Dispatch/OFP information
+                            will be available here
+                            when the flight is released
+                            for operations.
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="planning-card">
+
+                        <h3>
+                            Aircraft
+                        </h3>
+
+                        <p>
+
+                            Scheduled aircraft:
+                            <strong>
+
+                                ${escapeHtml(
+                                    flight.aircraft
+                                )}
+
+                            </strong>
+
+                            <br>
+
+                            Final aircraft assignment
+                            remains subject to
+                            operational changes.
+
+                        </p>
+
+                    </div>
+
+
+                    <div class="planning-card">
+
+                        <h3>
+                            Crew Information
+                        </h3>
+
+                        <p>
+
+                            Assigned crew information
+                            will appear here once the
+                            flight has been assigned
+                            to an active crew pairing.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                ${
+                    pairing
+                        ? createPairingSection(
+                            pairing
+                        )
+                        : ""
+                }
+
+
+            </div>
+
+        </article>
+
+    `;
+
+}
+
+
+/* ============================================================
+   PAIRING LOOKUP
+============================================================ */
+
+function findPairingForFlight(
+    flightNumber
+) {
+
+    if (
+        typeof generateViaviaPairings !==
+        "function"
+    ) {
+
+        return null;
+
+    }
+
+
+    const pairings =
+        generateViaviaPairings({
+            maxLegs: 3
+        });
+
+
+    return (
+        pairings.find(
+            pairing =>
+                pairing.flightNumbers
+                    .includes(
+                        flightNumber
+                    )
+        ) ||
+        null
+    );
+
+}
+
+
+/* ============================================================
+   PAIRING SECTION
+============================================================ */
+
+function createPairingSection(
+    pairing
+) {
+
+    return `
+
+        <div class="pairing-card">
+
+            <div class="pairing-header">
+
+                <h2>
+
+                    Crew Pairing
+
+                    ·
+
+                    ${escapeHtml(
+                        pairing.pairingId
+                    )}
+
+                </h2>
+
+
+                <span>
+
+                    Base:
+                    ${escapeHtml(
+                        pairing.base
+                    )}
+
+                    ·
+
+                    ${pairing.legs}
+
+                    ${
+                        pairing.legs === 1
+                            ? "leg"
+                            : "legs"
+                    }
+
+                </span>
+
+            </div>
+
+
+            <div class="pairing-body">
+
+                ${pairing.flights
+                    .map(
+                        flight => `
+
+                            <div
+                                class="pairing-flight"
+                            >
+
+                                <strong>
+
+                                    ${escapeHtml(
+                                        flight.flightNumber
+                                    )}
+
+                                </strong>
+
+
+                                <span>
+
+                                    ${escapeHtml(
+                                        flight.origin
+                                    )}
+
+                                    →
+
+                                    ${escapeHtml(
+                                        flight.destination
+                                    )}
+
+                                </span>
+
+
+                                <span>
+
+                                    ${escapeHtml(
+                                        flight.departure
+                                    )}
+
+                                    →
+
+                                    ${escapeHtml(
+                                        formatArrival(
+                                            flight
+                                        )
+                                    )}
+
+                                </span>
+
+
+                                <span>
+
+                                    ${escapeHtml(
+                                        flight.aircraft
+                                    )}
+
+                                </span>
+
+                            </div>
+
+                        `
+                    )
+                    .join("")}
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+/* ============================================================
+   GATE STATUS
+============================================================ */
+
+function getGateStatus(
+    flight
+) {
+
+    /*
+     * If the master schedule provides a
+     * dedicated gate-status function,
+     * use it.
+     */
+
+    if (
+        typeof getViaviaGateStatus ===
+        "function"
+    ) {
+
+        try {
+
+            const status =
+                getViaviaGateStatus(
+                    flight
+                );
+
+
+            if (
+                status &&
+                typeof status ===
+                "object"
+            ) {
+
+                return {
+
+                    title:
+                        status.title ||
+                        "Gate Assignment",
+
+                    text:
+                        status.text ||
+                        VIAVIA_SCHEDULE
+                            .operations
+                            .gatePendingText
+
+                };
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "Shared gate status lookup failed:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /*
+     * Until an actual operating date/time
+     * is associated with the flight, the
+     * safe display is the pending status.
+     */
+
+    return {
+
+        title:
+            "Gate Assignment Pending",
+
+        text:
+            VIAVIA_SCHEDULE
+                .operations
+                .gatePendingText
+
+    };
+
+}
+
+
+/* ============================================================
+   ARRIVAL DISPLAY
+============================================================ */
+
+function formatArrival(
+    flight
+) {
+
+    return flight.nextDay
+        ? `${flight.arrival}+1`
+        : flight.arrival;
+
+}
+
+
+/* ============================================================
+   EMPTY STATE
+============================================================ */
+
+function showEmptyState() {
+
+    const resultArea =
+        document.getElementById(
+            "resultArea"
+        );
+
+
+    if (!resultArea) {
+
+        return;
+
+    }
+
+
+    resultArea.innerHTML = `
+
+        <div class="empty-state">
+
+            <div class="icon">
+                ✈
+            </div>
+
+            <h2>
+                Search for a Flight
+            </h2>
+
+            <p>
+                Enter a Viavia flight number,
+                route, or airport above.
+            </p>
+
+        </div>
+
+    `;
+
+}
+
+
+/* ============================================================
+   NO FLIGHT
+============================================================ */
+
+function showNoFlight(
+    search
+) {
+
+    const resultArea =
+        document.getElementById(
+            "resultArea"
+        );
+
+
+    if (!resultArea) {
+
+        return;
+
+    }
+
+
+    resultArea.innerHTML = `
+
+        <div class="empty-state">
+
+            <div class="icon">
+                🔎
+            </div>
+
+            <h2>
+                Flight Not Found
+            </h2>
+
+            <p>
+
+                No Viavia scheduled flight
+                matched:
+
+                <strong>
+                    ${escapeHtml(
+                        search
+                    )}
+                </strong>
+
+            </p>
+
+        </div>
+
+    `;
+
+}
+
+
+/* ============================================================
+   ERROR
+============================================================ */
+
+function showError(
+    message
+) {
+
+    const resultArea =
+        document.getElementById(
+            "resultArea"
+        );
+
+
+    if (!resultArea) {
+
+        return;
+
+    }
+
+
+    resultArea.innerHTML = `
+
+        <div class="error-box">
+
+            ${escapeHtml(
+                message
+            )}
+
+        </div>
+
+    `;
+
+}
+
+
+/* ============================================================
+   HTML ESCAPING
+============================================================ */
+
+function escapeHtml(
+    value
+) {
+
+    if (
+        value === null ||
+        value === undefined
+    ) {
+
+        return "";
+
+    }
+
+
+    return String(value)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+/* ============================================================
+   DEBUG HELPERS
+============================================================ */
+
+window.searchViaviaFlight =
+    function (
+        flightNumber
+    ) {
+
+        searchFlight(
+            flightNumber
+        );
+
+    };
+
+
+window.getViaviaFlightPlanningData =
+    function (
+        flightNumber
+    ) {
+
+        const search =
+            String(
+                flightNumber || ""
+            )
+                .trim()
+                .toUpperCase();
+
+
+        return scheduleFlights.find(
+            flight =>
+                String(
+                    flight.flightNumber
+                )
+                    .toUpperCase() ===
+                search
+        ) || null;
+
+    };
+
+
+/* ============================================================
+   FINAL SAFETY CHECK
+============================================================ */
+
+if (
+    typeof VIAVIA_SCHEDULE ===
+    "undefined"
+) {
+
+    console.error(
+        "Viavia master schedule is unavailable."
+    );
+
+}
+</script>
+
+</body>
+</html>
