@@ -3,463 +3,256 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pilot Center | Viavia Airlines</title>
+
+<title>Viavia Airlines — Pilot Center</title>
 
 <style>
-*{
-    box-sizing:border-box;
+* {
+    box-sizing: border-box;
 }
 
-body{
-    margin:0;
-    font-family:Arial,Helvetica,sans-serif;
-    background:#f7f4fa;
-    color:#24142f;
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f7f4fa;
+    color: #24142f;
 }
 
-header{
-    background:#5b247a;
-    color:white;
-    padding:16px 40px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:25px;
-    flex-wrap:wrap;
+header {
+    background: #c6b4d9;
+    padding: 16px 40px;
+    border-bottom: 1px solid #b8a5cb;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
 }
 
-.brand{
-    display:flex;
-    align-items:center;
-    text-decoration:none;
+.brand {
+    display: flex;
+    align-items: center;
 }
 
-.brand img{
-    height:46px;
-    width:auto;
-    display:block;
+.brand img {
+    height: 58px;
+    width: auto;
+    display: block;
 }
 
-nav{
-    display:flex;
-    gap:7px;
-    flex-wrap:wrap;
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
 }
 
-nav a{
-    color:white;
-    text-decoration:none;
-    padding:9px 12px;
-    border-radius:7px;
-    font-size:13px;
+nav a {
+    color: #24142f;
+    text-decoration: none;
+    font-weight: 700;
+    padding: 9px 12px;
+    border-radius: 8px;
 }
 
 nav a:hover,
-nav a.active{
-    background:rgba(255,255,255,.16);
+nav a.active {
+    background: rgba(255,255,255,.55);
 }
 
-main{
-    max-width:1200px;
-    margin:32px auto;
-    padding:0 22px 50px;
+.hero {
+    background: linear-gradient(135deg, #5b247a, #7d4b9b);
+    color: white;
+    padding: 42px 40px;
 }
 
-.page-heading{
-    margin-bottom:24px;
+.hero-inner {
+    max-width: 1150px;
+    margin: auto;
 }
 
-.page-heading h1{
-    margin:0 0 6px;
-    font-size:30px;
+.hero h1 {
+    margin: 0 0 8px;
+    font-size: 38px;
 }
 
-.page-heading p{
-    margin:0;
-    color:#706578;
-    font-size:15px;
+.hero p {
+    margin: 0;
+    font-size: 17px;
+    opacity: .92;
 }
 
-.profile-layout{
-    display:grid;
-    grid-template-columns:300px 1fr;
-    gap:20px;
-    margin-bottom:24px;
+.container {
+    max-width: 1150px;
+    margin: 28px auto 50px;
+    padding: 0 20px;
 }
 
-.card{
-    background:white;
-    border:1px solid #e2dbe8;
-    border-radius:13px;
-    box-shadow:0 2px 8px rgba(50,20,70,.05);
+.welcome,
+.card {
+    background: white;
+    border: 1px solid #e1d7e9;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(60,30,80,.06);
 }
 
-.profile-card{
-    padding:22px;
+.welcome {
+    padding: 22px;
+    margin-bottom: 22px;
 }
 
-.profile-avatar{
-    width:72px;
-    height:72px;
-    border-radius:50%;
-    background:#eee4f4;
-    color:#5b247a;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:27px;
-    font-weight:bold;
-    margin-bottom:15px;
+.welcome h2,
+.section-title {
+    color: #5b247a;
 }
 
-.profile-card h2{
-    margin:0 0 4px;
-    font-size:21px;
+.welcome h2 {
+    margin: 0 0 8px;
 }
 
-.profile-card .role{
-    color:#6f6375;
-    font-size:13px;
-    margin-bottom:20px;
+.muted {
+    color: #6e6474;
 }
 
-.profile-row{
-    display:flex;
-    justify-content:space-between;
-    gap:10px;
-    padding:9px 0;
-    border-top:1px solid #eee8f1;
-    font-size:13px;
+.section-title {
+    margin: 28px 0 14px;
 }
 
-.profile-row span:first-child{
-    color:#81758a;
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
 }
 
-.profile-row strong{
-    color:#4b3b53;
+.card {
+    padding: 20px;
 }
 
-.status-pill{
-    display:inline-block;
-    padding:4px 8px;
-    border-radius:15px;
-    background:#e7f6ed;
-    color:#19713d;
-    font-size:11px;
-    font-weight:bold;
+.card h3 {
+    margin: 0 0 8px;
+    color: #5b247a;
 }
 
-.ops-panel{
-    padding:22px;
+.card p {
+    margin: 0 0 16px;
+    line-height: 1.5;
+    color: #62586a;
 }
 
-.ops-panel h2{
-    margin:0 0 16px;
-    font-size:21px;
+.button {
+    display: inline-block;
+    background: #5b247a;
+    color: white;
+    text-decoration: none;
+    border: 0;
+    border-radius: 9px;
+    padding: 10px 15px;
+    font-weight: 700;
 }
 
-.ops-grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:12px;
+.button:hover {
+    background: #481c61;
 }
 
-.ops-card{
-    border:1px solid #e4dce9;
-    border-radius:10px;
-    padding:17px;
-    text-decoration:none;
-    color:#24142f;
-    transition:.18s;
+.button.secondary {
+    background: #eee6f3;
+    color: #5b247a;
 }
 
-.ops-card:hover{
-    border-color:#bda4ca;
-    transform:translateY(-1px);
-    box-shadow:0 3px 10px rgba(50,20,70,.07);
+.button.secondary:hover {
+    background: #e2d6eb;
 }
 
-.ops-card h3{
-    margin:0 0 5px;
-    color:#5b247a;
-    font-size:16px;
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 18px;
 }
 
-.ops-card p{
-    margin:0;
-    color:#756a7d;
-    font-size:12px;
-    line-height:1.45;
+.status {
+    background: #f8f4fb;
+    border: 1px solid #e4d9eb;
+    border-radius: 10px;
+    padding: 14px;
 }
 
-.ops-count{
-    margin-top:10px;
-    color:#5b247a;
-    font-size:12px;
-    font-weight:bold;
+.status .label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: #75687c;
+    margin-bottom: 5px;
 }
 
-.stats{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:14px;
-    margin-bottom:24px;
+.status .value {
+    font-size: 18px;
+    font-weight: 700;
+    color: #5b247a;
 }
 
-.stat{
-    background:white;
-    border:1px solid #e2dbe8;
-    border-radius:11px;
-    padding:18px;
+.assignment {
+    border-left: 5px solid #5b247a;
+    background: #faf7fc;
+    padding: 16px 18px;
+    border-radius: 8px;
 }
 
-.stat-label{
-    color:#81758a;
-    text-transform:uppercase;
-    letter-spacing:.5px;
-    font-size:11px;
-    margin-bottom:7px;
+.operations-note {
+    background: #faf7fc;
+    border: 1px solid #e4d9eb;
+    border-radius: 12px;
+    padding: 18px;
+    margin-top: 20px;
 }
 
-.stat-value{
-    color:#5b247a;
-    font-size:25px;
-    font-weight:bold;
+.operations-note strong {
+    color: #5b247a;
 }
 
-.assignment-card{
-    padding:22px;
-    margin-bottom:24px;
+footer {
+    text-align: center;
+    color: #776d7e;
+    font-size: 13px;
+    padding: 28px 20px 40px;
 }
 
-.section-title{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:15px;
-    margin-bottom:16px;
-}
+@media(max-width:900px) {
 
-.section-title h2{
-    margin:0;
-    font-size:21px;
-}
-
-.section-title span{
-    color:#81758a;
-    font-size:12px;
-}
-
-.assignment{
-    border:1px solid #e3dce9;
-    border-radius:10px;
-    padding:17px;
-    background:#fbf9fc;
-}
-
-.assignment-top{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:15px;
-    flex-wrap:wrap;
-    margin-bottom:14px;
-}
-
-.assignment-trip{
-    color:#5b247a;
-    font-size:18px;
-    font-weight:bold;
-}
-
-.assignment-status{
-    padding:5px 9px;
-    border-radius:15px;
-    background:#e7f6ed;
-    color:#19713d;
-    font-size:11px;
-    font-weight:bold;
-    text-transform:uppercase;
-}
-
-.assignment-route{
-    font-size:20px;
-    font-weight:bold;
-    margin-bottom:13px;
-}
-
-.assignment-grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:15px;
-}
-
-.assignment-info .label{
-    color:#81758a;
-    text-transform:uppercase;
-    font-size:10px;
-    letter-spacing:.4px;
-    margin-bottom:4px;
-}
-
-.assignment-info .value{
-    font-size:13px;
-    font-weight:bold;
-}
-
-.assignment-actions{
-    margin-top:17px;
-    display:flex;
-    gap:8px;
-    flex-wrap:wrap;
-}
-
-.button{
-    display:inline-block;
-    border:0;
-    border-radius:7px;
-    padding:9px 13px;
-    background:#5b247a;
-    color:white;
-    text-decoration:none;
-    font-size:12px;
-    cursor:pointer;
-}
-
-.button:hover{
-    background:#471b61;
-}
-
-.button.secondary{
-    background:#eee7f2;
-    color:#5b247a;
-}
-
-.button.secondary:hover{
-    background:#e1d7e8;
-}
-
-.two-column{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:20px;
-}
-
-.panel{
-    padding:22px;
-}
-
-.panel h2{
-    margin:0 0 16px;
-    font-size:20px;
-}
-
-.quick-list{
-    display:flex;
-    flex-direction:column;
-    gap:9px;
-}
-
-.quick-item{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:15px;
-    padding:12px 13px;
-    border:1px solid #e5dfe9;
-    border-radius:8px;
-    text-decoration:none;
-    color:#33263a;
-    font-size:13px;
-}
-
-.quick-item:hover{
-    background:#faf7fc;
-}
-
-.quick-item span{
-    color:#81758a;
-    font-size:11px;
-}
-
-.rule-box{
-    background:#f5f0f7;
-    border-left:4px solid #5b247a;
-    border-radius:7px;
-    padding:13px 15px;
-    font-size:12px;
-    line-height:1.55;
-    color:#514455;
-}
-
-.rule-box strong{
-    color:#5b247a;
-}
-
-.empty{
-    color:#75697c;
-    font-size:13px;
-    line-height:1.5;
-    padding:10px 0;
-}
-
-.error{
-    background:#fff0f0;
-    border:1px solid #efcccc;
-    color:#8c3131;
-    padding:14px;
-    border-radius:8px;
-    margin-bottom:20px;
-    font-size:13px;
-}
-
-footer{
-    text-align:center;
-    padding:25px;
-    color:#827889;
-    font-size:12px;
-}
-
-@media(max-width:950px){
-
-    .profile-layout{
-        grid-template-columns:1fr;
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 
-    .stats{
-        grid-template-columns:repeat(2,1fr);
+    .status-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 
-    .assignment-grid{
-        grid-template-columns:repeat(2,1fr);
+    header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    nav {
+        justify-content: flex-start;
     }
 }
 
-@media(max-width:650px){
+@media(max-width:600px) {
 
-    header{
-        padding:14px 20px;
-        align-items:flex-start;
-        flex-direction:column;
+    .grid,
+    .status-grid {
+        grid-template-columns: 1fr;
     }
 
-    main{
-        margin-top:25px;
-        padding:0 15px 40px;
+    .hero {
+        padding: 32px 20px;
     }
 
-    .ops-grid,
-    .two-column{
-        grid-template-columns:1fr;
+    .hero h1 {
+        font-size: 30px;
     }
 
-    .stats{
-        grid-template-columns:1fr 1fr;
-    }
-
-    .assignment-grid{
-        grid-template-columns:1fr 1fr;
+    header {
+        padding: 14px 20px;
     }
 }
 </style>
@@ -469,969 +262,417 @@ footer{
 
 <header>
 
-    <a class="brand" href="pilot-center.html">
+    <a class="brand" href="index.html">
         <img src="viavia-logo.png" alt="Viavia Airlines">
     </a>
 
     <nav>
-        <a href="pilot-center.html" class="active">Pilot Center</a>
-        <a href="available-bids.html">Available Bids</a>
-        <a href="my-trips.html">My Trips</a>
-        <a href="crew-calendar.html">Crew Calendar</a>
-        <a href="flight-planning.html">Flight Planning</a>
-        <a href="index.html">Main Site</a>
+
+        <a class="active" href="pilot-center.html">
+            Pilot Center
+        </a>
+
+        <a href="available-bids.html">
+            Available Bids
+        </a>
+
+        <a href="my-trips.html">
+            My Trips
+        </a>
+
+        <a href="crew-calendar.html">
+            Crew Calendar
+        </a>
+
+        <a href="flight-planning.html">
+            Flight Planning
+        </a>
+
+        <a href="crew-scheduling.html">
+            Crew Scheduling
+        </a>
+
+        <a href="index.html">
+            Main Site
+        </a>
+
     </nav>
 
 </header>
 
 
-<main>
+<section class="hero">
 
-    <div class="page-heading">
+    <div class="hero-inner">
+
         <h1>Pilot Center</h1>
-        <p>Welcome to Viavia Pilot Operations.</p>
+
+        <p>
+            Your central hub for Viavia pilot operations.
+        </p>
+
     </div>
 
-    <div id="errorContainer"></div>
+</section>
 
 
-    <!-- PILOT PROFILE + OPERATIONS -->
+<main class="container">
 
-    <section class="profile-layout">
 
-        <div class="card profile-card">
+<section class="welcome">
 
-            <div class="profile-avatar">
-                CP
+    <h2>Welcome, Captain</h2>
+
+    <p class="muted">
+        Welcome to the Viavia Airlines Pilot Center.
+        Manage your trips, bidding, schedule, flight planning,
+        and pilot information from one place.
+    </p>
+
+
+    <div class="status-grid">
+
+        <div class="status">
+
+            <div class="label">
+                Position
             </div>
 
-            <h2>Pilot Profile</h2>
-
-            <div class="role">
+            <div class="value">
                 Captain
             </div>
 
-            <div class="profile-row">
-                <span>Position</span>
-                <strong>Captain</strong>
+        </div>
+
+
+        <div class="status">
+
+            <div class="label">
+                Status
             </div>
 
-            <div class="profile-row">
-                <span>Status</span>
-                <strong>
-                    <span class="status-pill">Check Airman</span>
-                </strong>
-            </div>
-
-            <div class="profile-row">
-                <span>Seniority</span>
-                <strong>#1</strong>
-            </div>
-
-            <div class="profile-row">
-                <span>Fleet</span>
-                <strong>A319 / A320 / A321</strong>
-            </div>
-
-            <div class="profile-row">
-                <span>Base</span>
-                <strong id="profileBase">—</strong>
+            <div class="value">
+                Check Airman
             </div>
 
         </div>
 
 
-        <div class="card ops-panel">
+        <div class="status">
 
-            <h2>Operations</h2>
-
-            <div class="ops-grid">
-
-                <a class="ops-card" href="available-bids.html">
-                    <h3>Available Bids</h3>
-                    <p>
-                        Review open pairings from the Viavia master
-                        flight schedule and submit trip bids.
-                    </p>
-                    <div class="ops-count" id="availableCount">
-                        Loading...
-                    </div>
-                </a>
-
-
-                <a class="ops-card" href="my-trips.html">
-                    <h3>My Trips</h3>
-                    <p>
-                        View submitted and awarded trips and
-                        review individual flight legs.
-                    </p>
-                    <div class="ops-count" id="myTripsCount">
-                        Loading...
-                    </div>
-                </a>
-
-
-                <a class="ops-card" href="crew-calendar.html">
-                    <h3>Crew Calendar</h3>
-                    <p>
-                        Review your trip activity and scheduled
-                        pairing information.
-                    </p>
-                    <div class="ops-count" id="calendarCount">
-                        Loading...
-                    </div>
-                </a>
-
-
-                <a class="ops-card" href="flight-planning.html">
-                    <h3>Flight Planning</h3>
-                    <p>
-                        Search Viavia flights and review operational
-                        information.
-                    </p>
-                    <div class="ops-count">
-                        Open Flight Planning →
-                    </div>
-                </a>
-
+            <div class="label">
+                Seniority
             </div>
 
-        </div>
-
-    </section>
-
-
-    <!-- LIVE STATS -->
-
-    <section class="stats">
-
-        <div class="stat">
-            <div class="stat-label">Available Pairings</div>
-            <div class="stat-value" id="statPairings">0</div>
-        </div>
-
-        <div class="stat">
-            <div class="stat-label">My Trips</div>
-            <div class="stat-value" id="statTrips">0</div>
-        </div>
-
-        <div class="stat">
-            <div class="stat-label">Trip Legs</div>
-            <div class="stat-value" id="statLegs">0</div>
-        </div>
-
-        <div class="stat">
-            <div class="stat-label">Master Flights</div>
-            <div class="stat-value" id="statFlights">0</div>
-        </div>
-
-    </section>
-
-
-    <!-- UPCOMING ASSIGNMENT -->
-
-    <section class="card assignment-card">
-
-        <div class="section-title">
-            <h2>Upcoming Assignment</h2>
-            <span id="assignmentSource">
-                Live from My Trips
-            </span>
-        </div>
-
-        <div id="assignmentContainer"></div>
-
-    </section>
-
-
-    <!-- QUICK ACCESS + OPERATIONAL RULES -->
-
-    <section class="two-column">
-
-        <div class="card panel">
-
-            <h2>Quick Access</h2>
-
-            <div class="quick-list">
-
-                <a class="quick-item" href="available-bids.html">
-                    <strong>Available Bids</strong>
-                    <span>Review pairings →</span>
-                </a>
-
-                <a class="quick-item" href="my-trips.html">
-                    <strong>My Trips</strong>
-                    <span>View trips →</span>
-                </a>
-
-                <a class="quick-item" href="crew-calendar.html">
-                    <strong>Crew Calendar</strong>
-                    <span>Open calendar →</span>
-                </a>
-
-                <a class="quick-item" href="flight-planning.html">
-                    <strong>Flight Planning</strong>
-                    <span>Plan a flight →</span>
-                </a>
-
+            <div class="value">
+                #1
             </div>
 
         </div>
 
 
-        <div class="card panel">
+        <div class="status">
 
-            <h2>Operations Notes</h2>
-
-            <div class="rule-box">
-
-                <strong>Gate Assignment</strong><br>
-
-                Gates are not considered assigned until at least
-                12 hours before the aircraft's scheduled departure.
-
-                Before that window, Flight Planning displays:
-
-                <br><br>
-
-                <strong>
-                    TBD — Gate assignment pending
-                </strong>
-
-                <br><br>
-
-                Within the 12-hour window, a specific gate may be
-                assigned from the applicable Viavia airport gate
-                database.
-
+            <div class="label">
+                Fleet
             </div>
 
-            <br>
-
-            <div class="rule-box">
-
-                <strong>Schedule Source</strong><br>
-
-                Viavia's master flight schedule is the authoritative
-                source for flight numbers, routes, scheduled times,
-                aircraft, and operating bases.
-
+            <div class="value">
+                A319 / A320 / A321
             </div>
 
         </div>
 
-    </section>
+    </div>
+
+</section>
+
+
+<h2 class="section-title">
+    Your Operations
+</h2>
+
+
+<div class="grid">
+
+
+    <div class="card">
+
+        <h3>
+            📋 Available Bids
+        </h3>
+
+        <p>
+            View pre-built Viavia trips available for bidding.
+            Filter by base, aircraft, and trip length.
+        </p>
+
+        <a class="button" href="available-bids.html">
+            View Available Bids
+        </a>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>
+            🧳 My Trips
+        </h3>
+
+        <p>
+            View your submitted and awarded trips,
+            complete trip details, flight legs, and assignments.
+        </p>
+
+        <a class="button" href="my-trips.html">
+            View My Trips
+        </a>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>
+            📅 Crew Calendar
+        </h3>
+
+        <p>
+            View awarded trips, days off, training,
+            check rides, and other scheduled pilot assignments.
+        </p>
+
+        <a class="button" href="crew-calendar.html">
+            Open Crew Calendar
+        </a>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>
+            ✈️ Flight Planning
+        </h3>
+
+        <p>
+            Access detailed flight information before departure,
+            including report times, gates, aircraft, routing,
+            and operational information.
+        </p>
+
+        <a class="button" href="flight-planning.html">
+            Open Flight Planning
+        </a>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>
+            🧑‍✈️ Crew Scheduling
+        </h3>
+
+        <p>
+            Operations personnel can review pilot bids,
+            manage bid status, and award or deny crew assignments.
+        </p>
+
+        <a class="button" href="crew-scheduling.html">
+            Open Crew Scheduling
+        </a>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>
+            💰 Pay &amp; Hours
+        </h3>
+
+        <p>
+            Review credited hours, Captain pay, per diem,
+            premiums, and accumulated trip earnings.
+        </p>
+
+        <a class="button secondary" href="my-trips.html">
+            View Pay
+        </a>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>
+            📜 Flight History
+        </h3>
+
+        <p>
+            Review completed Viavia trips and
+            previous flight activity.
+        </p>
+
+        <a class="button secondary" href="my-trips.html">
+            View History
+        </a>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>
+            👤 Pilot Profile
+        </h3>
+
+        <p>
+            View your pilot position, seniority number,
+            base, fleet, qualifications, and other pilot information.
+        </p>
+
+        <a class="button secondary" href="pilot-center.html">
+            Pilot Profile
+        </a>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>
+            🏨 Crew Hotels
+        </h3>
+
+        <p>
+            View Viavia-designated overnight hotels,
+            addresses, and crew transportation information.
+        </p>
+
+        <a class="button secondary" href="crew-calendar.html">
+            Crew Hotels
+        </a>
+
+    </div>
+
+
+    <div class="card">
+
+        <h3>
+            🎓 Training / Check Airman
+        </h3>
+
+        <p>
+            Access training events, check rides,
+            line checks, recurrent training,
+            and other Check Airman assignments.
+        </p>
+
+        <a class="button secondary" href="crew-calendar.html">
+            Training
+        </a>
+
+    </div>
+
+</div>
+
+
+<h2 class="section-title">
+    Upcoming Assignment
+</h2>
+
+
+<section class="welcome">
+
+    <div class="assignment">
+
+        <strong>
+            No upcoming assignment displayed yet.
+        </strong>
+
+        <p
+            class="muted"
+            style="margin:7px 0 0"
+        >
+            Once a trip is awarded, your next assignment
+            will appear here with the report time,
+            trip number, and quick access to Flight Planning.
+        </p>
+
+    </div>
+
+</section>
+
+
+<h2 class="section-title">
+    Pilot Operations
+</h2>
+
+
+<section class="welcome">
+
+    <p style="margin-top:0">
+
+        <strong>
+            Gate assignment rule:
+        </strong>
+
+        Viavia gates are not assigned until at least
+        12 hours before scheduled aircraft departure.
+
+        Before that window, Flight Planning will display:
+
+        <strong>
+            TBD — Gate assignment pending
+        </strong>.
+
+    </p>
+
+
+    <p
+        class="muted"
+        style="margin-bottom:0"
+    >
+
+        Once inside the 12-hour window,
+        Flight Planning can display the assigned gate
+        from Viavia's approved airport gate pool.
+
+    </p>
+
+</section>
+
+
+<div class="operations-note">
+
+    <strong>
+        Crew Scheduling
+    </strong>
+
+    <p class="muted" style="margin:8px 0 0">
+
+        Crew Scheduling is the operations-side system
+        for reviewing submitted pilot bids and managing
+        crew assignments.
+
+    </p>
+
+</div>
+
 
 </main>
 
 
 <footer>
-    Viavia Airlines • Pilot Operations • Your destination, via us!
+
+    Viavia Airlines · Pilot Center ·
+    Your destination, via us!
+
 </footer>
 
-
-<script src="viavia-schedule.js"></script>
-
-<script>
-
-const STORAGE_KEY = "viaviaBids";
-
-let pairings = [];
-let bids = [];
-let trips = [];
-
-
-document.addEventListener(
-    "DOMContentLoaded",
-    initializePilotCenter
-);
-
-
-function initializePilotCenter(){
-
-    try{
-
-        if(
-            typeof VIAVIA_SCHEDULE === "undefined"
-        ){
-            throw new Error(
-                "The Viavia master schedule could not be loaded."
-            );
-        }
-
-
-        if(
-            typeof generateViaviaPairings !== "function"
-        ){
-            throw new Error(
-                "The Viavia pairing engine could not be loaded."
-            );
-        }
-
-
-        pairings =
-            generateViaviaPairings({
-                maxLegs:3
-            });
-
-
-        bids =
-            loadBids();
-
-
-        trips =
-            buildTrips();
-
-
-        renderDashboard();
-
-    }
-    catch(error){
-
-        console.error(
-            "Pilot Center error:",
-            error
-        );
-
-        document.getElementById(
-            "errorContainer"
-        ).innerHTML = `
-            <div class="error">
-                ${escapeHtml(error.message)}
-            </div>
-        `;
-    }
-}
-
-
-function loadBids(){
-
-    try{
-
-        const raw =
-            localStorage.getItem(
-                STORAGE_KEY
-            );
-
-        if(!raw){
-            return [];
-        }
-
-        const parsed =
-            JSON.parse(raw);
-
-        return Array.isArray(parsed)
-            ? parsed
-            : [];
-
-    }
-    catch(error){
-
-        console.error(
-            "Could not read pilot bids:",
-            error
-        );
-
-        return [];
-    }
-}
-
-
-function buildTrips(){
-
-    const result = [];
-
-
-    /*
-     * Trip 001 remains the fixed RSW-MDE-RSW pairing.
-     */
-    const trip001 =
-        pairings.find(
-            pairing =>
-                pairing.id === "TRIP-001"
-        );
-
-
-    const storedTrip001 =
-        bids.find(
-            bid =>
-                bid.pairingId === "TRIP-001" ||
-                bid.tripNumber === "Trip 001"
-        );
-
-
-    if(trip001){
-
-        result.push({
-            pairing:trip001,
-            status:storedTrip001
-                ? getStatus(storedTrip001)
-                : "awarded"
-        });
-
-    }
-
-
-    /*
-     * Add other trips from submitted bids.
-     */
-    bids.forEach(bid => {
-
-        const id =
-            bid.pairingId ||
-            bid.id;
-
-
-        if(id === "TRIP-001"){
-            return;
-        }
-
-
-        const pairing =
-            pairings.find(
-                item =>
-                    item.id === id
-            );
-
-
-        if(!pairing){
-            return;
-        }
-
-
-        if(
-            result.some(
-                item =>
-                    item.pairing.id === pairing.id
-            )
-        ){
-            return;
-        }
-
-
-        result.push({
-            pairing:pairing,
-            status:getStatus(bid)
-        });
-
-    });
-
-
-    return result;
-}
-
-
-function getStatus(bid){
-
-    const status =
-        String(
-            bid.status || "submitted"
-        ).toLowerCase();
-
-
-    if(
-        status === "awarded" ||
-        status === "confirmed" ||
-        status === "assigned"
-    ){
-        return "awarded";
-    }
-
-
-    if(status === "pending"){
-        return "pending";
-    }
-
-
-    return "submitted";
-}
-
-
-function renderDashboard(){
-
-    const flightCount =
-        Array.isArray(
-            VIAVIA_SCHEDULE.flights
-        )
-            ? VIAVIA_SCHEDULE.flights.length
-            : 0;
-
-
-    document.getElementById(
-        "statPairings"
-    ).textContent =
-        pairings.length;
-
-
-    document.getElementById(
-        "statTrips"
-    ).textContent =
-        trips.length;
-
-
-    document.getElementById(
-        "statLegs"
-    ).textContent =
-        trips.reduce(
-            (total,trip) =>
-                total +
-                getLegs(
-                    trip.pairing
-                ).length,
-            0
-        );
-
-
-    document.getElementById(
-        "statFlights"
-    ).textContent =
-        flightCount;
-
-
-    document.getElementById(
-        "availableCount"
-    ).textContent =
-        `${pairings.length} pairings available →`;
-
-
-    document.getElementById(
-        "myTripsCount"
-    ).textContent =
-        trips.length === 1
-            ? "1 trip on file →"
-            : `${trips.length} trips on file →`;
-
-
-    document.getElementById(
-        "calendarCount"
-    ).textContent =
-        trips.length === 1
-            ? "1 trip to display →"
-            : `${trips.length} trips to display →`;
-
-
-    renderBase();
-
-    renderAssignment();
-}
-
-
-function renderBase(){
-
-    const bases = [
-        ...new Set(
-            trips
-                .map(
-                    trip =>
-                        trip.pairing.base
-                )
-                .filter(Boolean)
-        )
-    ];
-
-
-    /*
-     * Pilot bases are DFW, RSW and SMF.
-     * KFTW is intentionally not included.
-     */
-    const validBases =
-        bases.filter(
-            base =>
-                ["DFW","RSW","SMF"]
-                    .includes(base)
-        );
-
-
-    let display = "DFW / RSW / SMF";
-
-
-    if(validBases.length === 1){
-        display = validBases[0];
-    }
-    else if(validBases.length > 1){
-        display = "Multiple";
-    }
-
-
-    document.getElementById(
-        "profileBase"
-    ).textContent =
-        display;
-}
-
-
-function renderAssignment(){
-
-    const container =
-        document.getElementById(
-            "assignmentContainer"
-        );
-
-
-    if(!trips.length){
-
-        container.innerHTML = `
-            <div class="empty">
-
-                No upcoming assignment is currently
-                on file.
-
-                <br><br>
-
-                Review Available Bids to submit
-                a trip preference.
-
-                <br><br>
-
-                <a
-                    class="button"
-                    href="available-bids.html"
-                >
-                    View Available Bids
-                </a>
-
-            </div>
-        `;
-
-        return;
-    }
-
-
-    /*
-     * Keep Trip 001 first because it is the fixed
-     * known pilot pairing.
-     */
-    const trip =
-        trips[0];
-
-
-    const pairing =
-        trip.pairing;
-
-
-    const legs =
-        getLegs(pairing);
-
-
-    if(!legs.length){
-
-        container.innerHTML = `
-            <div class="empty">
-                Assignment information is currently unavailable.
-            </div>
-        `;
-
-        return;
-    }
-
-
-    const route =
-        pairing.route ||
-        buildRoute(legs);
-
-
-    const aircraft =
-        pairing.aircraft ||
-        getAircraft(legs);
-
-
-    const status =
-        trip.status === "awarded"
-            ? "Awarded"
-            : trip.status === "pending"
-                ? "Pending"
-                : "Submitted";
-
-
-    const firstFlight =
-        legs[0];
-
-
-    const lastFlight =
-        legs[legs.length - 1];
-
-
-    const tripNumber =
-        pairing.tripNumber ||
-        formatTripNumber(pairing.id);
-
-
-    const detailLink =
-        pairing.id === "TRIP-001"
-            ? "trip-001.html"
-            : `flight-planning.html?flight=${encodeURIComponent(
-                firstFlight.flightNumber
-            )}`;
-
-
-    container.innerHTML = `
-
-        <div class="assignment">
-
-            <div class="assignment-top">
-
-                <div class="assignment-trip">
-                    ${escapeHtml(tripNumber)}
-                </div>
-
-                <div class="assignment-status">
-                    ${status}
-                </div>
-
-            </div>
-
-
-            <div class="assignment-route">
-                ${escapeHtml(route)}
-            </div>
-
-
-            <div class="assignment-grid">
-
-                <div class="assignment-info">
-                    <div class="label">Base</div>
-                    <div class="value">
-                        ${escapeHtml(
-                            pairing.base || "—"
-                        )}
-                    </div>
-                </div>
-
-
-                <div class="assignment-info">
-                    <div class="label">Aircraft</div>
-                    <div class="value">
-                        ${escapeHtml(aircraft)}
-                    </div>
-                </div>
-
-
-                <div class="assignment-info">
-                    <div class="label">Legs</div>
-                    <div class="value">
-                        ${legs.length}
-                    </div>
-                </div>
-
-
-                <div class="assignment-info">
-                    <div class="label">First Flight</div>
-                    <div class="value">
-                        ${escapeHtml(
-                            firstFlight.flightNumber ||
-                            "—"
-                        )}
-                    </div>
-                </div>
-
-            </div>
-
-
-            <div class="assignment-actions">
-
-                <a
-                    class="button"
-                    href="${detailLink}"
-                >
-                    View Assignment
-                </a>
-
-                <a
-                    class="button secondary"
-                    href="flight-planning.html?flight=${encodeURIComponent(
-                        firstFlight.flightNumber || ""
-                    )}"
-                >
-                    Flight Planning
-                </a>
-
-            </div>
-
-        </div>
-    `;
-}
-
-
-function getLegs(pairing){
-
-    if(
-        pairing &&
-        Array.isArray(pairing.legs)
-    ){
-        return pairing.legs;
-    }
-
-
-    if(
-        pairing &&
-        Array.isArray(pairing.flights)
-    ){
-        return pairing.flights;
-    }
-
-
-    if(
-        pairing &&
-        Array.isArray(pairing.flightNumbers)
-    ){
-
-        return pairing.flightNumbers
-            .map(number =>
-                getFlight(number)
-            )
-            .filter(Boolean);
-    }
-
-
-    return [];
-}
-
-
-function getFlight(number){
-
-    if(
-        typeof getViaviaFlight ===
-        "function"
-    ){
-        return getViaviaFlight(
-            number
-        );
-    }
-
-
-    if(
-        Array.isArray(
-            VIAVIA_SCHEDULE.flights
-        )
-    ){
-        return VIAVIA_SCHEDULE.flights.find(
-            flight =>
-                flight.flightNumber === number
-        );
-    }
-
-
-    return null;
-}
-
-
-function buildRoute(legs){
-
-    if(!legs.length){
-        return "—";
-    }
-
-
-    const airports = [
-        legs[0].origin
-    ];
-
-
-    legs.forEach(flight => {
-
-        if(flight.destination){
-            airports.push(
-                flight.destination
-            );
-        }
-
-    });
-
-
-    return airports.join(" → ");
-}
-
-
-function getAircraft(legs){
-
-    const aircraft = [
-        ...new Set(
-            legs
-                .map(
-                    flight =>
-                        flight.aircraft
-                )
-                .filter(Boolean)
-        )
-    ];
-
-
-    if(aircraft.length === 1){
-        return aircraft[0];
-    }
-
-
-    if(aircraft.length > 1){
-        return "Mixed";
-    }
-
-
-    return "—";
-}
-
-
-function formatTripNumber(id){
-
-    if(!id){
-        return "Trip";
-    }
-
-
-    const match =
-        String(id).match(
-            /(\d+)$/
-        );
-
-
-    if(match){
-
-        return `Trip ${String(
-            parseInt(
-                match[1],
-                10
-            )
-        ).padStart(3,"0")}`;
-
-    }
-
-
-    return String(id);
-}
-
-
-function escapeHtml(value){
-
-    return String(
-        value ?? ""
-    )
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
-}
-
-
-/*
- * Debug helpers.
- */
-window.viaviaPilotCenter = {
-
-    getPairings:() =>
-        pairings,
-
-    getBids:() =>
-        bids,
-
-    getTrips:() =>
-        trips,
-
-    refresh:() =>
-        initializePilotCenter()
-
-};
-
-</script>
 
 </body>
 </html>
