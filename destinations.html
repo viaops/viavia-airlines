@@ -305,6 +305,10 @@
     L.marker([38.6951, -121.5908])
         .addTo(map)
         .bindPopup("<b>SMF — Sacramento, CA</b><br>Viavia Airlines Base");
+    L.polyline([
+        [26.5362, -81.7552],
+        [33.6407, -84.4277]
+    ]).addTo(map);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
