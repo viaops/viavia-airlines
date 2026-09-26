@@ -438,6 +438,7 @@
 <main class="container">
 
     <section class="stats">
+
         <div class="stat-card">
             <div class="stat-label">Total Bids</div>
             <div class="stat-number" id="totalBids">0</div>
@@ -457,6 +458,7 @@
             <div class="stat-label">Held</div>
             <div class="stat-number" id="heldBids">0</div>
         </div>
+
     </section>
 
     <div class="notice">
@@ -474,6 +476,7 @@
         </div>
 
         <div class="filters">
+
             <select id="statusFilter">
                 <option value="all">All Statuses</option>
                 <option value="submitted">Submitted</option>
@@ -494,6 +497,7 @@
                 type="search"
                 placeholder="Search pilot, trip number, route, or flight..."
             >
+
         </div>
 
         <div id="bidList" class="bid-list"></div>
@@ -509,273 +513,385 @@
 <script src="viavia-schedule.js"></script>
 
 <script>
-(function () {
+"use strict";
 
-    "use strict";
+const STORAGE_KEY = "viaviaBids";
+const GATE_PENDING = "TBD — Gate assignment pending";
 
-    const STORAGE_KEY = "viaviaBids";
-    const GATE_PENDING = "TBD — Gate assignment pending";
+let bids = [];
 
-    let bids = [];
+/* ============================================================
+   STORAGE
+   ============================================================ */
 
-    function loadBids() {
-        try {
-            const stored = localStorage.getItem(STORAGE_KEY);
+function loadBids() {
 
-            if (!stored) {
-                bids = [];
-                return;
-            }
+    try {
 
-            const parsed = JSON.parse(stored);
+        const stored =
+            localStorage.getItem(STORAGE_KEY);
 
-            bids = Array.isArray(parsed) ? parsed : [];
-
-        } catch (error) {
-            console.error("Unable to load Viavia bids:", error);
+        if (!stored) {
             bids = [];
-        }
-    }
-
-    function saveBids() {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(bids));
-    }
-
-    function getPairings() {
-        try {
-            if (
-                typeof generateViaviaPairings === "function"
-            ) {
-                return generateViaviaPairings({
-                    maxLegs: 3
-                }) || [];
-            }
-        } catch (error) {
-            console.error("Unable to generate Viavia pairings:", error);
+            return;
         }
 
-        return [];
-    }
+        const parsed =
+            JSON.parse(stored);
 
-    function getPairingId(bid) {
-        if (!bid) {
-            return "";
+        bids =
+            Array.isArray(parsed)
+                ? parsed
+                : [];
+
+    } catch (error) {
+
+        console.error(
+            "Unable to load Viavia bids:",
+            error
+        );
+
+        bids = [];
+    }
+}
+
+function saveBids() {
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(bids)
+    );
+
+    /*
+     * Notify this page immediately.
+     */
+    loadBids();
+}
+
+/* ============================================================
+   PAIRINGS
+   ============================================================ */
+
+function getPairings() {
+
+    try {
+
+        if (
+            typeof generateViaviaPairings ===
+            "function"
+        ) {
+
+            return generateViaviaPairings({
+                maxLegs: 3
+            }) || [];
         }
 
-        return (
-            bid.pairingId ||
-            bid.tripId ||
-            bid.tripNumber ||
-            bid.pairing ||
-            ""
+    } catch (error) {
+
+        console.error(
+            "Unable to generate Viavia pairings:",
+            error
         );
     }
 
-    function findPairing(bid) {
+    return [];
+}
 
-        const pairings = getPairings();
+function getPairingId(bid) {
 
-        const pairingId = getPairingId(bid);
+    if (!bid) {
+        return "";
+    }
 
-        if (pairingId) {
+    return String(
+        bid.pairingId ||
+        bid.tripId ||
+        bid.tripNumber ||
+        bid.pairing ||
+        ""
+    ).trim();
+}
 
-            const direct = pairings.find(function (pairing) {
+function findPairing(bid) {
+
+    const pairings =
+        getPairings();
+
+    const pairingId =
+        getPairingId(bid);
+
+    if (pairingId) {
+
+        const direct =
+            pairings.find(function(pairing) {
+
                 return (
                     pairing &&
-                    (
-                        pairing.pairingId === pairingId ||
-                        pairing.id === pairingId ||
-                        pairing.tripId === pairingId
-                    )
+                    String(
+                        pairing.pairingId || ""
+                    ) === pairingId
                 );
             });
 
-            if (direct) {
-                return direct;
-            }
+        if (direct) {
+            return direct;
         }
+    }
 
-        if (
-            Array.isArray(bid.flightNumbers) &&
-            bid.flightNumbers.length
-        ) {
-
-            const byFlights = pairings.find(function (pairing) {
-
-                if (
-                    !pairing ||
-                    !Array.isArray(pairing.flightNumbers)
-                ) {
-                    return false;
-                }
-
-                return (
-                    pairing.flightNumbers.length ===
-                    bid.flightNumbers.length &&
-                    pairing.flightNumbers.every(function (number) {
-                        return bid.flightNumbers.includes(number);
+    /*
+     * Fallback using flight numbers.
+     */
+    const bidNumbers =
+        Array.isArray(bid.flightNumbers)
+            ? bid.flightNumbers.map(String)
+            : Array.isArray(bid.flights)
+                ? bid.flights
+                    .map(function(flight) {
+                        return String(
+                            flight.flightNumber ||
+                            ""
+                        );
                     })
-                );
-            });
+                    .filter(Boolean)
+                : [];
 
-            if (byFlights) {
-                return byFlights;
-            }
-        }
-
+    if (!bidNumbers.length) {
         return null;
     }
 
-    function getTripLabel(bid) {
+    return pairings.find(function(pairing) {
 
-        const pairing = findPairing(bid);
+        const pairingNumbers =
+            Array.isArray(pairing.flightNumbers)
+                ? pairing.flightNumbers.map(String)
+                : [];
 
         return (
-            getPairingId(bid) ||
-            (pairing && pairing.pairingId) ||
-            "Unassigned Trip"
+            pairingNumbers.length ===
+            bidNumbers.length &&
+            pairingNumbers.every(function(number) {
+                return bidNumbers.includes(number);
+            })
         );
+
+    }) || null;
+}
+
+/* ============================================================
+   STATUS
+   ============================================================ */
+
+function getStatus(bid) {
+
+    if (!bid) {
+        return "submitted";
     }
 
-    function getStatus(bid) {
-
-        if (bid.awarded === true) {
-            return "awarded";
-        }
-
-        if (bid.denied === true) {
-            return "denied";
-        }
-
-        if (bid.held === true) {
-            return "held";
-        }
-
-        return bid.status || "submitted";
+    if (
+        bid.status === "awarded" ||
+        bid.assignmentStatus === "assigned" ||
+        bid.awarded === true
+    ) {
+        return "awarded";
     }
 
-    function formatTime(value) {
+    if (
+        bid.status === "held" ||
+        bid.held === true
+    ) {
+        return "held";
+    }
 
-        if (!value) {
-            return "—";
-        }
+    if (
+        bid.status === "denied" ||
+        bid.denied === true
+    ) {
+        return "denied";
+    }
 
+    return "submitted";
+}
+
+/* ============================================================
+   DISPLAY HELPERS
+   ============================================================ */
+
+function escapeHtml(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function getTripLabel(bid) {
+
+    const pairing =
+        findPairing(bid);
+
+    return (
+        getPairingId(bid) ||
+        (
+            pairing
+                ? pairing.pairingId
+                : ""
+        ) ||
+        "Unassigned Trip"
+    );
+}
+
+function getRoute(bid, pairing) {
+
+    if (bid.route) {
+        return bid.route;
+    }
+
+    if (
+        pairing &&
+        pairing.route
+    ) {
+        return pairing.route;
+    }
+
+    if (
+        pairing &&
+        Array.isArray(pairing.flights)
+    ) {
+
+        return pairing.flights
+            .map(function(flight) {
+
+                return (
+                    flight.origin +
+                    " → " +
+                    flight.destination
+                );
+
+            })
+            .join(" → ");
+    }
+
+    return "Route unavailable";
+}
+
+function getFlights(bid, pairing) {
+
+    if (
+        Array.isArray(bid.flights) &&
+        bid.flights.length
+    ) {
+        return bid.flights;
+    }
+
+    if (
+        pairing &&
+        Array.isArray(pairing.flights)
+    ) {
+        return pairing.flights;
+    }
+
+    return [];
+}
+
+function formatSubmittedTime(value) {
+
+    if (!value) {
+        return "—";
+    }
+
+    const date =
+        new Date(value);
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
         return String(value);
     }
 
-    function formatSubmittedTime(value) {
+    return date.toLocaleString();
+}
 
-        if (!value) {
-            return "—";
-        }
+/* ============================================================
+   STATS
+   ============================================================ */
 
-        const date = new Date(value);
+function updateStats() {
 
-        if (Number.isNaN(date.getTime())) {
-            return String(value);
-        }
+    document.getElementById(
+        "totalBids"
+    ).textContent = bids.length;
 
-        return date.toLocaleString();
-    }
+    document.getElementById(
+        "submittedBids"
+    ).textContent =
+        bids.filter(function(bid) {
+            return getStatus(bid) === "submitted";
+        }).length;
 
-    function escapeHtml(value) {
+    document.getElementById(
+        "awardedBids"
+    ).textContent =
+        bids.filter(function(bid) {
+            return getStatus(bid) === "awarded";
+        }).length;
 
-        return String(value ?? "")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
-    }
+    document.getElementById(
+        "heldBids"
+    ).textContent =
+        bids.filter(function(bid) {
+            return getStatus(bid) === "held";
+        }).length;
+}
 
-    function getRoute(bid, pairing) {
+/* ============================================================
+   RENDER
+   ============================================================ */
 
-        if (bid.route) {
-            return bid.route;
-        }
+function renderBids() {
 
-        if (
-            pairing &&
-            pairing.route
-        ) {
-            return pairing.route;
-        }
+    const list =
+        document.getElementById(
+            "bidList"
+        );
 
-        if (
-            pairing &&
-            Array.isArray(pairing.flights)
-        ) {
+    const statusFilter =
+        document.getElementById(
+            "statusFilter"
+        ).value;
 
-            return pairing.flights
-                .map(function (flight) {
-                    return flight.origin + " → " + flight.destination;
-                })
-                .join(" → ");
-        }
+    const baseFilter =
+        document.getElementById(
+            "baseFilter"
+        ).value;
 
-        return "Route unavailable";
-    }
+    const search =
+        document.getElementById(
+            "searchFilter"
+        ).value
+        .trim()
+        .toLowerCase();
 
-    function getFlights(bid, pairing) {
+    updateStats();
 
-        if (
-            Array.isArray(bid.flights) &&
-            bid.flights.length
-        ) {
-            return bid.flights;
-        }
+    const filtered =
+        bids
+        .map(function(bid, index) {
+            return {
+                bid: bid,
+                index: index
+            };
+        })
+        .filter(function(entry) {
 
-        if (
-            pairing &&
-            Array.isArray(pairing.flights)
-        ) {
-            return pairing.flights;
-        }
+            const bid =
+                entry.bid;
 
-        return [];
-    }
-
-    function updateStats() {
-
-        document.getElementById("totalBids").textContent =
-            bids.length;
-
-        document.getElementById("submittedBids").textContent =
-            bids.filter(function (bid) {
-                return getStatus(bid) === "submitted";
-            }).length;
-
-        document.getElementById("awardedBids").textContent =
-            bids.filter(function (bid) {
-                return getStatus(bid) === "awarded";
-            }).length;
-
-        document.getElementById("heldBids").textContent =
-            bids.filter(function (bid) {
-                return getStatus(bid) === "held";
-            }).length;
-    }
-
-    function renderBids() {
-
-        const list = document.getElementById("bidList");
-
-        const statusFilter =
-            document.getElementById("statusFilter").value;
-
-        const baseFilter =
-            document.getElementById("baseFilter").value;
-
-        const search =
-            document.getElementById("searchFilter").value
-                .trim()
-                .toLowerCase();
-
-        updateStats();
-
-        const filtered = bids.filter(function (bid) {
-
-            const status = getStatus(bid);
+            const status =
+                getStatus(bid);
 
             if (
                 statusFilter !== "all" &&
@@ -786,7 +902,9 @@
 
             if (
                 baseFilter !== "all" &&
-                String(bid.base || "").toUpperCase() !==
+                String(
+                    bid.base || ""
+                ).toUpperCase() !==
                 baseFilter
             ) {
                 return false;
@@ -794,9 +912,11 @@
 
             if (search) {
 
-                const pairing = findPairing(bid);
+                const pairing =
+                    findPairing(bid);
 
-                const searchText = [
+                const text = [
+
                     bid.pilotName,
                     bid.pilotId,
                     bid.pairingId,
@@ -805,472 +925,801 @@
                     bid.route,
                     bid.base,
                     bid.aircraft,
-                    ...(bid.flightNumbers || []),
-                    ...(pairing && pairing.flightNumbers
+
+                    ...(Array.isArray(
+                        bid.flightNumbers
+                    )
+                        ? bid.flightNumbers
+                        : []),
+
+                    ...(pairing &&
+                    Array.isArray(
+                        pairing.flightNumbers
+                    )
                         ? pairing.flightNumbers
                         : [])
+
                 ]
                 .filter(Boolean)
                 .join(" ")
                 .toLowerCase();
 
-                if (!searchText.includes(search)) {
+                if (
+                    !text.includes(search)
+                ) {
                     return false;
                 }
             }
 
             return true;
+
         });
 
-        if (!filtered.length) {
+    if (!filtered.length) {
 
-            list.innerHTML = `
-                <div class="empty">
-                    <h3>No bids found</h3>
-                    <p>
-                        Submitted pilot bids will appear here when available.
-                    </p>
-                </div>
-            `;
+        list.innerHTML = `
+            <div class="empty">
+                <h3>No bids found</h3>
+                <p>
+                    Submitted pilot bids will appear here when available.
+                </p>
+            </div>
+        `;
 
-            return;
-        }
-
-        list.innerHTML = filtered
-            .map(renderBid)
-            .join("");
+        return;
     }
 
-    function renderBid(bid) {
+    list.innerHTML =
+        filtered
+            .map(function(entry) {
 
-        const pairing = findPairing(bid);
-        const status = getStatus(bid);
-        const tripLabel = getTripLabel(bid);
-        const route = getRoute(bid, pairing);
-        const flights = getFlights(bid, pairing);
+                return renderBid(
+                    entry.bid,
+                    entry.index
+                );
 
-        const base =
-            bid.base ||
-            (pairing && pairing.base) ||
-            "—";
+            })
+            .join("");
+}
 
-        const aircraft =
-            bid.aircraft ||
-            (
-                pairing &&
-                Array.isArray(pairing.aircraft)
-                    ? pairing.aircraft.join(", ")
-                    : "—"
-            );
+/* ============================================================
+   BID CARD
+   ============================================================ */
 
-        const legCount =
-            bid.legCount ||
-            bid.legs ||
-            flights.length ||
-            "—";
+function renderBid(bid, bidIndex) {
 
-        const gateStatus =
-            bid.gateStatus ||
-            GATE_PENDING;
+    const pairing =
+        findPairing(bid);
 
-        const pilotName =
-            bid.pilotName ||
-            "Captain";
+    const status =
+        getStatus(bid);
 
-        const statusClass =
-            "status-" + status;
+    const tripLabel =
+        getTripLabel(bid);
 
-        const flightRows = flights.length
-            ? flights.map(function (flight) {
+    const route =
+        getRoute(
+            bid,
+            pairing
+        );
+
+    const flights =
+        getFlights(
+            bid,
+            pairing
+        );
+
+    const base =
+        bid.base ||
+        (
+            pairing
+                ? pairing.base
+                : "—"
+        );
+
+    const aircraft =
+        bid.aircraft ||
+        (
+            pairing &&
+            Array.isArray(pairing.aircraft)
+                ? pairing.aircraft.join(", ")
+                : "—"
+        );
+
+    const legCount =
+        bid.legCount ||
+        bid.legs ||
+        flights.length ||
+        "—";
+
+    const gateStatus =
+        bid.gateStatus ||
+        GATE_PENDING;
+
+    const pilotName =
+        bid.pilotName ||
+        "Captain";
+
+    const flightRows =
+        flights.length
+            ? flights.map(function(flight) {
 
                 return `
                     <div class="flight-row">
+
                         <span class="flight-number">
                             ${escapeHtml(
                                 flight.flightNumber ||
-                                "VIA" + (flight.number || "")
+                                "VIA" +
+                                (
+                                    flight.number ||
+                                    ""
+                                )
                             )}
                         </span>
 
                         <span>
                             ${escapeHtml(
-                                flight.origin || "—"
+                                flight.origin ||
+                                "—"
                             )}
                             →
                             ${escapeHtml(
-                                flight.destination || "—"
+                                flight.destination ||
+                                "—"
                             )}
                         </span>
 
                         <span>
                             ${escapeHtml(
-                                formatTime(flight.departure)
+                                flight.departure ||
+                                "—"
                             )}
                             –
                             ${escapeHtml(
-                                formatTime(flight.arrival)
+                                flight.arrival ||
+                                "—"
                             )}
                         </span>
 
                         <span>
                             ${escapeHtml(
-                                flight.aircraft || aircraft
+                                flight.aircraft ||
+                                aircraft
                             )}
                         </span>
+
                     </div>
                 `;
 
             }).join("")
             : `
                 <div class="flight-row">
-                    <span>No flight details available</span>
+                    <span>
+                        No flight details available
+                    </span>
                 </div>
             `;
 
-        return `
-            <article class="bid-card">
+    /*
+     * IMPORTANT:
+     * The button now uses the actual array index.
+     * It does NOT depend on bid.bidId existing.
+     */
+    const actions =
+        status === "submitted"
+            ? `
+                <button
+                    class="btn-award"
+                    type="button"
+                    onclick="awardBid(${bidIndex})"
+                >
+                    Award Trip
+                </button>
 
-                <div class="bid-top">
+                <button
+                    class="btn-hold"
+                    type="button"
+                    onclick="holdBid(${bidIndex})"
+                >
+                    Hold
+                </button>
 
-                    <div>
-                        <div class="trip-title">
+                <button
+                    class="btn-deny"
+                    type="button"
+                    onclick="denyBid(${bidIndex})"
+                >
+                    Deny
+                </button>
+            `
+            : "";
+
+    return `
+        <article class="bid-card">
+
+            <div class="bid-top">
+
+                <div>
+
+                    <div class="trip-title">
+                        ${escapeHtml(tripLabel)}
+                    </div>
+
+                    <div class="trip-subtitle">
+                        Pilot:
+                        ${escapeHtml(pilotName)}
+                        • Base:
+                        ${escapeHtml(base)}
+                    </div>
+
+                </div>
+
+                <span class="status status-${escapeHtml(status)}">
+                    ${escapeHtml(status)}
+                </span>
+
+            </div>
+
+            <div class="bid-body">
+
+                <div class="details">
+
+                    <div class="detail">
+
+                        <div class="detail-label">
+                            Pilot ID
+                        </div>
+
+                        <div class="detail-value">
+                            ${escapeHtml(
+                                bid.pilotId ||
+                                "PILOT-001"
+                            )}
+                        </div>
+
+                    </div>
+
+                    <div class="detail">
+
+                        <div class="detail-label">
+                            Base
+                        </div>
+
+                        <div class="detail-value">
+                            ${escapeHtml(base)}
+                        </div>
+
+                    </div>
+
+                    <div class="detail">
+
+                        <div class="detail-label">
+                            Aircraft
+                        </div>
+
+                        <div class="detail-value">
+                            ${escapeHtml(aircraft)}
+                        </div>
+
+                    </div>
+
+                    <div class="detail">
+
+                        <div class="detail-label">
+                            Legs
+                        </div>
+
+                        <div class="detail-value">
+                            ${escapeHtml(legCount)}
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="route-box">
+
+                    <div class="detail-label">
+                        Pairing Route
+                    </div>
+
+                    <div class="route-line">
+                        ${escapeHtml(route)}
+                    </div>
+
+                    <div class="flight-list">
+                        ${flightRows}
+                    </div>
+
+                </div>
+
+                <div class="details">
+
+                    <div class="detail">
+
+                        <div class="detail-label">
+                            Trip ID
+                        </div>
+
+                        <div class="detail-value">
                             ${escapeHtml(tripLabel)}
                         </div>
 
-                        <div class="trip-subtitle">
-                            Pilot:
-                            ${escapeHtml(pilotName)}
-                            • Base:
-                            ${escapeHtml(base)}
-                        </div>
                     </div>
 
-                    <span class="status ${statusClass}">
-                        ${escapeHtml(status)}
-                    </span>
-
-                </div>
-
-                <div class="bid-body">
-
-                    <div class="details">
-
-                        <div class="detail">
-                            <div class="detail-label">
-                                Pilot ID
-                            </div>
-
-                            <div class="detail-value">
-                                ${escapeHtml(
-                                    bid.pilotId || "PILOT-001"
-                                )}
-                            </div>
-                        </div>
-
-                        <div class="detail">
-                            <div class="detail-label">
-                                Base
-                            </div>
-
-                            <div class="detail-value">
-                                ${escapeHtml(base)}
-                            </div>
-                        </div>
-
-                        <div class="detail">
-                            <div class="detail-label">
-                                Aircraft
-                            </div>
-
-                            <div class="detail-value">
-                                ${escapeHtml(aircraft)}
-                            </div>
-                        </div>
-
-                        <div class="detail">
-                            <div class="detail-label">
-                                Legs
-                            </div>
-
-                            <div class="detail-value">
-                                ${escapeHtml(legCount)}
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="route-box">
+                    <div class="detail">
 
                         <div class="detail-label">
-                            Pairing Route
+                            Gate
                         </div>
 
-                        <div class="route-line">
-                            ${escapeHtml(route)}
-                        </div>
-
-                        <div class="flight-list">
-                            ${flightRows}
+                        <div class="detail-value">
+                            ${escapeHtml(gateStatus)}
                         </div>
 
                     </div>
 
-                    <div class="details">
+                    <div class="detail">
 
-                        <div class="detail">
-                            <div class="detail-label">
-                                Trip ID
-                            </div>
-
-                            <div class="detail-value">
-                                ${escapeHtml(tripLabel)}
-                            </div>
+                        <div class="detail-label">
+                            Submitted
                         </div>
 
-                        <div class="detail">
-                            <div class="detail-label">
-                                Gate
-                            </div>
-
-                            <div class="detail-value">
-                                ${escapeHtml(gateStatus)}
-                            </div>
-                        </div>
-
-                        <div class="detail">
-                            <div class="detail-label">
-                                Submitted
-                            </div>
-
-                            <div class="detail-value">
-                                ${escapeHtml(
-                                    formatSubmittedTime(
-                                        bid.submittedAt
-                                    )
-                                )}
-                            </div>
-                        </div>
-
-                        <div class="detail">
-                            <div class="detail-label">
-                                Assignment
-                            </div>
-
-                            <div class="detail-value">
-                                ${escapeHtml(
-                                    bid.assignmentStatus ||
-                                    (
-                                        status === "awarded"
-                                            ? "assigned"
-                                            : "pending"
-                                    )
-                                )}
-                            </div>
+                        <div class="detail-value">
+                            ${escapeHtml(
+                                formatSubmittedTime(
+                                    bid.submittedAt
+                                )
+                            )}
                         </div>
 
                     </div>
 
-                    <div class="actions">
+                    <div class="detail">
 
-                        ${
-                            status === "submitted"
-                                ? `
-                                    <button
-                                        class="btn-award"
-                                        onclick="awardBid('${escapeHtml(bid.bidId)}')"
-                                    >
-                                        Award Trip
-                                    </button>
+                        <div class="detail-label">
+                            Assignment
+                        </div>
 
-                                    <button
-                                        class="btn-hold"
-                                        onclick="holdBid('${escapeHtml(bid.bidId)}')"
-                                    >
-                                        Hold
-                                    </button>
-
-                                    <button
-                                        class="btn-deny"
-                                        onclick="denyBid('${escapeHtml(bid.bidId)}')"
-                                    >
-                                        Deny
-                                    </button>
-                                `
-                                : ""
-                        }
-
-                        <button
-                            class="btn-view"
-                            onclick="viewBid('${escapeHtml(bid.bidId)}')"
-                        >
-                            View Details
-                        </button>
+                        <div class="detail-value">
+                            ${escapeHtml(
+                                bid.assignmentStatus ||
+                                (
+                                    status === "awarded"
+                                        ? "assigned"
+                                        : "pending"
+                                )
+                            )}
+                        </div>
 
                     </div>
 
                 </div>
 
-            </article>
-        `;
+                <div class="actions">
+
+                    ${actions}
+
+                    <button
+                        class="btn-view"
+                        type="button"
+                        onclick="viewBid(${bidIndex})"
+                    >
+                        View Details
+                    </button>
+
+                </div>
+
+            </div>
+
+        </article>
+    `;
+}
+
+/* ============================================================
+   AWARD
+   ============================================================ */
+
+window.awardBid = function(bidIndex) {
+
+    console.log(
+        "Viavia Crew Scheduling: Award requested for bid index:",
+        bidIndex
+    );
+
+    /*
+     * Get the exact bid directly from the array.
+     * This avoids the old bidId problem entirely.
+     */
+    const bid =
+        bids[Number(bidIndex)];
+
+    if (!bid) {
+
+        console.error(
+            "Award failed: bid not found.",
+            {
+                bidIndex: bidIndex,
+                bids: bids
+            }
+        );
+
+        alert(
+            "Unable to award this trip because the bid could not be found."
+        );
+
+        return;
     }
 
-    window.awardBid = function (bidId) {
+    const pairing =
+        findPairing(bid);
 
-        const bid = bids.find(function (item) {
-            return item.bidId === bidId;
-        });
+    const tripLabel =
+        getTripLabel(bid);
 
-        if (!bid) {
-            return;
-        }
+    const flights =
+        getFlights(
+            bid,
+            pairing
+        );
 
-        const tripLabel = getTripLabel(bid);
-
-        const confirmed = confirm(
+    const confirmed =
+        confirm(
             "Award " +
             tripLabel +
             " to " +
-            (bid.pilotName || "Captain") +
+            (
+                bid.pilotName ||
+                "Captain"
+            ) +
             "?"
         );
 
-        if (!confirmed) {
-            return;
-        }
+    if (!confirmed) {
+        return;
+    }
 
-        bid.status = "awarded";
-        bid.assignmentStatus = "assigned";
-        bid.awarded = true;
-        bid.held = false;
-        bid.denied = false;
-        bid.awardedAt = new Date().toISOString();
-        bid.awardedBy = "Crew Scheduling";
-        bid.assignedTrip = tripLabel;
+    const now =
+        new Date().toISOString();
+
+    /*
+     * Preserve the actual trip identity.
+     */
+    const authoritativePairingId =
+        (
+            pairing &&
+            pairing.pairingId
+        ) ||
+        getPairingId(bid) ||
+        tripLabel;
+
+    bid.pairingId =
+        authoritativePairingId;
+
+    bid.tripId =
+        authoritativePairingId;
+
+    bid.tripNumber =
+        authoritativePairingId;
+
+    /*
+     * Award state.
+     */
+    bid.status = "awarded";
+
+    bid.assignmentStatus =
+        "assigned";
+
+    bid.awarded = true;
+
+    bid.held = false;
+
+    bid.denied = false;
+
+    bid.awardedAt =
+        now;
+
+    bid.awardedBy =
+        "Crew Scheduling";
+
+    bid.assignedTrip =
+        authoritativePairingId;
+
+    /*
+     * Preserve the actual flights.
+     */
+    if (flights.length) {
+
+        bid.flights =
+            flights.map(function(flight) {
+                return flight;
+            });
+
+        bid.flightNumbers =
+            flights.map(function(flight) {
+                return String(
+                    flight.flightNumber ||
+                    ""
+                );
+            }).filter(Boolean);
+
         bid.assignedFlights =
-            Array.isArray(bid.flightNumbers)
-                ? bid.flightNumbers
+            bid.flightNumbers.slice();
+
+    } else {
+
+        bid.assignedFlights =
+            Array.isArray(
+                bid.flightNumbers
+            )
+                ? bid.flightNumbers.slice()
                 : [];
+    }
 
-        bid.updatedAt = new Date().toISOString();
+    bid.updatedAt =
+        now;
 
-        saveBids();
-        renderBids();
+    /*
+     * Save the exact same object back to the
+     * viaviaBids array.
+     */
+    bids[Number(bidIndex)] =
+        bid;
+
+    try {
+
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(bids)
+        );
+
+        /*
+         * Immediately verify the write.
+         */
+        const verification =
+            JSON.parse(
+                localStorage.getItem(
+                    STORAGE_KEY
+                ) || "[]"
+            );
+
+        const savedBid =
+            verification[
+                Number(bidIndex)
+            ];
+
+        console.log(
+            "Viavia Crew Scheduling: Award saved.",
+            savedBid
+        );
+
+        if (
+            !savedBid ||
+            savedBid.status !== "awarded" ||
+            savedBid.awarded !== true
+        ) {
+
+            throw new Error(
+                "Award verification failed."
+            );
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Unable to save awarded trip:",
+            error
+        );
 
         alert(
-            tripLabel +
-            " has been awarded by Crew Scheduling."
-        );
-    };
-
-    window.holdBid = function (bidId) {
-
-        const bid = bids.find(function (item) {
-            return item.bidId === bidId;
-        });
-
-        if (!bid) {
-            return;
-        }
-
-        bid.status = "held";
-        bid.held = true;
-        bid.awarded = false;
-        bid.denied = false;
-        bid.assignmentStatus = "pending";
-        bid.updatedAt = new Date().toISOString();
-
-        saveBids();
-        renderBids();
-    };
-
-    window.denyBid = function (bidId) {
-
-        const bid = bids.find(function (item) {
-            return item.bidId === bidId;
-        });
-
-        if (!bid) {
-            return;
-        }
-
-        const confirmed = confirm(
-            "Deny this pilot bid?"
+            "The trip could not be saved. Check the browser console for details."
         );
 
-        if (!confirmed) {
-            return;
-        }
+        return;
+    }
 
-        bid.status = "denied";
-        bid.denied = true;
-        bid.awarded = false;
-        bid.held = false;
-        bid.assignmentStatus = "denied";
-        bid.updatedAt = new Date().toISOString();
-
-        saveBids();
-        renderBids();
-    };
-
-    window.viewBid = function (bidId) {
-
-        const bid = bids.find(function (item) {
-            return item.bidId === bidId;
-        });
-
-        if (!bid) {
-            return;
-        }
-
-        const pairing = findPairing(bid);
-
-        console.log("Viavia Crew Scheduling — Bid Details:", {
-            bid: bid,
-            pairing: pairing
-        });
-
-        alert(
-            "Trip: " +
-            getTripLabel(bid) +
-            "\n" +
-            "Pilot: " +
-            (bid.pilotName || "Captain") +
-            "\n" +
-            "Base: " +
-            (bid.base || "—") +
-            "\n" +
-            "Route: " +
-            getRoute(bid, pairing) +
-            "\n" +
-            "Status: " +
-            getStatus(bid)
-        );
-    };
-
-    document
-        .getElementById("statusFilter")
-        .addEventListener("change", renderBids);
-
-    document
-        .getElementById("baseFilter")
-        .addEventListener("change", renderBids);
-
-    document
-        .getElementById("searchFilter")
-        .addEventListener("input", renderBids);
-
-    window.addEventListener("storage", function (event) {
-
-        if (event.key === STORAGE_KEY) {
-            loadBids();
-            renderBids();
-        }
-    });
-
+    /*
+     * Refresh this page.
+     */
     loadBids();
     renderBids();
 
-})();
+    /*
+     * Tell the user exactly what happened.
+     */
+    alert(
+        authoritativePairingId +
+        " has been awarded by Crew Scheduling."
+    );
+};
+
+/* ============================================================
+   HOLD
+   ============================================================ */
+
+window.holdBid = function(bidIndex) {
+
+    const bid =
+        bids[Number(bidIndex)];
+
+    if (!bid) {
+        return;
+    }
+
+    bid.status =
+        "held";
+
+    bid.held =
+        true;
+
+    bid.awarded =
+        false;
+
+    bid.denied =
+        false;
+
+    bid.assignmentStatus =
+        "pending";
+
+    bid.updatedAt =
+        new Date().toISOString();
+
+    bids[Number(bidIndex)] =
+        bid;
+
+    saveBids();
+    renderBids();
+};
+
+/* ============================================================
+   DENY
+   ============================================================ */
+
+window.denyBid = function(bidIndex) {
+
+    const bid =
+        bids[Number(bidIndex)];
+
+    if (!bid) {
+        return;
+    }
+
+    const confirmed =
+        confirm(
+            "Deny this pilot bid?"
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+    bid.status =
+        "denied";
+
+    bid.denied =
+        true;
+
+    bid.awarded =
+        false;
+
+    bid.held =
+        false;
+
+    bid.assignmentStatus =
+        "denied";
+
+    bid.updatedAt =
+        new Date().toISOString();
+
+    bids[Number(bidIndex)] =
+        bid;
+
+    saveBids();
+    renderBids();
+};
+
+/* ============================================================
+   VIEW
+   ============================================================ */
+
+window.viewBid = function(bidIndex) {
+
+    const bid =
+        bids[Number(bidIndex)];
+
+    if (!bid) {
+        return;
+    }
+
+    const pairing =
+        findPairing(bid);
+
+    console.log(
+        "Viavia Crew Scheduling — Bid Details:",
+        {
+            bid: bid,
+            pairing: pairing
+        }
+    );
+
+    alert(
+        "Trip: " +
+        getTripLabel(bid) +
+        "\n" +
+        "Pilot: " +
+        (
+            bid.pilotName ||
+            "Captain"
+        ) +
+        "\n" +
+        "Base: " +
+        (
+            bid.base ||
+            "—"
+        ) +
+        "\n" +
+        "Route: " +
+        getRoute(
+            bid,
+            pairing
+        ) +
+        "\n" +
+        "Status: " +
+        getStatus(bid)
+    );
+};
+
+/* ============================================================
+   FILTERS
+   ============================================================ */
+
+document
+    .getElementById("statusFilter")
+    .addEventListener(
+        "change",
+        renderBids
+    );
+
+document
+    .getElementById("baseFilter")
+    .addEventListener(
+        "change",
+        renderBids
+    );
+
+document
+    .getElementById("searchFilter")
+    .addEventListener(
+        "input",
+        renderBids
+    );
+
+/* ============================================================
+   CROSS-PAGE UPDATES
+   ============================================================ */
+
+window.addEventListener(
+    "storage",
+    function(event) {
+
+        if (
+            event.key === STORAGE_KEY
+        ) {
+
+            loadBids();
+            renderBids();
+        }
+    }
+);
+
+/* ============================================================
+   INITIAL LOAD
+   ============================================================ */
+
+loadBids();
+renderBids();
+
 </script>
 
 </body>
