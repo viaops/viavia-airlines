@@ -4,10 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Available Bids — Viavia Airlines</title>
+<title>My Trips — Viavia Airlines</title>
 
 <style>
-
 *{
     box-sizing:border-box;
 }
@@ -94,61 +93,219 @@ nav a.active{
     padding:0 20px;
 }
 
-.card{
+.stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:25px;
+}
+
+.stat{
     background:white;
     border:1px solid #e1d7e9;
     border-radius:12px;
+    padding:18px;
     box-shadow:0 2px 8px rgba(50,20,70,.05);
 }
 
-.filters{
-    padding:22px;
-    margin-bottom:24px;
-}
-
-.filters h2{
-    margin:0 0 18px;
-    color:#5b247a;
-    font-size:21px;
-}
-
-.filter-grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:14px;
-}
-
-.field label{
-    display:block;
+.stat-label{
     font-size:12px;
-    font-weight:700;
-    color:#6f6377;
-    margin-bottom:6px;
+    color:#75687c;
     text-transform:uppercase;
     letter-spacing:.04em;
+    font-weight:700;
 }
 
-.field select,
-.field input{
-    width:100%;
-    padding:11px 12px;
-    border:1px solid #d8ccdf;
-    border-radius:8px;
+.stat-value{
+    margin-top:7px;
+    font-size:27px;
+    font-weight:800;
+    color:#5b247a;
+}
+
+.notice{
+    background:#eeeaf6;
+    border:1px solid #d9cde4;
+    color:#4e2866;
+    padding:15px 17px;
+    border-radius:9px;
+    margin-bottom:24px;
+    font-size:14px;
+    line-height:1.5;
+}
+
+.notice strong{
+    color:#5b247a;
+}
+
+.trip-list{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+
+.trip-card{
     background:white;
-    color:#24142f;
+    border:1px solid #e1d7e9;
+    border-radius:13px;
+    padding:22px;
+    box-shadow:0 2px 9px rgba(50,20,70,.05);
+}
+
+.trip-header{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:15px;
+    margin-bottom:18px;
+}
+
+.trip-title{
+    color:#5b247a;
+    font-size:22px;
+    font-weight:800;
+}
+
+.trip-subtitle{
+    margin-top:5px;
+    color:#75687c;
+    font-size:13px;
+}
+
+.badge{
+    display:inline-block;
+    background:#e8f4ea;
+    color:#27713b;
+    border-radius:999px;
+    padding:7px 11px;
+    font-size:12px;
+    font-weight:800;
+    white-space:nowrap;
+}
+
+.route{
+    display:grid;
+    grid-template-columns:1fr 70px 1fr;
+    align-items:center;
+    gap:15px;
+    padding:18px;
+    background:#faf7fc;
+    border:1px solid #eee7f2;
+    border-radius:10px;
+    margin-bottom:18px;
+}
+
+.airport{
+    font-size:30px;
+    font-weight:800;
+    color:#5b247a;
+}
+
+.route-label{
+    margin-top:4px;
+    color:#665a6c;
+    font-size:13px;
+}
+
+.route-center{
+    text-align:center;
+    color:#8b7597;
+    font-size:24px;
+}
+
+.info-grid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:12px;
+    margin-bottom:18px;
+}
+
+.info-box{
+    padding:12px;
+    background:#faf8fb;
+    border:1px solid #eee7f2;
+    border-radius:8px;
+}
+
+.info-label{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:#75687c;
+}
+
+.info-value{
+    margin-top:5px;
+    color:#5b247a;
+    font-weight:800;
     font-size:14px;
 }
 
-.field select:focus,
-.field input:focus{
-    outline:none;
-    border-color:#5b247a;
+.legs{
+    border-top:1px solid #eee7f2;
+    padding-top:16px;
 }
 
-.filter-actions{
-    margin-top:16px;
+.legs-title{
+    color:#5b247a;
+    font-weight:800;
+    font-size:15px;
+    margin-bottom:10px;
+}
+
+.leg{
+    display:grid;
+    grid-template-columns:100px 1.2fr 1.2fr 80px;
+    gap:12px;
+    align-items:center;
+    padding:12px 0;
+    border-bottom:1px solid #f0ebf3;
+    font-size:13px;
+}
+
+.leg:last-child{
+    border-bottom:0;
+}
+
+.leg-flight{
+    color:#5b247a;
+    font-weight:800;
+}
+
+.leg-route{
+    color:#4c4054;
+}
+
+.leg-time{
+    color:#62576a;
+}
+
+.leg-aircraft{
+    text-align:right;
+    color:#62576a;
+    font-weight:700;
+}
+
+.gate{
+    margin-top:14px;
+    padding:11px 13px;
+    background:#f7f3fa;
+    border-radius:8px;
+    color:#6e6175;
+    font-size:12px;
+}
+
+.gate strong{
+    color:#5b247a;
+}
+
+.actions{
+    margin-top:18px;
+    padding-top:16px;
+    border-top:1px solid #eee7f2;
     display:flex;
-    gap:10px;
+    gap:9px;
+    flex-wrap:wrap;
 }
 
 .button{
@@ -177,268 +334,41 @@ nav a.active{
     background:#e2d6eb;
 }
 
-.bid-layout{
-    display:grid;
-    grid-template-columns:minmax(0,1fr) 330px;
-    gap:20px;
-    align-items:start;
-}
-
-.trip-list{
-    display:flex;
-    flex-direction:column;
-    gap:16px;
-}
-
-.trip-card{
+.empty{
     background:white;
     border:1px solid #e1d7e9;
-    border-radius:12px;
-    padding:20px;
+    border-radius:13px;
+    padding:55px 25px;
+    text-align:center;
     box-shadow:0 2px 8px rgba(50,20,70,.04);
 }
 
-.trip-header{
-    display:flex;
-    align-items:flex-start;
-    justify-content:space-between;
-    gap:15px;
-    margin-bottom:16px;
-}
-
-.trip-number{
-    color:#5b247a;
-    font-size:20px;
-    font-weight:800;
-}
-
-.trip-subtitle{
-    margin-top:4px;
-    color:#75687c;
-    font-size:13px;
-}
-
-.badge{
-    display:inline-block;
-    background:#eee6f3;
-    color:#5b247a;
-    border-radius:999px;
-    padding:6px 10px;
-    font-size:12px;
-    font-weight:800;
-    white-space:nowrap;
-}
-
-.route{
-    display:grid;
-    grid-template-columns:1fr 50px 1fr;
-    align-items:center;
-    gap:10px;
-    padding:15px;
-    background:#faf7fc;
-    border:1px solid #eee7f2;
-    border-radius:9px;
-    margin-bottom:16px;
-}
-
-.airport{
-    font-size:27px;
-    font-weight:800;
-    color:#5b247a;
-}
-
-.time{
-    margin-top:3px;
-    font-size:13px;
-    color:#665a6c;
-}
-
-.arrow{
-    text-align:center;
-    font-size:22px;
+.empty-icon{
+    font-size:42px;
+    margin-bottom:12px;
     color:#8b7597;
 }
 
-.trip-info{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:12px;
-    margin-bottom:16px;
+.empty h2{
+    margin:0 0 8px;
+    color:#5b247a;
 }
 
-.info-box{
-    padding:11px;
-    background:#faf8fb;
-    border:1px solid #eee7f2;
-    border-radius:8px;
-}
-
-.info-label{
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:.04em;
+.empty p{
+    margin:0 auto 20px;
+    max-width:540px;
     color:#75687c;
-}
-
-.info-value{
-    margin-top:4px;
-    color:#5b247a;
-    font-weight:800;
-    font-size:14px;
-}
-
-.legs{
-    border-top:1px solid #eee7f2;
-    padding-top:14px;
-}
-
-.legs-title{
-    color:#5b247a;
-    font-weight:800;
-    font-size:14px;
-    margin-bottom:8px;
-}
-
-.leg{
-    display:grid;
-    grid-template-columns:90px 1fr 1fr 90px;
-    gap:10px;
-    padding:9px 0;
-    border-bottom:1px solid #f0ebf3;
-    font-size:13px;
-}
-
-.leg:last-child{
-    border-bottom:0;
-}
-
-.leg strong{
-    color:#5b247a;
-}
-
-.gate{
-    margin-top:12px;
-    padding:10px 12px;
-    background:#f7f3fa;
-    border-radius:7px;
-    color:#6e6175;
-    font-size:12px;
-}
-
-.trip-actions{
-    margin-top:16px;
-    display:flex;
-    gap:9px;
-    flex-wrap:wrap;
-}
-
-.sidebar{
-    padding:20px;
-    height:max-content;
-    position:sticky;
-    top:15px;
-}
-
-.sidebar h2{
-    margin:0 0 7px;
-    color:#5b247a;
-    font-size:20px;
-}
-
-.sidebar p{
-    color:#6e6175;
-    font-size:13px;
     line-height:1.5;
-    margin:0 0 16px;
-}
-
-.my-bid{
-    border:1px solid #e1d7e9;
-    border-radius:9px;
-    padding:12px;
-    margin-bottom:10px;
-    background:#faf7fc;
-}
-
-.my-bid-number{
-    color:#5b247a;
-    font-weight:800;
-}
-
-.my-bid-route{
-    margin-top:4px;
-    font-size:13px;
-    color:#62576a;
-}
-
-.priority{
-    font-size:12px;
-    color:#75687c;
-    margin-top:5px;
-}
-
-.status{
-    display:inline-block;
-    margin-top:8px;
-    padding:5px 8px;
-    border-radius:999px;
-    background:#eee6f3;
-    color:#5b247a;
-    font-size:11px;
-    font-weight:800;
-    text-transform:uppercase;
-}
-
-.bid-buttons{
-    display:flex;
-    gap:6px;
-    margin-top:9px;
-}
-
-.small-button{
-    border:0;
-    border-radius:6px;
-    padding:6px 8px;
-    cursor:pointer;
-    font-size:12px;
-    font-weight:700;
-    background:#eee6f3;
-    color:#5b247a;
-}
-
-.small-button.remove{
-    background:#f5e6e6;
-    color:#8a3333;
-}
-
-.empty{
-    padding:35px;
-    text-align:center;
-    color:#75687c;
-    background:white;
-    border:1px solid #e1d7e9;
-    border-radius:12px;
-}
-
-.no-results{
-    padding:30px;
-    text-align:center;
-    color:#75687c;
-    background:white;
-    border:1px solid #e1d7e9;
-    border-radius:12px;
-}
-
-.success{
-    display:none;
-    margin-bottom:18px;
-    padding:13px 15px;
-    border-radius:8px;
-    background:#eeeaf6;
-    border:1px solid #d9cde4;
-    color:#4e2866;
     font-size:14px;
-    font-weight:700;
+}
+
+.error{
+    background:#f8eaea;
+    border:1px solid #e7caca;
+    color:#7b3030;
+    padding:15px;
+    border-radius:9px;
+    margin-bottom:20px;
 }
 
 footer{
@@ -450,21 +380,17 @@ footer{
 
 @media(max-width:950px){
 
-    .filter-grid{
+    .stats{
         grid-template-columns:repeat(2,1fr);
     }
 
-    .bid-layout{
-        grid-template-columns:1fr;
-    }
-
-    .sidebar{
-        position:static;
+    .info-grid{
+        grid-template-columns:repeat(3,1fr);
     }
 
 }
 
-@media(max-width:650px){
+@media(max-width:700px){
 
     header{
         padding:14px 20px;
@@ -484,9 +410,12 @@ footer{
         font-size:30px;
     }
 
-    .filter-grid,
-    .trip-info{
-        grid-template-columns:1fr;
+    .stats{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .info-grid{
+        grid-template-columns:1fr 1fr;
     }
 
     .route{
@@ -494,7 +423,7 @@ footer{
         text-align:center;
     }
 
-    .arrow{
+    .route-center{
         transform:rotate(90deg);
     }
 
@@ -502,8 +431,20 @@ footer{
         grid-template-columns:1fr 1fr;
     }
 
+    .leg-aircraft{
+        text-align:left;
+    }
+
 }
 
+@media(max-width:480px){
+
+    .stats,
+    .info-grid{
+        grid-template-columns:1fr;
+    }
+
+}
 </style>
 </head>
 
@@ -517,8 +458,8 @@ footer{
 
 <nav>
     <a href="pilot-center.html">Pilot Center</a>
-    <a class="active" href="available-bids.html">Available Bids</a>
-    <a href="my-trips.html">My Trips</a>
+    <a href="available-bids.html">Available Bids</a>
+    <a class="active" href="my-trips.html">My Trips</a>
     <a href="crew-calendar.html">Crew Calendar</a>
     <a href="flight-planning.html">Flight Planning</a>
     <a href="crew-scheduling.html">Crew Scheduling</a>
@@ -532,10 +473,10 @@ footer{
 
 <div class="hero-inner">
 
-<h1>Available Bids</h1>
+<h1>My Trips</h1>
 
 <p>
-Review open Viavia pairings and submit your trip preferences.
+View trips that have been awarded to you by Viavia Crew Scheduling.
 </p>
 
 </div>
@@ -545,123 +486,50 @@ Review open Viavia pairings and submit your trip preferences.
 
 <main class="container">
 
-<div id="successMessage" class="success"></div>
+<div id="errorMessage"></div>
 
 
-<section class="card filters">
+<section class="stats">
 
-<h2>Find Available Trips</h2>
-
-<div class="filter-grid">
-
-<div class="field">
-
-<label for="baseFilter">Base</label>
-
-<select id="baseFilter">
-
-<option value="all">All Bases</option>
-<option value="DFW">DFW — Dallas/Fort Worth</option>
-<option value="RSW">RSW — Fort Myers</option>
-<option value="SMF">SMF — Sacramento</option>
-
-</select>
-
+<div class="stat">
+    <div class="stat-label">Awarded Trips</div>
+    <div class="stat-value" id="tripCount">0</div>
 </div>
 
-
-<div class="field">
-
-<label for="fleetFilter">Fleet</label>
-
-<select id="fleetFilter">
-
-<option value="all">All Fleets</option>
-<option value="A319">A319</option>
-<option value="A320">A320</option>
-<option value="A321">A321</option>
-
-</select>
-
+<div class="stat">
+    <div class="stat-label">Flight Legs</div>
+    <div class="stat-value" id="legCount">0</div>
 </div>
 
-
-<div class="field">
-
-<label for="lengthFilter">Trip Length</label>
-
-<select id="lengthFilter">
-
-<option value="all">Any Length</option>
-<option value="2">2 Legs</option>
-<option value="3">3 Legs</option>
-
-</select>
-
+<div class="stat">
+    <div class="stat-label">Pilot Base</div>
+    <div class="stat-value" id="baseValue">—</div>
 </div>
 
-
-<div class="field">
-
-<label for="searchFilter">Search</label>
-
-<input
-    id="searchFilter"
-    type="text"
-    placeholder="Trip number, flight or airport"
->
-
-</div>
-
-</div>
-
-
-<div class="filter-actions">
-
-<button class="button" onclick="applyFilters()">
-    Apply Filters
-</button>
-
-<button class="button secondary" onclick="resetFilters()">
-    Reset
-</button>
-
+<div class="stat">
+    <div class="stat-label">Status</div>
+    <div class="stat-value">Active</div>
 </div>
 
 </section>
 
 
-<div class="bid-layout">
+<div class="notice">
 
-<section>
-
-<div id="tripList" class="trip-list"></div>
-
-</section>
-
-
-<aside class="card sidebar">
-
-<h2>My Submitted Bids</h2>
-
-<p>
-Submitted bids are sent to Crew Scheduling for review.
-A submitted bid is <strong>not</strong> awarded automatically.
-</p>
-
-<div id="myBids"></div>
-
-</aside>
+<strong>Crew Scheduling:</strong>
+Only trips that have been awarded by Crew Scheduling appear here.
+Submitting a bid does not place a trip in My Trips.
 
 </div>
+
+
+<section id="tripList" class="trip-list"></section>
 
 </main>
 
 
 <footer>
-
-Viavia Airlines · Pilot Operations · Available Bids
-
+Viavia Airlines · Pilot Operations · My Trips
 </footer>
 
 
@@ -670,32 +538,40 @@ Viavia Airlines · Pilot Operations · Available Bids
 <script>
 
 /* ============================================================
-   VIAVIA AVAILABLE BIDS
-   Crew Scheduling is the authority for awarding trips.
+   VIAVIA MY TRIPS
+   Awarded trips only.
+   Crew Scheduling is the authority for trip assignment.
 ============================================================ */
 
 
 /* ------------------------------------------------------------
-   Storage helpers
+   Storage
 ------------------------------------------------------------ */
 
 function getViaviaBids(){
 
     try{
 
-        const stored = localStorage.getItem("viaviaBids");
+        const stored =
+            localStorage.getItem("viaviaBids");
 
         if(!stored){
             return [];
         }
 
-        const parsed = JSON.parse(stored);
+        const parsed =
+            JSON.parse(stored);
 
-        return Array.isArray(parsed) ? parsed : [];
+        return Array.isArray(parsed)
+            ? parsed
+            : [];
 
     }catch(error){
 
-        console.error("Unable to read viaviaBids:", error);
+        console.error(
+            "Unable to read viaviaBids:",
+            error
+        );
 
         return [];
 
@@ -704,28 +580,16 @@ function getViaviaBids(){
 }
 
 
-function saveViaviaBids(bids){
-
-    localStorage.setItem(
-        "viaviaBids",
-        JSON.stringify(bids)
-    );
-
-}
-
-
 /* ------------------------------------------------------------
-   Pairing data
+   Pairings
 ------------------------------------------------------------ */
 
-function getAllAvailablePairings(){
+function getAllPairings(){
 
-    if(typeof generateViaviaPairings !== "function"){
-
-        console.error(
-            "generateViaviaPairings() is unavailable. " +
-            "Check that viavia-schedule.js is loaded."
-        );
+    if(
+        typeof generateViaviaPairings !==
+        "function"
+    ){
 
         return [];
 
@@ -739,640 +603,608 @@ function getAllAvailablePairings(){
 
 
 /* ------------------------------------------------------------
-   Determine whether a pairing has already been submitted
-   by this pilot.
+   Normalize pairing ID
 ------------------------------------------------------------ */
 
-function getBidForPairing(pairingId){
+function getBidPairingId(bid){
 
-    const bids = getViaviaBids();
-
-    return bids.find(bid => {
-
-        return String(bid.pairingId || "").toUpperCase() ===
-               String(pairingId || "").toUpperCase();
-
-    }) || null;
-
-}
-
-
-/* ------------------------------------------------------------
-   Format pairing aircraft
------------------------------------------------------------- */
-
-function getPairingAircraft(pairing){
-
-    if(!pairing){
-        return "—";
+    if(!bid){
+        return "";
     }
 
-    if(Array.isArray(pairing.aircraft)){
-
-        return pairing.aircraft.join(" / ");
-
-    }
-
-    return pairing.aircraft || "—";
-
-}
-
-
-/* ------------------------------------------------------------
-   Determine gate display.
------------------------------------------------------------- */
-
-function getGateDisplay(){
-
-    return "TBD — Gate assignment pending";
+    return String(
+        bid.pairingId ||
+        bid.tripId ||
+        bid.tripNumber ||
+        bid.assignedTrip ||
+        bid.pairing ||
+        ""
+    ).trim();
 
 }
 
 
 /* ------------------------------------------------------------
-   Create a normalized bid record.
-   
-   This is the important part of the rebuild.
-
-   Crew Scheduling will receive:
-   - pairingId
-   - tripNumber
-   - base
-   - fleet
-   - flightNumbers
-   - flights
-   - route
-   - legCount
-   - status
-   - assignmentStatus
-   - submittedAt
+   Find master-schedule pairing
 ------------------------------------------------------------ */
 
-function createBidRecord(pairing){
-
-    const flightNumbers =
-        pairing.legs.map(leg => leg.flightNumber);
-
-    const flightSnapshots =
-        pairing.legs.map(leg => ({
-
-            flightNumber: leg.flightNumber,
-            origin: leg.origin,
-            destination: leg.destination,
-            departure: leg.departure,
-            arrival: leg.arrival,
-            aircraft: leg.aircraft,
-            base: leg.base || pairing.base,
-            nextDay: Boolean(leg.nextDay)
-
-        }));
-
-
-    return {
-
-        /* Identity */
-
-        bidId:
-            "BID-" +
-            Date.now() +
-            "-" +
-            Math.random()
-                .toString(36)
-                .substring(2,8)
-                .toUpperCase(),
-
-        pairingId:
-            pairing.id,
-
-        tripId:
-            pairing.id,
-
-        tripNumber:
-            pairing.tripNumber,
-
-        /* Pilot information */
-
-        pilotName:
-            "Captain",
-
-        pilotId:
-            "PILOT-001",
-
-        pilotStatus:
-            "Captain",
-
-        /* Scheduling information */
-
-        base:
-            pairing.base,
-
-        fleet:
-            getPairingAircraft(pairing),
-
-        aircraft:
-            getPairingAircraft(pairing),
-
-        route:
-            pairing.route,
-
-        legCount:
-            pairing.legCount,
-
-        flightNumbers:
-            flightNumbers,
-
-        flights:
-            flightSnapshots,
-
-        /* Trip information */
-
-        startAirport:
-            pairing.startAirport,
-
-        endAirport:
-            pairing.endAirport,
-
-        startTime:
-            pairing.startTime,
-
-        endTime:
-            pairing.endTime,
-
-        durationMinutes:
-            pairing.durationMinutes,
-
-        connectionMinutes:
-            pairing.connectionMinutes,
-
-        overnight:
-            Boolean(pairing.overnight),
-
-        gateStatus:
-            getGateDisplay(),
-
-        /* Bid workflow */
-
-        status:
-            "submitted",
-
-        assignmentStatus:
-            "pending",
-
-        awarded:
-            false,
-
-        held:
-            false,
-
-        denied:
-            false,
-
-        /* Audit information */
-
-        submittedAt:
-            new Date().toISOString(),
-
-        submittedBy:
-            "Pilot Center",
-
-        awardedAt:
-            null,
-
-        awardedBy:
-            null,
-
-        heldAt:
-            null,
-
-        heldBy:
-            null,
-
-        deniedAt:
-            null,
-
-        deniedBy:
-            null
-
-    };
-
-}
-
-
-/* ------------------------------------------------------------
-   Submit bid
------------------------------------------------------------- */
-
-function submitBid(pairingId){
+function findPairingForBid(bid){
 
     const pairings =
-        getAllAvailablePairings();
+        getAllPairings();
 
-    const pairing =
-        pairings.find(item =>
-            item.id === pairingId
-        );
+    const requestedId =
+        getBidPairingId(bid);
 
+    if(requestedId){
 
-    if(!pairing){
-
-        alert(
-            "Unable to submit this bid because the pairing " +
-            "could not be found in the Viavia master schedule."
-        );
-
-        return;
-
-    }
-
-
-    const existingBid =
-        getBidForPairing(pairing.id);
-
-
-    if(existingBid){
-
-        const status =
-            String(existingBid.status || "")
-                .toLowerCase();
-
-
-        if(
-            status === "submitted" ||
-            status === "held" ||
-            status === "awarded"
-        ){
-
-            alert(
-                `${pairing.tripNumber} has already been submitted.`
+        const exact =
+            pairings.find(
+                pairing =>
+                    String(
+                        pairing.pairingId || ""
+                    ).toUpperCase() ===
+                    requestedId.toUpperCase()
             );
 
-            return;
-
+        if(exact){
+            return exact;
         }
 
     }
-
-
-    const bids =
-        getViaviaBids();
-
-
-    const bid =
-        createBidRecord(pairing);
-
-
-    bids.push(bid);
-
-
-    saveViaviaBids(bids);
-
-
-    showSuccess(
-        `${pairing.tripNumber} submitted successfully. ` +
-        `Crew Scheduling can now review the bid.`
-    );
-
-
-    renderAll();
-
-}
-
-
-/* ------------------------------------------------------------
-   Remove a submitted bid
------------------------------------------------------------- */
-
-function removeBid(bidId){
-
-    const bids =
-        getViaviaBids();
-
-
-    const bid =
-        bids.find(item =>
-            item.bidId === bidId
-        );
-
-
-    if(!bid){
-        return;
-    }
-
-
-    const status =
-        String(bid.status || "")
-            .toLowerCase();
 
 
     /*
-     * Once Crew Scheduling has awarded, held, or denied
-     * the bid, the pilot page cannot simply delete the
-     * operational record.
+     * If an older bid does not contain a valid
+     * pairing ID, match using its flight numbers.
      */
 
-    if(
+    const bidFlights =
+        Array.isArray(bid.flightNumbers)
+            ? bid.flightNumbers
+            : Array.isArray(bid.flights)
+                ? bid.flights.map(
+                    flight =>
+                        flight.flightNumber
+                )
+                : [];
+
+
+    if(bidFlights.length){
+
+        const match =
+            pairings.find(
+                pairing =>
+                    bidFlights.every(
+                        flightNumber =>
+                            pairing.flightNumbers.includes(
+                                flightNumber
+                            )
+                    )
+            );
+
+        if(match){
+            return match;
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+/* ------------------------------------------------------------
+   Determine awarded status
+------------------------------------------------------------ */
+
+function isAwardedTrip(bid){
+
+    if(!bid){
+        return false;
+    }
+
+    const status =
+        String(
+            bid.status || ""
+        ).toLowerCase();
+
+    const assignmentStatus =
+        String(
+            bid.assignmentStatus || ""
+        ).toLowerCase();
+
+
+    /*
+     * Crew Scheduling marks awarded trips with
+     * status = awarded and/or assignmentStatus = assigned.
+     */
+
+    return (
         status === "awarded" ||
-        status === "held" ||
-        status === "denied"
+        assignmentStatus === "assigned" ||
+        bid.awarded === true
+    );
+
+}
+
+
+/* ------------------------------------------------------------
+   Get the flights to display
+------------------------------------------------------------ */
+
+function getFlightsForTrip(
+    bid,
+    pairing
+){
+
+    if(
+        pairing &&
+        Array.isArray(pairing.flights)
     ){
 
-        alert(
-            "This bid has already been processed by Crew Scheduling " +
-            "and cannot be removed from Available Bids."
-        );
-
-        return;
+        return pairing.flights;
 
     }
 
 
-    const confirmed =
-        confirm(
-            `Remove ${bid.tripNumber} from your submitted bids?`
-        );
+    if(
+        bid &&
+        Array.isArray(bid.flights)
+    ){
 
+        return bid.flights;
 
-    if(!confirmed){
-        return;
     }
 
 
-    const updated =
-        bids.filter(item =>
-            item.bidId !== bidId
-        );
+    return [];
+
+}
 
 
-    saveViaviaBids(updated);
+/* ------------------------------------------------------------
+   Aircraft
+------------------------------------------------------------ */
+
+function getAircraft(
+    flights,
+    pairing
+){
+
+    const aircraft = [];
 
 
-    showSuccess(
-        `${bid.tripNumber} was removed from your submitted bids.`
+    flights.forEach(
+        flight => {
+
+            if(
+                flight &&
+                flight.aircraft &&
+                !aircraft.includes(
+                    flight.aircraft
+                )
+            ){
+
+                aircraft.push(
+                    flight.aircraft
+                );
+
+            }
+
+        }
     );
 
 
-    renderAll();
-
-}
-
-
-/* ------------------------------------------------------------
-   Apply filters
------------------------------------------------------------- */
-
-function applyFilters(){
-
-    renderPairings();
-
-}
-
-
-/* ------------------------------------------------------------
-   Reset filters
------------------------------------------------------------- */
-
-function resetFilters(){
-
-    document.getElementById("baseFilter").value = "all";
-
-    document.getElementById("fleetFilter").value = "all";
-
-    document.getElementById("lengthFilter").value = "all";
-
-    document.getElementById("searchFilter").value = "";
-
-    renderPairings();
-
-}
-
-
-/* ------------------------------------------------------------
-   Pairing filtering
------------------------------------------------------------- */
-
-function getFilteredPairings(){
-
-    const base =
-        document.getElementById("baseFilter").value;
-
-    const fleet =
-        document.getElementById("fleetFilter").value;
-
-    const length =
-        document.getElementById("lengthFilter").value;
-
-    const search =
-        document.getElementById("searchFilter")
-            .value
-            .trim()
-            .toLowerCase();
-
-
-    const pairings =
-        getAllAvailablePairings();
-
-
-    return pairings.filter(pairing => {
-
-
-        if(
-            base !== "all" &&
-            pairing.base !== base
-        ){
-
-            return false;
-
-        }
-
-
-        if(
-            length !== "all" &&
-            String(pairing.legCount) !== String(length)
-        ){
-
-            return false;
-
-        }
-
-
-        if(fleet !== "all"){
-
-            const hasFleet =
-                pairing.legs.some(
-                    leg => leg.aircraft === fleet
-                );
-
-            if(!hasFleet){
-                return false;
-            }
-
-        }
-
-
-        if(search){
-
-            const searchable = [
-
-                pairing.id,
-
-                pairing.tripNumber,
-
-                pairing.route,
-
-                pairing.base,
-
-                ...pairing.legs.map(
-                    leg => leg.flightNumber
-                ),
-
-                ...pairing.legs.map(
-                    leg => leg.origin
-                ),
-
-                ...pairing.legs.map(
-                    leg => leg.destination
-                )
-
-            ]
-            .join(" ")
-            .toLowerCase();
-
-
-            if(!searchable.includes(search)){
-
-                return false;
-
-            }
-
-        }
-
-
-        return true;
-
-    });
-
-}
-
-
-/* ------------------------------------------------------------
-   Render available pairings
------------------------------------------------------------- */
-
-function renderPairings(){
-
-    const container =
-        document.getElementById("tripList");
-
-
-    const pairings =
-        getFilteredPairings();
-
-
-    if(!pairings.length){
-
-        container.innerHTML = `
-
-            <div class="no-results">
-
-                <strong>No pairings found.</strong>
-
-                <div style="margin-top:7px;">
-                    Try changing the filters or search terms.
-                </div>
-
-            </div>
-
-        `;
-
-        return;
+    if(
+        aircraft.length
+    ){
+
+        return aircraft.join(" / ");
 
     }
 
 
-    const html =
-        pairings.map(renderPairingCard)
-            .join("");
+    if(
+        pairing &&
+        Array.isArray(pairing.aircraft)
+    ){
+
+        return pairing.aircraft.join(
+            " / "
+        );
+
+    }
 
 
-    container.innerHTML = html;
+    return "—";
 
 }
 
 
 /* ------------------------------------------------------------
-   Render one pairing
+   Duration
 ------------------------------------------------------------ */
 
-function renderPairingCard(pairing){
+function timeToMinutes(time){
 
-    const existingBid =
-        getBidForPairing(pairing.id);
+    if(!time){
+        return null;
+    }
+
+    const parts =
+        String(time).split(":");
+
+    if(parts.length !== 2){
+        return null;
+    }
+
+    return (
+        Number(parts[0]) * 60 +
+        Number(parts[1])
+    );
+
+}
 
 
-    const status =
-        existingBid
-            ? String(existingBid.status || "")
-                .toLowerCase()
+function arrivalMinutes(flight){
+
+    let arrival =
+        timeToMinutes(
+            flight.arrival
+        );
+
+    const departure =
+        timeToMinutes(
+            flight.departure
+        );
+
+    if(
+        flight.nextDay ||
+        (
+            arrival !== null &&
+            departure !== null &&
+            arrival < departure
+        )
+    ){
+
+        arrival += 1440;
+
+    }
+
+    return arrival;
+
+}
+
+
+function calculateTripDuration(
+    flights
+){
+
+    if(
+        !flights.length
+    ){
+
+        return "—";
+
+    }
+
+    const first =
+        flights[0];
+
+    const last =
+        flights[
+            flights.length - 1
+        ];
+
+
+    const start =
+        timeToMinutes(
+            first.departure
+        );
+
+    let end =
+        arrivalMinutes(
+            last
+        );
+
+
+    if(
+        start === null ||
+        end === null
+    ){
+
+        return "—";
+
+    }
+
+
+    while(
+        end < start
+    ){
+
+        end += 1440;
+
+    }
+
+
+    const total =
+        end - start;
+
+    const hours =
+        Math.floor(
+            total / 60
+        );
+
+    const minutes =
+        total % 60;
+
+
+    if(hours === 0){
+
+        return `${minutes} min`;
+
+    }
+
+
+    return `${hours}h ${minutes}m`;
+
+}
+
+
+/* ------------------------------------------------------------
+   Route
+------------------------------------------------------------ */
+
+function getTripRoute(
+    flights,
+    pairing
+){
+
+    if(
+        pairing &&
+        pairing.route
+    ){
+
+        return pairing.route;
+
+    }
+
+    if(
+        !flights.length
+    ){
+
+        return "Route unavailable";
+
+    }
+
+
+    const route =
+        [
+            flights[0].origin,
+            ...flights.map(
+                flight =>
+                    flight.destination
+            )
+        ];
+
+
+    return route.join(
+        " → "
+    );
+
+}
+
+
+/* ------------------------------------------------------------
+   Escape HTML
+------------------------------------------------------------ */
+
+function escapeHtml(value){
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+/* ------------------------------------------------------------
+   Render a flight leg
+------------------------------------------------------------ */
+
+function renderLeg(
+    flight
+){
+
+    const nextDay =
+        flight.nextDay
+            ? " +1"
             : "";
 
 
-    let actionHtml = "";
+    return `
+
+        <div class="leg">
+
+            <div class="leg-flight">
+                ${escapeHtml(
+                    flight.flightNumber
+                )}
+            </div>
+
+            <div class="leg-route">
+                ${escapeHtml(
+                    flight.origin
+                )}
+                →
+                ${escapeHtml(
+                    flight.destination
+                )}
+            </div>
+
+            <div class="leg-time">
+                ${escapeHtml(
+                    flight.departure
+                )}
+                –
+                ${escapeHtml(
+                    flight.arrival
+                )}
+                ${nextDay}
+            </div>
+
+            <div class="leg-aircraft">
+                ${escapeHtml(
+                    flight.aircraft ||
+                    "—"
+                )}
+            </div>
+
+        </div>
+
+    `;
+
+}
 
 
-    if(!existingBid){
+/* ------------------------------------------------------------
+   Render one awarded trip
+------------------------------------------------------------ */
 
-        actionHtml = `
+function renderTrip(
+    bid,
+    pairing
+){
 
-            <button
-                class="button"
-                onclick="submitBid('${pairing.id}')"
-            >
-                Submit Bid
-            </button>
-
-        `;
-
-    }else{
-
-        let label =
-            "Bid Submitted";
-
-        if(status === "awarded"){
-            label = "Awarded";
-        }
-
-        if(status === "held"){
-            label = "Held by Crew Scheduling";
-        }
-
-        if(status === "denied"){
-            label = "Denied";
-        }
+    const flights =
+        getFlightsForTrip(
+            bid,
+            pairing
+        );
 
 
-        actionHtml = `
+    if(
+        !flights.length
+    ){
 
-            <span class="badge">
-                ${escapeHtml(label)}
-            </span>
-
-        `;
+        return "";
 
     }
 
 
-    const legsHtml =
-        pairing.legs.map(
-            renderLeg
-        ).join("");
+    const first =
+        flights[0];
+
+    const last =
+        flights[
+            flights.length - 1
+        ];
 
 
-    const firstLeg =
-        pairing.legs[0];
+    const tripNumber =
+        (
+            pairing &&
+            pairing.pairingId
+        ) ||
+        bid.pairingId ||
+        bid.tripId ||
+        bid.tripNumber ||
+        bid.assignedTrip ||
+        "Awarded Trip";
 
 
-    const lastLeg =
-        pairing.legs[pairing.legs.length - 1];
+    const base =
+        (
+            pairing &&
+            pairing.base
+        ) ||
+        bid.base ||
+        "—";
+
+
+    const aircraft =
+        getAircraft(
+            flights,
+            pairing
+        );
+
+
+    const route =
+        getTripRoute(
+            flights,
+            pairing
+        );
+
+
+    const duration =
+        calculateTripDuration(
+            flights
+        );
+
+
+    const flightLegs =
+        flights
+            .map(renderLeg)
+            .join("");
+
+
+    const firstFlightPlanning =
+        first.flightNumber
+            ?
+            `flight-planning.html?flight=${encodeURIComponent(
+                first.flightNumber
+            )}`
+            :
+            "flight-planning.html";
+
+
+    let tripDetailsButton =
+        "";
+
+
+    /*
+     * Trip 001 has a dedicated trip-details page.
+     */
+
+    if(
+        String(tripNumber).toUpperCase()
+        === "TRIP-001"
+    ){
+
+        tripDetailsButton = `
+
+            <a
+                class="button secondary"
+                href="trip-001.html"
+            >
+                Trip Details
+            </a>
+
+        `;
+
+    }
 
 
     return `
@@ -1383,21 +1215,28 @@ function renderPairingCard(pairing){
 
                 <div>
 
-                    <div class="trip-number">
-                        ${escapeHtml(pairing.tripNumber)}
+                    <div class="trip-title">
+                        ${escapeHtml(
+                            tripNumber
+                        )}
                     </div>
 
                     <div class="trip-subtitle">
-                        ${escapeHtml(pairing.id)}
-                        ·
-                        ${escapeHtml(pairing.base)}
+                        ${escapeHtml(
+                            base
+                        )}
                         base
+                        ·
+                        ${flights.length}
+                        ${flights.length === 1
+                            ? "leg"
+                            : "legs"}
                     </div>
 
                 </div>
 
                 <span class="badge">
-                    ${pairing.legCount} legs
+                    Awarded
                 </span>
 
             </div>
@@ -1408,17 +1247,24 @@ function renderPairingCard(pairing){
                 <div>
 
                     <div class="airport">
-                        ${escapeHtml(firstLeg.origin)}
+                        ${escapeHtml(
+                            first.origin
+                        )}
                     </div>
 
-                    <div class="time">
-                        ${escapeHtml(firstLeg.departure)}
+                    <div class="route-label">
+                        Departure
+                        ·
+                        ${escapeHtml(
+                            first.departure
+                        )}
+
                     </div>
 
                 </div>
 
 
-                <div class="arrow">
+                <div class="route-center">
                     →
                 </div>
 
@@ -1426,11 +1272,20 @@ function renderPairingCard(pairing){
                 <div>
 
                     <div class="airport">
-                        ${escapeHtml(lastLeg.destination)}
+                        ${escapeHtml(
+                            last.destination
+                        )}
                     </div>
 
-                    <div class="time">
-                        ${escapeHtml(lastLeg.arrival)}
+                    <div class="route-label">
+                        Arrival
+                        ·
+                        ${escapeHtml(
+                            last.arrival
+                        )}
+                        ${last.nextDay
+                            ? "+1"
+                            : ""}
                     </div>
 
                 </div>
@@ -1438,7 +1293,7 @@ function renderPairingCard(pairing){
             </div>
 
 
-            <div class="trip-info">
+            <div class="info-grid">
 
                 <div class="info-box">
 
@@ -1447,7 +1302,9 @@ function renderPairingCard(pairing){
                     </div>
 
                     <div class="info-value">
-                        ${escapeHtml(pairing.base)}
+                        ${escapeHtml(
+                            base
+                        )}
                     </div>
 
                 </div>
@@ -1461,8 +1318,21 @@ function renderPairingCard(pairing){
 
                     <div class="info-value">
                         ${escapeHtml(
-                            getPairingAircraft(pairing)
+                            aircraft
                         )}
+                    </div>
+
+                </div>
+
+
+                <div class="info-box">
+
+                    <div class="info-label">
+                        Legs
+                    </div>
+
+                    <div class="info-value">
+                        ${flights.length}
                     </div>
 
                 </div>
@@ -1475,8 +1345,8 @@ function renderPairingCard(pairing){
                     </div>
 
                     <div class="info-value">
-                        ${formatDuration(
-                            pairing.durationMinutes
+                        ${escapeHtml(
+                            duration
                         )}
                     </div>
 
@@ -1486,12 +1356,11 @@ function renderPairingCard(pairing){
                 <div class="info-box">
 
                     <div class="info-label">
-                        Connection
+                        Status
                     </div>
 
                     <div class="info-value">
-                        ${pairing.connectionMinutes}
-                        min
+                        Awarded
                     </div>
 
                 </div>
@@ -1505,7 +1374,7 @@ function renderPairingCard(pairing){
                     Flight Legs
                 </div>
 
-                ${legsHtml}
+                ${flightLegs}
 
             </div>
 
@@ -1513,22 +1382,35 @@ function renderPairingCard(pairing){
             <div class="gate">
 
                 <strong>Gate:</strong>
-                TBD — Gate assignment pending
+
+                ${escapeHtml(
+                    bid.gateStatus ||
+                    (
+                        pairing &&
+                        pairing.gateStatus
+                    ) ||
+                    "TBD — Gate assignment pending"
+                )}
 
             </div>
 
 
-            <div class="trip-actions">
+            <div class="actions">
 
-                ${actionHtml}
+                ${tripDetailsButton}
+
+                <a
+                    class="button"
+                    href="${firstFlightPlanning}"
+                >
+                    Flight Planning
+                </a>
 
                 <a
                     class="button secondary"
-                    href="flight-planning.html?flight=${encodeURIComponent(
-                        firstLeg.flightNumber
-                    )}"
+                    href="crew-calendar.html"
                 >
-                    Flight Planning
+                    Crew Calendar
                 </a>
 
             </div>
@@ -1541,64 +1423,229 @@ function renderPairingCard(pairing){
 
 
 /* ------------------------------------------------------------
-   Render individual leg
+   Render page
 ------------------------------------------------------------ */
 
-function renderLeg(leg){
-
-    return `
-
-        <div class="leg">
-
-            <strong>
-                ${escapeHtml(leg.flightNumber)}
-            </strong>
-
-            <span>
-                ${escapeHtml(leg.origin)}
-                →
-                ${escapeHtml(leg.destination)}
-            </span>
-
-            <span>
-                ${escapeHtml(leg.departure)}
-                –
-                ${escapeHtml(leg.arrival)}
-                ${leg.nextDay ? "+1" : ""}
-            </span>
-
-            <span>
-                ${escapeHtml(leg.aircraft)}
-            </span>
-
-        </div>
-
-    `;
-
-}
-
-
-/* ------------------------------------------------------------
-   Render submitted bids sidebar
------------------------------------------------------------- */
-
-function renderMyBids(){
+function renderMyTrips(){
 
     const container =
-        document.getElementById("myBids");
+        document.getElementById(
+            "tripList"
+        );
+
+
+    const errorElement =
+        document.getElementById(
+            "errorMessage"
+        );
+
+
+    errorElement.innerHTML =
+        "";
 
 
     const bids =
         getViaviaBids();
 
 
-    if(!bids.length){
+    const awardedBids =
+        bids.filter(
+            isAwardedTrip
+        );
+
+
+    const trips = [];
+
+
+    awardedBids.forEach(
+        bid => {
+
+            const pairing =
+                findPairingForBid(
+                    bid
+                );
+
+
+            /*
+             * Avoid duplicate rendering if
+             * Crew Scheduling has written both
+             * an awarded record and an assignment
+             * record for the same pairing.
+             */
+
+            const tripId =
+                getBidPairingId(
+                    bid
+                ).toUpperCase();
+
+
+            const duplicate =
+                trips.some(
+                    existing =>
+                        existing.tripId
+                            .toUpperCase()
+                        === tripId
+                );
+
+
+            if(
+                duplicate &&
+                tripId
+            ){
+
+                return;
+
+            }
+
+
+            trips.push({
+                bid:bid,
+                pairing:pairing,
+                tripId:
+                    tripId ||
+                    String(
+                        bid.bidId ||
+                        Math.random()
+                    )
+            });
+
+        }
+    );
+
+
+    /*
+     * Sort by scheduled first-leg departure.
+     */
+
+    trips.sort(
+        (a,b) => {
+
+            const aFlights =
+                getFlightsForTrip(
+                    a.bid,
+                    a.pairing
+                );
+
+            const bFlights =
+                getFlightsForTrip(
+                    b.bid,
+                    b.pairing
+                );
+
+
+            const aTime =
+                aFlights.length
+                    ? timeToMinutes(
+                        aFlights[0].departure
+                    )
+                    : 9999;
+
+
+            const bTime =
+                bFlights.length
+                    ? timeToMinutes(
+                        bFlights[0].departure
+                    )
+                    : 9999;
+
+
+            return aTime - bTime;
+
+        }
+    );
+
+
+    /* --------------------------------------------------------
+       Statistics
+    -------------------------------------------------------- */
+
+    document.getElementById(
+        "tripCount"
+    ).textContent =
+        trips.length;
+
+
+    const totalLegs =
+        trips.reduce(
+            (total, trip) => {
+
+                return total +
+                    getFlightsForTrip(
+                        trip.bid,
+                        trip.pairing
+                    ).length;
+
+            },
+            0
+        );
+
+
+    document.getElementById(
+        "legCount"
+    ).textContent =
+        totalLegs;
+
+
+    const bases =
+        [
+            ...new Set(
+                trips
+                    .map(
+                        trip =>
+                            (
+                                trip.pairing &&
+                                trip.pairing.base
+                            ) ||
+                            trip.bid.base ||
+                            null
+                    )
+                    .filter(Boolean)
+            )
+        ];
+
+
+    document.getElementById(
+        "baseValue"
+    ).textContent =
+        bases.length === 1
+            ? bases[0]
+            : bases.length > 1
+                ? "Multiple"
+                : "—";
+
+
+    /* --------------------------------------------------------
+       Empty state
+    -------------------------------------------------------- */
+
+    if(!trips.length){
 
         container.innerHTML = `
 
             <div class="empty">
 
-                No submitted bids yet.
+                <div class="empty-icon">
+                    ✈
+                </div>
+
+                <h2>
+                    No Awarded Trips
+                </h2>
+
+                <p>
+                    You do not currently have any trips
+                    awarded by Crew Scheduling.
+                    Submit a bid from Available Bids
+                    and your trip will appear here
+                    after it has been awarded.
+                </p>
+
+                <a
+                    class="button"
+                    href="available-bids.html"
+                >
+                    View Available Bids
+                </a>
 
             </div>
 
@@ -1609,232 +1656,60 @@ function renderMyBids(){
     }
 
 
-    /*
-     * Show newest first.
-     */
+    /* --------------------------------------------------------
+       Render trips
+    -------------------------------------------------------- */
 
-    const sorted =
-        [...bids].reverse();
+    const html =
+        trips
+            .map(
+                trip =>
+                    renderTrip(
+                        trip.bid,
+                        trip.pairing
+                    )
+            )
+            .join("");
 
 
     container.innerHTML =
-        sorted.map(renderMyBid)
-            .join("");
+        html ||
+        `
 
-}
+            <div class="empty">
 
+                <h2>
+                    Trip Information Unavailable
+                </h2>
 
-/* ------------------------------------------------------------
-   Render one submitted bid
------------------------------------------------------------- */
-
-function renderMyBid(bid){
-
-    const status =
-        String(bid.status || "submitted")
-            .toLowerCase();
-
-
-    let statusLabel =
-        "Submitted";
-
-    if(status === "awarded"){
-        statusLabel = "Awarded";
-    }
-
-    if(status === "held"){
-        statusLabel = "Held";
-    }
-
-    if(status === "denied"){
-        statusLabel = "Denied";
-    }
-
-
-    const canRemove =
-        status === "submitted";
-
-
-    return `
-
-        <div class="my-bid">
-
-            <div class="my-bid-number">
-                ${escapeHtml(
-                    bid.tripNumber || bid.tripId || "Trip"
-                )}
-            </div>
-
-
-            <div class="my-bid-route">
-                ${escapeHtml(
-                    bid.route || "Route unavailable"
-                )}
-            </div>
-
-
-            <div class="priority">
-
-                ${escapeHtml(
-                    bid.pairingId || "No pairing ID"
-                )}
-
-                ·
-
-                ${escapeHtml(
-                    bid.base || "—"
-                )}
+                <p>
+                    An awarded trip was found, but
+                    its scheduled flight information
+                    could not be matched to the
+                    Viavia master schedule.
+                </p>
 
             </div>
 
-
-            <div class="status">
-                ${escapeHtml(statusLabel)}
-            </div>
-
-
-            ${
-                canRemove
-                ?
-                `
-                <div class="bid-buttons">
-
-                    <button
-                        class="small-button remove"
-                        onclick="removeBid('${escapeJs(bid.bidId)}')"
-                    >
-                        Remove Bid
-                    </button>
-
-                </div>
-                `
-                :
-                ""
-            }
-
-        </div>
-
-    `;
+        `;
 
 }
 
 
 /* ------------------------------------------------------------
-   Success message
------------------------------------------------------------- */
-
-function showSuccess(message){
-
-    const element =
-        document.getElementById("successMessage");
-
-
-    element.textContent =
-        message;
-
-
-    element.style.display =
-        "block";
-
-
-    window.scrollTo({
-        top:0,
-        behavior:"smooth"
-    });
-
-
-    setTimeout(() => {
-
-        element.style.display =
-            "none";
-
-    },5000);
-
-}
-
-
-/* ------------------------------------------------------------
-   Duration formatter
------------------------------------------------------------- */
-
-function formatDuration(minutes){
-
-    if(!Number.isFinite(Number(minutes))){
-        return "—";
-    }
-
-
-    const total =
-        Number(minutes);
-
-
-    const hours =
-        Math.floor(total / 60);
-
-
-    const mins =
-        total % 60;
-
-
-    if(hours === 0){
-        return `${mins} min`;
-    }
-
-
-    return `${hours}h ${mins}m`;
-
-}
-
-
-/* ------------------------------------------------------------
-   HTML escaping
------------------------------------------------------------- */
-
-function escapeHtml(value){
-
-    return String(value ?? "")
-        .replace(/&/g,"&amp;")
-        .replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;")
-        .replace(/"/g,"&quot;")
-        .replace(/'/g,"&#039;");
-
-}
-
-
-function escapeJs(value){
-
-    return String(value ?? "")
-        .replace(/\\/g,"\\\\")
-        .replace(/'/g,"\\'");
-
-}
-
-
-/* ------------------------------------------------------------
-   Render everything
------------------------------------------------------------- */
-
-function renderAll(){
-
-    renderPairings();
-
-    renderMyBids();
-
-}
-
-
-/* ------------------------------------------------------------
-   Live updates
+   Storage updates
 ------------------------------------------------------------ */
 
 window.addEventListener(
     "storage",
     function(event){
 
-        if(event.key === "viaviaBids"){
+        if(
+            event.key ===
+            "viaviaBids"
+        ){
 
-            renderAll();
+            renderMyTrips();
 
         }
 
@@ -1843,79 +1718,17 @@ window.addEventListener(
 
 
 /* ------------------------------------------------------------
-   Search while typing
------------------------------------------------------------- */
-
-document
-    .getElementById("searchFilter")
-    .addEventListener(
-        "input",
-        function(){
-
-            renderPairings();
-
-        }
-    );
-
-
-/* ------------------------------------------------------------
-   Debug helper
------------------------------------------------------------- */
-
-window.viaviaAvailableBidsDebug =
-function(){
-
-    const pairings =
-        getAllAvailablePairings();
-
-    const bids =
-        getViaviaBids();
-
-
-    console.log(
-        "Viavia Available Pairings:",
-        pairings
-    );
-
-
-    console.log(
-        "Viavia Submitted Bids:",
-        bids
-    );
-
-
-    console.log(
-        "Crew Scheduling Bid Records:",
-        bids.map(bid => ({
-
-            bidId: bid.bidId,
-            pairingId: bid.pairingId,
-            tripNumber: bid.tripNumber,
-            base: bid.base,
-            flightNumbers: bid.flightNumbers,
-            status: bid.status,
-            assignmentStatus: bid.assignmentStatus
-
-        }))
-
-    );
-
-
-    return {
-
-        pairings,
-        bids
-
-    };
-
-};
-
-
-/* ------------------------------------------------------------
    Initial load
 ------------------------------------------------------------ */
 
-renderAll();
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        renderMyTrips();
+
+    }
+);
 
 </script>
 
