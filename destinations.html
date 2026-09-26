@@ -316,51 +316,56 @@
         [33.6407, -84.4277]
    ], routeStyle).addTo(map);
 
-    L.polyline([[26.5362, -81.7552], [32.8968, -97.0380]]).addTo(map); // RSW → DFW
-    L.polyline([[26.5362, -81.7552], [36.0801, -115.1522]]).addTo(map); // RSW → LAS
-    L.polyline([[26.5362, -81.7552], [35.2140, -80.9431]]).addTo(map); // RSW → CLT
-    L.polyline([[26.5362, -81.7552], [39.9980, -82.8919]]).addTo(map); // RSW → CMH
-    L.polyline([[26.5362, -81.7552], [10.4424, -75.5130]]).addTo(map); // RSW → CTG
-    L.polyline([[26.5362, -81.7552], [6.1645, -75.4231]]).addTo(map); // RSW → MDE
-    L.polyline([[26.5362, -81.7552], [18.0409, -63.1089]]).addTo(map); // RSW → SXM
-    L.polyline([[26.5362, -81.7552], [30.4941, -81.6879]]).addTo(map); // RSW → JAX
-    L.polyline([[26.5362, -81.7552], [40.7769, -73.8740]]).addTo(map); // RSW → LGA
-    L.polyline([[26.5362, -81.7552], [34.7294, -92.2243]]).addTo(map); // RSW → LIT
-    L.polyline([[26.5362, -81.7552], [42.9472, -87.8966]]).addTo(map); // RSW → MKE
-    L.polyline([[26.5362, -81.7552], [9.0714, -79.3835]]).addTo(map); // RSW → PTY
-    L.polyline([[26.5362, -81.7552], [18.5674, -68.3634]]).addTo(map); // RSW → PUJ
-    L.polyline([[26.5362, -81.7552], [18.4297, -69.6689]]).addTo(map); // RSW → SDQ
-    L.polyline([[26.5362, -81.7552], [18.4394, -66.0018]]).addTo(map); // RSW → SJU
-    L.polyline([[26.5362, -81.7552], [30.4832, -86.5254]]).addTo(map); // RSW → VPS
-    L.polyline([[26.5362, -81.7552], [14.3824, -87.6211]]).addTo(map); // RSW → XPL
-    L.polyline([[32.8998, -97.0403], [33.6407, -84.4277]]).addTo(map); // DFW → ATL
-    L.polyline([[32.8998, -97.0403], [39.1754, -76.6684]]).addTo(map); // DFW → BWI
-    L.polyline([[32.8998, -97.0403], [35.2140, -80.9431]]).addTo(map); // DFW → CLT
-    L.polyline([[32.8998, -97.0403], [39.9980, -82.8919]]).addTo(map); // DFW → CMH
-    L.polyline([[32.8998, -97.0403], [24.5561, -81.7596]]).addTo(map); // DFW → EYW
-    L.polyline([[32.8998, -97.0403], [26.0726, -80.1527]]).addTo(map); // DFW → FLL
-    L.polyline([[32.8998, -97.0403], [25.7932, -80.2906]]).addTo(map); // DFW → MIA
-    L.polyline([[32.8998, -97.0403], [30.4941, -81.6879]]).addTo(map); // DFW → JAX
-    L.polyline([[32.8998, -97.0403], [40.6413, -73.7781]]).addTo(map); // DFW → JFK
-    L.polyline([[32.8998, -97.0403], [36.0801, -115.1522]]).addTo(map); // DFW → LAS
-    L.polyline([[32.8998, -97.0403], [33.9416, -118.4085]]).addTo(map); // DFW → LAX
-    L.polyline([[32.8998, -97.0403], [40.7769, -73.8740]]).addTo(map); // DFW → LGA
-    L.polyline([[32.8998, -97.0403], [28.4294, -81.3089]]).addTo(map); // DFW → MCO
-    L.polyline([[32.8998, -97.0403], [42.9472, -87.8966]]).addTo(map); // DFW → MKE
-    L.polyline([[32.8998, -97.0403], [26.5362, -81.7552]]).addTo(map); // DFW → RSW
-    L.polyline([[32.8998, -97.0403], [47.4502, -122.3088]]).addTo(map); // DFW → SEA
-    L.polyline([[32.8998, -97.0403], [38.6951, -121.5908]]).addTo(map); // DFW → SMF
-    L.polyline([[32.8998, -97.0403], [18.4394, -66.0018]]).addTo(map); // DFW → SJU
-    L.polyline([[32.8998, -97.0403], [33.6757, -117.8682]]).addTo(map); // DFW → SNA
-    L.polyline([[32.8998, -97.0403], [32.1161, -110.9410]]).addTo(map); // DFW → TUS
-    L.polyline([[32.8998, -97.0403], [30.4832, -86.5254]]).addTo(map); // DFW → VPS
-    L.polyline([[38.6951, -121.5908], [32.8968, -97.0380]]).addTo(map); // SMF → DFW
-    L.polyline([[38.6951, -121.5908], [34.7294, -92.2243]]).addTo(map); // SMF → LIT
-    L.polyline([[38.6951, -121.5908], [36.0801, -115.1522]]).addTo(map); // SMF → LAS
-    L.polyline([[38.6951, -121.5908], [33.9416, -118.4085]]).addTo(map); // SMF → LAX
-    L.polyline([[38.6951, -121.5908], [32.1161, -110.9410]]).addTo(map); // SMF → TUS
-    L.polyline([[38.6951, -121.5908], [42.3744, -122.8735]]).addTo(map); // SMF → MFR
-    L.polyline([[38.6951, -121.5908], [34.4262, -119.8404]]).addTo(map); // SMF → SBA
+       // RSW routes
+        L.polyline([[26.5362, -81.7552], [32.8968, -97.0380]], routeStyle).addTo(map); // RSW → DFW
+        L.polyline([[26.5362, -81.7552], [36.0801, -115.1522]], routeStyle).addTo(map); // RSW → LAS
+        L.polyline([[26.5362, -81.7552], [35.2140, -80.9431]], routeStyle).addTo(map); // RSW → CLT
+        L.polyline([[26.5362, -81.7552], [39.9980, -82.8919]], routeStyle).addTo(map); // RSW → CMH
+        L.polyline([[26.5362, -81.7552], [10.4424, -75.5130]], routeStyle).addTo(map); // RSW → CTG
+        L.polyline([[26.5362, -81.7552], [6.1645, -75.4231]], routeStyle).addTo(map); // RSW → MDE
+        L.polyline([[26.5362, -81.7552], [18.0409, -63.1089]], routeStyle).addTo(map); // RSW → SXM
+        L.polyline([[26.5362, -81.7552], [30.4941, -81.6879]], routeStyle).addTo(map); // RSW → JAX
+        L.polyline([[26.5362, -81.7552], [40.7769, -73.8740]], routeStyle).addTo(map); // RSW → LGA
+        L.polyline([[26.5362, -81.7552], [34.7294, -92.2243]], routeStyle).addTo(map); // RSW → LIT
+        L.polyline([[26.5362, -81.7552], [42.9472, -87.8966]], routeStyle).addTo(map); // RSW → MKE
+        L.polyline([[26.5362, -81.7552], [9.0714, -79.3835]], routeStyle).addTo(map); // RSW → PTY
+        L.polyline([[26.5362, -81.7552], [18.5674, -68.3634]], routeStyle).addTo(map); // RSW → PUJ
+        L.polyline([[26.5362, -81.7552], [18.4297, -69.6689]], routeStyle).addTo(map); // RSW → SDQ
+        L.polyline([[26.5362, -81.7552], [18.4394, -66.0018]], routeStyle).addTo(map); // RSW → SJU
+        L.polyline([[26.5362, -81.7552], [30.4832, -86.5254]], routeStyle).addTo(map); // RSW → VPS
+        L.polyline([[26.5362, -81.7552], [14.3824, -87.6211]], routeStyle).addTo(map); // RSW → XPL
+
+        // DFW routes
+        L.polyline([[32.8998, -97.0403], [33.6407, -84.4277]], routeStyle).addTo(map); // DFW → ATL
+        L.polyline([[32.8998, -97.0403], [39.1754, -76.6684]], routeStyle).addTo(map); // DFW → BWI
+        L.polyline([[32.8998, -97.0403], [35.2140, -80.9431]], routeStyle).addTo(map); // DFW → CLT
+        L.polyline([[32.8998, -97.0403], [39.9980, -82.8919]], routeStyle).addTo(map); // DFW → CMH
+        L.polyline([[32.8998, -97.0403], [24.5561, -81.7596]], routeStyle).addTo(map); // DFW → EYW
+        L.polyline([[32.8998, -97.0403], [26.0726, -80.1527]], routeStyle).addTo(map); // DFW → FLL
+        L.polyline([[32.8998, -97.0403], [25.7932, -80.2906]], routeStyle).addTo(map); // DFW → MIA
+        L.polyline([[32.8998, -97.0403], [30.4941, -81.6879]], routeStyle).addTo(map); // DFW → JAX
+        L.polyline([[32.8998, -97.0403], [40.6413, -73.7781]], routeStyle).addTo(map); // DFW → JFK
+        L.polyline([[32.8998, -97.0403], [36.0801, -115.1522]], routeStyle).addTo(map); // DFW → LAS
+        L.polyline([[32.8998, -97.0403], [33.9416, -118.4085]], routeStyle).addTo(map); // DFW → LAX
+        L.polyline([[32.8998, -97.0403], [40.7769, -73.8740]], routeStyle).addTo(map); // DFW → LGA
+        L.polyline([[32.8998, -97.0403], [28.4294, -81.3089]], routeStyle).addTo(map); // DFW → MCO
+        L.polyline([[32.8998, -97.0403], [42.9472, -87.8966]], routeStyle).addTo(map); // DFW → MKE
+        L.polyline([[32.8998, -97.0403], [26.5362, -81.7552]], routeStyle).addTo(map); // DFW → RSW
+        L.polyline([[32.8998, -97.0403], [47.4502, -122.3088]], routeStyle).addTo(map); // DFW → SEA
+        L.polyline([[32.8998, -97.0403], [38.6951, -121.5908]], routeStyle).addTo(map); // DFW → SMF
+        L.polyline([[32.8998, -97.0403], [18.4394, -66.0018]], routeStyle).addTo(map); // DFW → SJU
+        L.polyline([[32.8998, -97.0403], [33.6757, -117.8682]], routeStyle).addTo(map); // DFW → SNA
+        L.polyline([[32.8998, -97.0403], [32.1161, -110.9410]], routeStyle).addTo(map); // DFW → TUS
+        L.polyline([[32.8998, -97.0403], [30.4832, -86.5254]], routeStyle).addTo(map); // DFW → VPS
+
+        // SMF routes
+        L.polyline([[38.6951, -121.5908], [32.8968, -97.0380]], routeStyle).addTo(map); // SMF → DFW
+        L.polyline([[38.6951, -121.5908], [34.7294, -92.2243]], routeStyle).addTo(map); // SMF → LIT
+        L.polyline([[38.6951, -121.5908], [36.0801, -115.1522]], routeStyle).addTo(map); // SMF → LAS
+        L.polyline([[38.6951, -121.5908], [33.9416, -118.4085]], routeStyle).addTo(map); // SMF → LAX
+        L.polyline([[38.6951, -121.5908], [32.1161, -110.9410]], routeStyle).addTo(map); // SMF → TUS
+        L.polyline([[38.6951, -121.5908], [42.3744, -122.8735]], routeStyle).addTo(map); // SMF → MFR
+        L.polyline([[38.6951, -121.5908], [34.4262, -119.8404]], routeStyle).addTo(map); // SMF → SBA
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
