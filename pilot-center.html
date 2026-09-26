@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viavia Pilot Center</title>
+<style>
+    body{margin:0;font-family:Arial,sans-serif;background:#f7f4fa;color:#24142f}
+    header{background:#c6b4d9;padding:18px 50px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e5dff0}
+    header img{height:75px}
+    nav a{color:#24142f;text-decoration:none;margin-left:25px;font-weight:bold}
+    nav a:hover{color:#5b247a}
+    .hero{background:#5b247a;color:#fff;text-align:center;padding:55px 20px}
+    .hero h1{font-size:42px;margin:0 0 10px}
+    .hero p{font-size:18px;margin:0}
+    .dashboard{max-width:1200px;margin:auto;padding:40px 6%}
+    .card,.trip-card{background:#fff;border-radius:15px;padding:25px;box-shadow:0 4px 15px rgba(0,0,0,.08);margin-bottom:20px}
+    .card h2,.trip-card h3{color:#5b247a;margin-top:0}
+    .trip-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+    .trip-card{margin:0}
+    .trip-meta{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+    .tag{background:#eee6f4;padding:6px 10px;border-radius:20px;font-size:13px}
+    button,.button{display:inline-block;background:#5b247a;color:#fff;border:0;text-decoration:none;padding:11px 17px;border-radius:8px;font-weight:bold;cursor:pointer;margin:4px 5px 0 0}
+    button:hover,.button:hover{background:#43205c}
+    .secondary{background:#ddd1e8;color:#24142f}
+    .danger{background:#7a244f}
+    .hidden{display:none!important}
+    .status{font-weight:bold;color:#5b247a}
+    .detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .detail{background:#f7f4fa;padding:15px;border-radius:10px}
+    .leg{border-left:4px solid #5b247a;padding-left:16px;margin:18px 0}
+    .section-title{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+    select{padding:10px;border:1px solid #d4c9df;border-radius:8px;background:#fff;color:#24142f}
+    footer{background:#24142f;color:#fff;text-align:center;padding:25px;margin-top:40px}
+    @media(max-width:800px){.trip-grid,.detail-grid{grid-template-columns:1fr}header{flex-direction:column;gap:15px}nav a{margin:0 8px}}
+
+        .hotel-box {
+            margin-top: 12px;
+            padding: 12px 14px;
+            border-radius: 10px;
+            background: #f4edf9;
+            border: 1px solid #ddd0e8;
+            line-height: 1.55;
+        }
+        .hotel-box strong {
+            color: #5b247a;
+        }
+
+
+        .day-summary-wrap{margin:12px 0}.day-summary{background:#f7f4fa;border-left:4px solid #5b247a;padding:8px 10px;margin:5px 0;border-radius:6px;font-size:14px}.day-block{margin:18px 0;padding:15px;border-radius:12px;background:#faf8fc}.day-block h3{margin-top:0;color:#5b247a}.release-line{padding:12px;background:#eee6f4;border-radius:8px}.pay-box{background:#f4edf9;border:1px solid #ddd0e8;border-radius:12px;padding:15px}.total-pay{font-size:20px;color:#5b247a;border-top:1px solid #ddd0e8;padding-top:12px}.pay-note{font-size:12px;color:#665d6b}.hotel-box{margin:10px 0;padding:13px 15px;border-radius:10px;background:#f4edf9;border:1px solid #ddd0e8;line-height:1.55}.hotel-box strong{color:#5b247a}
+</style>
+</head>
+<body>
+
+<header>
+    <img src="viavia-logo.png" alt="Viavia Airlines">
+    <nav>
+        <a href="index.html">Home</a>
+        <a href="destinations.html">Destinations</a>
+        <a href="pilot-center.html">Pilot Center</a>
+    </nav>
+</header>
+
+<section class="hero">
+    <h1>Viavia Pilot Center</h1>
+    <p>Your crew operations hub.</p>
+</section>
+
+<main class="dashboard">
+
+<div class="card">
+    <div class="section-title">
+        <div>
+            <h2>Available Trips</h2>
+            <p>Bid on pre-built Viavia crew pairings.</p>
+        </div>
+        <div>
+            <select id="baseFilter" onchange="renderTrips()">
+                <option value="ALL">All Bases</option>
+                <option value="RSW">RSW</option>
+                <option value="DFW">DFW</option>
+                <option value="SMF">SMF</option>
+            </select>
+            <select id="lengthFilter" onchange="renderTrips()">
+                <option value="ALL">All Lengths</option>
+                <option value="1">1 Day</option>
+                <option value="2">2 Days</option>
+                <option value="3">3 Days</option>
+            </select>
+            <select id="aircraftFilter" onchange="renderTrips()">
+                <option value="ALL">All Aircraft</option>
+                <option value="A319">A319</option>
+                <option value="A320">A320</option>
+                <option value="A321">A321</option>
+            </select>
+        </div>
+    </div>
+    <div id="tripList" class="trip-grid"></div>
+</div>
+
+<div class="card">
+    <h2>My Active Bid</h2>
+    <div id="activeBid">No active bid.</div>
+</div>
+
+<div class="card">
+    <div class="section-title">
+        <h2>My Trips</h2>
+        <span class="status" id="tripCount">0 awarded</span>
+    </div>
+    <div id="myTrips">No awarded trips yet.</div>
+</div>
+
+<div class="card">
+    <h2>Pilot Profile</h2>
+    <div class="detail-grid">
+        <div class="detail"><strong>Pilot</strong><br>Captain</div>
+        <div class="detail"><strong>Seniority</strong><br>#1</div>
+        <div class="detail"><strong>Status</strong><br>Check Airman</div>
+        <div class="detail"><strong>Base</strong><br>RSW / DFW / SMF</div>
+        <div class="detail"><strong>Aircraft</strong><br>A319 / A320 / A321</div>
+        <div class="detail"><strong>Bid Status</strong><br><span id="profileBidStatus">No active bid</span></div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Pay & Hours</h2>
+    <div class="detail-grid">
+        <div class="detail"><strong>Total Awarded Trips</strong><br><span id="payTrips">0</span></div>
+        <div class="detail"><strong>Payable Hours</strong><br><span id="payHours">0.00</span></div>
+        <div class="detail"><strong>Trip Earnings</strong><br>$<span id="payMoney">0.00</span></div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Flight History</h2>
+    <div id="history">No completed flights recorded.</div>
+</div>
+
+</main>
+
+<footer>
+    <p>© 2026 Viavia Airlines — Your destination, via us!</p>
+</footer>
+
+<script>
+/*
+    VIAVIA PRE-BUILT TRIP LIBRARY
+    A319 / A320 / A321 only.
+    Trips are fixed pairings; the site does not randomly invent flights.
+*/
+const trips = [
+/* RSW 1-day */
+{id:"001",base:"RSW",days:1,aircraft:"A320",legs:[
+["VIA1757","RSW","MDE","15:56","18:36"],
+["VIA1758","MDE","RSW","19:46","00:31 +1"]],payHours:5.4,pay:180,overnight:"None",hotel:"None",transport:"None"},
+{id:"002",base:"RSW",days:1,aircraft:"A321",legs:[
+["VIA1621","RSW","SXM","13:00","16:15"],
+["VIA1622","SXM","RSW","17:25","21:00"]],payHours:6.8,pay:225,overnight:"None",hotel:"None",transport:"None"},
+{id:"003",base:"RSW",days:1,aircraft:"A321",legs:[
+["VIA2203","RSW","SJU","15:55","18:50"],
+["VIA2204","SJU","RSW","19:50","23:05"]],payHours:6.2,pay:210,overnight:"None",hotel:"None",transport:"None"},
+{id:"004",base:"RSW",days:1,aircraft:"A321",legs:[
+["VIA2317","RSW","PUJ","15:52","18:32"],
+["VIA2318","PUJ","RSW","19:42","22:42"]],payHours:5.8,pay:195,overnight:"None",hotel:"None",transport:"None"},
+{id:"005",base:"RSW",days:1,aircraft:"A321",legs:[
+["VIA2073","RSW","PTY","20:58","23:08"],
+["VIA2074","PTY","RSW","07:30","11:45"]],payHours:8.0,pay:285,overnight:"PTY",hotel:"Crew hotel — PTY",transport:"Hotel shuttle"},
+{id:"006",base:"RSW",days:1,aircraft:"A320",legs:[
+["VIA776","RSW","LAS","08:05","10:50"],
+["VIA777","LAS","RSW","11:50","17:15"]],payHours:8.2,pay:275,overnight:"None",hotel:"None",transport:"None"},
+{id:"007",base:"RSW",days:1,aircraft:"A320",legs:[
+["VIA2313","RSW","JFK","11:10","14:00"],
+["VIA2314","JFK","RSW","15:00","18:00"]],payHours:6.0,pay:205,overnight:"None",hotel:"None",transport:"None"},
+{id:"008",base:"RSW",days:1,aircraft:"A320",legs:[
+["VIA1392","RSW","MKE","12:17","14:32"],
+["VIA1393","MKE","RSW","15:32","19:37"]],payHours:6.3,pay:210,overnight:"None",hotel:"None",transport:"None"},
+{id:"009",base:"RSW",days:1,aircraft:"A320",legs:[
+["VIA360","RSW","VPS","14:11","14:51"],
+["VIA361","VPS","RSW","15:51","18:26"]],payHours:4.2,pay:150,overnight:"None",hotel:"None",transport:"None"},
+{id:"010",base:"RSW",days:1,aircraft:"A320",legs:[
+["VIA299","RSW","JAX","07:50","09:10"],
+["VIA300","JAX","RSW","10:10","11:30"]],payHours:3.8,pay:140,overnight:"None",hotel:"None",transport:"None"},
+{id:"011",base:"RSW",days:1,aircraft:"A321",legs:[
+["VIA953","RSW","CTG","16:45","18:50"],
+["VIA954","CTG","RSW","20:00","00:10 +1"]],payHours:7.0,pay:245,overnight:"None",hotel:"None",transport:"None"},
+{id:"012",base:"RSW",days:1,aircraft:"A320",legs:[
+["VIA2382","RSW","LIT","07:00","08:35"],
+["VIA2383","LIT","RSW","19:40","23:00"]],payHours:4.9,pay:175,overnight:"LIT layover",hotel:"Crew hotel — LIT",transport:"Hotel shuttle"},
+
+/* RSW 2-day */
+{id:"013",base:"RSW",days:2,aircraft:"A321",legs:[
+["VIA2203","RSW","SJU","15:55","18:50"],
+["VIA1820","SJU","RSW","07:43","10:58"]],payHours:6.0,pay:260,overnight:"SJU",hotel:"Crew hotel — SJU",transport:"Hotel shuttle"},
+{id:"014",base:"RSW",days:2,aircraft:"A320",legs:[
+["VIA1621","RSW","SXM","13:00","16:15"],
+["VIA1622","SXM","RSW","17:25","21:00"]],payHours:6.8,pay:300,overnight:"SXM",hotel:"Crew hotel — SXM",transport:"Hotel shuttle"},
+{id:"015",base:"RSW",days:2,aircraft:"A321",legs:[
+["VIA2317","RSW","PUJ","15:52","18:32"],
+["VIA2318","PUJ","RSW","19:42","22:42"]],payHours:5.8,pay:280,overnight:"PUJ",hotel:"Crew hotel — PUJ",transport:"Hotel shuttle"},
+{id:"016",base:"RSW",days:2,aircraft:"A321",legs:[
+["VIA2073","RSW","PTY","20:58","23:08"],
+["VIA2074","PTY","RSW","07:30","11:45"]],payHours:8.0,pay:320,overnight:"PTY",hotel:"Crew hotel — PTY",transport:"Hotel shuttle"},
+{id:"017",base:"RSW",days:2,aircraft:"A320",legs:[
+["VIA776","RSW","LAS","08:05","10:50"],
+["VIA777","LAS","RSW","11:50","17:15"]],payHours:8.2,pay:310,overnight:"LAS",hotel:"Crew hotel — LAS",transport:"Hotel shuttle"},
+
+/* DFW 1-day */
+{id:"018",base:"DFW",days:1,aircraft:"A321",legs:[
+["VIA1922","DFW","LGA","05:05","09:20"],
+["VIA1923","LGA","DFW","10:20","13:10"]],payHours:7.1,pay:240,overnight:"None",hotel:"None",transport:"None"},
+{id:"019",base:"DFW",days:1,aircraft:"A321",legs:[
+["VIA1102","DFW","LAS","06:45","07:55"],
+["VIA2117","LAS","DFW","13:47","18:27"]],payHours:5.9,pay:210,overnight:"None",hotel:"None",transport:"None"},
+{id:"020",base:"DFW",days:1,aircraft:"A321",legs:[
+["VIA2213","DFW","MIA","07:05","10:55"],
+["VIA2214","MIA","DFW","11:55","14:10"]],payHours:6.1,pay:220,overnight:"None",hotel:"None",transport:"None"},
+{id:"021",base:"DFW",days:1,aircraft:"A321",legs:[
+["VIA2365","DFW","MCO","08:10","11:35"],
+["VIA2366","MCO","DFW","12:35","14:30"]],payHours:5.3,pay:195,overnight:"None",hotel:"None",transport:"None"},
+{id:"022",base:"DFW",days:1,aircraft:"A320",legs:[
+["VIA128","DFW","SNA","08:38","10:08"],
+["VIA129","SNA","DFW","11:08","16:03"]],payHours:6.4,pay:220,overnight:"None",hotel:"None",transport:"None"},
+{id:"023",base:"DFW",days:1,aircraft:"A320",legs:[
+["VIA1361","DFW","ATL","08:32","11:37"],
+["VIA1362","ATL","DFW","12:37","14:02"]],payHours:4.5,pay:175,overnight:"None",hotel:"None",transport:"None"},
+{id:"024",base:"DFW",days:1,aircraft:"A320",legs:[
+["VIA1539","DFW","JAX","11:54","14:19"],
+["VIA1540","JAX","DFW","15:19","17:04"]],payHours:4.2,pay:165,overnight:"None",hotel:"None",transport:"None"},
+{id:"025",base:"DFW",days:1,aircraft:"A320",legs:[
+["VIA1470","DFW","SEA","14:59","17:19"],
+["VIA1471","SEA","DFW","18:19","00:04 +1"]],payHours:7.3,pay:250,overnight:"None",hotel:"None",transport:"None"},
+{id:"026",base:"DFW",days:1,aircraft:"A320",legs:[
+["VIA1409","DFW","MKE","15:15","17:40"],
+["VIA1410","MKE","DFW","18:40","21:15"]],payHours:5.0,pay:185,overnight:"None",hotel:"None",transport:"None"},
+{id:"027",base:"DFW",days:1,aircraft:"A321",legs:[
+["VIA1776","DFW","LAX","05:55","07:25"],
+["VIA1777","LAX","DFW","08:25","13:25"]],payHours:6.5,pay:225,overnight:"None",hotel:"None",transport:"None"},
+{id:"028",base:"DFW",days:1,aircraft:"A321",legs:[
+["VIA2222","DFW","SMF","05:55","07:50"],
+["VIA2223","SMF","DFW","06:00","11:20"]],payHours:5.4,pay:205,overnight:"SMF",hotel:"Crew hotel — SMF",transport:"Hotel shuttle"},
+{id:"029",base:"DFW",days:1,aircraft:"A321",legs:[
+["VIA1241","DFW","SJU","05:00","10:40"],
+["VIA1242","SJU","DFW","11:40","16:05"]],payHours:10.1,pay:360,overnight:"None",hotel:"None",transport:"None"},
+{id:"030",base:"DFW",days:1,aircraft:"A321",legs:[
+["VIA1920","DFW","TUS","17:57","19:32"],
+["VIA1921","TUS","DFW","20:32","23:47"]],payHours:4.8,pay:175,overnight:"None",hotel:"None",transport:"None"},
+
+/* DFW 2-day */
+{id:"031",base:"DFW",days:2,aircraft:"A320",legs:[
+["VIA1776","DFW","LAX","05:55","07:25"],
+["VIA2025","LAX","DFW","16:13","21:13"]],payHours:5.5,pay:300,overnight:"LAX",hotel:"Crew hotel — LAX",transport:"Hotel shuttle"},
+{id:"032",base:"DFW",days:2,aircraft:"A320",legs:[
+["VIA1470","DFW","SEA","14:59","17:19"],
+["VIA1673","SEA","DFW","18:19","00:04 +1"]],payHours:7.3,pay:325,overnight:"SEA",hotel:"Crew hotel — SEA",transport:"Hotel shuttle"},
+{id:"033",base:"DFW",days:2,aircraft:"A320",legs:[
+["VIA333","DFW","JFK","20:59","01:14 +1"],
+["VIA334","JFK","DFW","21:01","23:51"]],payHours:8.1,pay:350,overnight:"JFK",hotel:"Crew hotel — JFK",transport:"Hotel shuttle"},
+{id:"034",base:"DFW",days:2,aircraft:"A321",legs:[
+["VIA1241","DFW","SJU","05:00","10:40"],
+["VIA1242","SJU","DFW","11:40","16:05"]],payHours:10.1,pay:380,overnight:"SJU",hotel:"Crew hotel — SJU",transport:"Hotel shuttle"},
+{id:"035",base:"DFW",days:2,aircraft:"A321",legs:[
+["VIA123","DFW","BWI","06:20","10:20"],
+["VIA124","BWI","DFW","11:20","13:50"]],payHours:6.5,pay:285,overnight:"BWI",hotel:"Crew hotel — BWI",transport:"Hotel shuttle"},
+{id:"036",base:"DFW",days:2,aircraft:"A320",legs:[
+["VIA2213","DFW","MIA","07:05","10:55"],
+["VIA2214","MIA","DFW","11:55","14:10"]],payHours:6.1,pay:280,overnight:"MIA",hotel:"Crew hotel — MIA",transport:"Hotel shuttle"},
+
+/* SMF 1-day */
+{id:"037",base:"SMF",days:1,aircraft:"A320",legs:[
+["VIA743","SMF","LAS","06:59","08:29"],
+["VIA744","LAS","SMF","08:55","10:35"]],payHours:3.8,pay:145,overnight:"None",hotel:"None",transport:"None"},
+{id:"038",base:"SMF",days:1,aircraft:"A321",legs:[
+["VIA1105","SMF","LAX","07:37","09:07"],
+["VIA1106","LAX","SMF","10:07","11:43"]],payHours:3.3,pay:135,overnight:"None",hotel:"None",transport:"None"},
+{id:"039",base:"SMF",days:1,aircraft:"A321",legs:[
+["VIA1114","SMF","MFR","08:44","10:54"],
+["VIA1115","MFR","SMF","11:54","13:09"]],payHours:3.4,pay:140,overnight:"None",hotel:"None",transport:"None"},
+{id:"040",base:"SMF",days:1,aircraft:"A320",legs:[
+["VIA1584","SMF","SEA","09:27","11:27"],
+["VIA1585","SEA","SMF","12:27","14:27"]],payHours:4.0,pay:155,overnight:"None",hotel:"None",transport:"None"},
+{id:"041",base:"SMF",days:1,aircraft:"A319",legs:[
+["VIA269","SMF","SBA","07:12","08:37"],
+["VIA270","SBA","SMF","09:37","11:02"]],payHours:3.2,pay:130,overnight:"None",hotel:"None",transport:"None"},
+{id:"042",base:"SMF",days:1,aircraft:"A321",legs:[
+["VIA1869","SMF","LIT","13:00","18:40"],
+["VIA1868","LIT","SMF","09:35","12:00"]],payHours:8.1,pay:300,overnight:"LIT",hotel:"Crew hotel — LIT",transport:"Hotel shuttle"},
+
+/* SMF 2-day */
+{id:"043",base:"SMF",days:2,aircraft:"A320",legs:[
+["VIA829","SMF","LAS","16:24","17:54"],
+["VIA830","LAS","SMF","18:54","20:34"]],payHours:3.8,pay:230,overnight:"LAS",hotel:"Crew hotel — LAS",transport:"Hotel shuttle"},
+{id:"044",base:"SMF",days:2,aircraft:"A321",legs:[
+["VIA1105","SMF","LAX","07:37","09:07"],
+["VIA1106","LAX","SMF","10:07","11:43"]],payHours:3.3,pay:220,overnight:"LAX",hotel:"Crew hotel — LAX",transport:"Hotel shuttle"},
+{id:"045",base:"SMF",days:2,aircraft:"A320",legs:[
+["VIA1584","SMF","SEA","09:27","11:27"],
+["VIA1585","SEA","SMF","12:27","14:27"]],payHours:4.0,pay:245,overnight:"SEA",hotel:"Crew hotel — SEA",transport:"Hotel shuttle"},
+{id:"046",base:"SMF",days:2,aircraft:"A319",legs:[
+["VIA269","SMF","SBA","07:12","08:37"],
+["VIA1203","SBA","SMF","21:30","22:55"]],payHours:3.2,pay:225,overnight:"SBA",hotel:"Crew hotel — SBA",transport:"Hotel shuttle"},
+{id:"047",base:"SMF",days:2,aircraft:"A321",legs:[
+["VIA1869","SMF","LIT","13:00","18:40"],
+["VIA1868","LIT","SMF","09:35","12:00"]],payHours:8.1,pay:330,overnight:"LIT",hotel:"Crew hotel — LIT",transport:"Hotel shuttle"},
+
+/* Multi-day examples */
+{id:"048",base:"DFW",days:3,aircraft:"A320",legs:[
+["VIA1776","DFW","LAX","05:55","07:25"],
+["VIA2025","LAX","DFW","16:13","21:13"],
+["VIA333","DFW","JFK","20:59","01:14 +1"],
+["VIA334","JFK","DFW","21:01","23:51"]],payHours:13.6,pay:520,overnight:"LAX / JFK",hotel:"Crew hotels — LAX and JFK",transport:"Hotel shuttles"},
+{id:"049",base:"RSW",days:3,aircraft:"A321",legs:[
+["VIA2203","RSW","SJU","15:55","18:50"],
+["VIA1820","SJU","RSW","07:43","10:58"],
+["VIA2317","RSW","PUJ","15:52","18:32"],
+["VIA2318","PUJ","RSW","19:42","22:42"]],payHours:11.8,pay:520,overnight:"SJU / PUJ",hotel:"Crew hotels — SJU and PUJ",transport:"Hotel shuttles"},
+{id:"050",base:"SMF",days:3,aircraft:"A320",legs:[
+["VIA829","SMF","LAS","16:24","17:54"],
+["VIA830","LAS","SMF","18:54","20:34"],
+["VIA1105","SMF","LAX","07:37","09:07"],
+["VIA1106","LAX","SMF","10:07","11:43"]],payHours:7.1,pay:450,overnight:"LAS / LAX",hotel:"Crew hotels — LAS and LAX",transport:"Hotel shuttles"}
+];
+
+function getBids(){return JSON.parse(localStorage.getItem("viaviaBids")||"[]")}
+function getAwarded(){return JSON.parse(localStorage.getItem("viaviaAwardedTrips")||"[]")}
+
+
+const hotelDirectory = {
+    BWI: {hotel:"Aloft BWI Baltimore Washington International Airport", address:"1741 West Nursery Road, Linthicum Heights, MD 21090", transport:"Viavia crew transportation"},
+    JFK: {hotel:"Marriott New York JFK Airport", address:"135-25 142nd Street, Jamaica, NY 11436", transport:"Viavia crew transportation"},
+    LAS: {hotel:"Hampton Inn & Suites Las Vegas Airport", address:"6575 South Eastern Avenue, Las Vegas, NV 89119", transport:"Viavia crew transportation"},
+    LAX: {hotel:"Renaissance Los Angeles Airport Hotel", address:"9620 Airport Boulevard, Los Angeles, CA 90045", transport:"Viavia crew transportation"},
+    LGA: {hotel:"New York LaGuardia Airport Marriott", address:"102-05 Ditmars Boulevard, East Elmhurst, NY 11369", transport:"Viavia crew transportation"},
+    MIA: {hotel:"Miami Airport Marriott", address:"1201 NW Le Jeune Road, Building A, Miami, FL 33126", transport:"Viavia crew transportation"},
+    MCO: {hotel:"Hyatt Regency Orlando International Airport", address:"9300 Jeff Fuqua Blvd, Orlando, FL 32827", transport:"Viavia crew transportation"},
+    MKE: {hotel:"Hilton Garden Inn Milwaukee Airport", address:"5890 S. Howell Avenue, Milwaukee, WI 53207", transport:"Viavia crew transportation"},
+    PTY: {hotel:"Crowne Plaza Panama Airport", address:"Ave. Domingo Diaz, Corregimiento de Tocumen, Panama", transport:"Hotel airport shuttle"},
+    PUJ: {hotel:"Four Points by Sheraton Puntacana", address:"Boulevard 1ero de Noviembre, Punta Cana, Dominican Republic", transport:"Hotel airport shuttle"},
+    SBA: {hotel:"Hilton Garden Inn Santa Barbara/Goleta", address:"6878 Hollister Avenue, Goleta, CA 93117", transport:"Viavia crew transportation"},
+    SEA: {hotel:"Seattle Airport Marriott", address:"3201 South 176th Street, Seattle, WA 98188", transport:"Hotel airport shuttle"},
+    SJU: {hotel:"San Juan Airport Hotel", address:"Terminal D, Luis Muñoz Marín International Airport, Carolina, PR 00979", transport:"Walk from terminal — hotel is inside SJU"},
+    SMF: {hotel:"Hyatt Place Sacramento International Airport", address:"4850 Duckhorn Dr, Sacramento, CA 95834", transport:"Hotel airport shuttle"},
+    SXM: {hotel:"Sonesta Maho Beach Resort, Casino & Spa", address:"1 Rhine Road, Maho Bay, Sint Maarten", transport:"Viavia crew transportation"},
+    TUS: {hotel:"DoubleTree Suites by Hilton Tucson Airport", address:"7051 South Tucson Boulevard, Tucson, AZ 85756", transport:"Viavia crew transportation"},
+    VPS: {hotel:"Hilton Garden Inn Ft. Walton Beach", address:"1297 Miracle Strip Parkway SE, Fort Walton Beach, FL 32548", transport:"Viavia crew transportation"},
+    LIT: {hotel:"Holiday Inn Express Little Rock-Airport", address:"3121 Bankhead Dr, Little Rock, AR 72206", transport:"Hotel airport shuttle"},
+    ATL: {hotel:"Atlanta Airport Marriott Gateway", address:"2020 Convention Center Concourse, Atlanta, GA 30337", transport:"ATL SkyTrain / Viavia crew transportation"},
+    CMH: {hotel:"Residence Inn by Marriott Columbus Airport", address:"4294 International Gateway, Columbus, OH 43219", transport:"Hotel airport shuttle"}
+};
+
+function getHotelForTrip(trip) {
+    if (!trip.overnight || trip.overnight === "None") return null;
+    const code = trip.overnightCode || trip.overnight;
+    return hotelDirectory[code] || null;
+}
+
+const captainRate = 250;
+const perDiemRate = 75;
+const dailyCreditGuarantee = 4.5;
+
+function tripCredit(t) {
+    return Math.max(Number(t.payHours || 0), Number(t.days || 1) * dailyCreditGuarantee);
+}
+
+function tripPay(t) {
+    return Math.round((tripCredit(t) * captainRate + Number(t.days || 1) * perDiemRate) * 100) / 100;
+}
+
+function formatMoney(n) {
+    return Number(n).toLocaleString("en-US", {style:"currency", currency:"USD", minimumFractionDigits:0, maximumFractionDigits:0});
+}
+
+function dayGroups(t) {
+    const groups = Array.from({length: t.days}, (_,i)=>({day:i+1, legs:[]}));
+    if (t.legs.length === 0) return groups;
+    if (t.days === 1) { groups[0].legs = t.legs; return groups; }
+    if (t.days === 2 && t.legs.length === 2) {
+        groups[0].legs=[t.legs[0]];
+        groups[1].legs=[t.legs[1]];
+        return groups;
+    }
+    if (t.days === 3 && t.legs.length === 4) {
+        groups[0].legs=t.legs.slice(0,2);
+        groups[1].legs=t.legs.slice(2,4);
+        return groups;
+    }
+    const per=Math.ceil(t.legs.length/t.days);
+    t.legs.forEach((leg,i)=>groups[Math.min(Math.floor(i/per),t.days-1)].legs.push(leg));
+    return groups;
+}
+
+
+function getHotelForTrip(trip) {
+    if (!trip.overnight) return null;
+    const code = trip.overnightCode || trip.overnight;
+    return hotelDirectory[code] || {
+        city: trip.overnight,
+        hotel: `${trip.overnight} Airport Hotel`,
+        transport: "Viavia crew shuttle"
+    };
+}
+
+function renderTrips(){
+    const base=document.getElementById("baseFilter").value;
+    const days=document.getElementById("lengthFilter").value;
+    const ac=document.getElementById("aircraftFilter").value;
+    const awarded=getAwarded();
+    const active=getBids();
+    const list=document.getElementById("tripList");
+    const filtered=trips.filter(t=>(base==="ALL"||t.base===base)&&(days==="ALL"||String(t.days)===days)&&(ac==="ALL"||t.aircraft===ac));
+    if(!filtered.length){list.innerHTML="<p>No trips match the selected filters.</p>";return}
+    list.innerHTML=filtered.map(t=>{
+        const isAwarded=awarded.some(x=>x.id===t.id);
+        const isBid=active.some(x=>x.id===t.id);
+        const groups=dayGroups(t);
+        const daySummary=groups.filter(g=>g.legs.length).map(g=>`<div class="day-summary"><strong>Day ${g.day}</strong> ${g.legs.map(l=>`${l[1]}–${l[2]}`).join(" · ")}</div>`).join("");
+        return `<div class="trip-card">
+            <h3>Trip ${t.id} — ${t.base}</h3>
+            <div class="trip-meta"><span class="tag">${t.days} Day${t.days>1?"s":""}</span><span class="tag">${t.legs.length} Legs</span><span class="tag">${t.aircraft}</span><span class="tag">${tripCredit(t).toFixed(1)} Credit Hrs</span></div>
+            <div class="day-summary-wrap">${daySummary}${t.days>groups.filter(g=>g.legs.length).length?`<div class="day-summary"><strong>Day ${t.days}</strong> Release</div>`:""}</div>
+            ${t.overnight && t.overnight!=="None" ? `<p><strong>Overnight:</strong> ${t.overnight}</p>` : "<p><strong>Overnight:</strong> None</p>"}
+            <p><strong>Trip Pay:</strong> ${formatMoney(tripPay(t))}</p>
+            <button onclick="viewTrip('${t.id}')">View Details</button>
+            ${isAwarded?'<span class="status"> Awarded</span>':isBid?'<span class="status"> Bid Submitted</span>':'<button onclick="bidTrip(\''+t.id+'\')">Bid</button>'}
+        </div>`
+    }).join("");
+}
+
+function viewTrip(id){
+    const t=trips.find(x=>x.id===id); if(!t)return;
+    const groups=dayGroups(t);
+    const hotelCodes=(t.overnight||"").split("/").map(x=>x.trim()).filter(x=>x && x!=="None");
+    const hotels=hotelCodes.map(code=>hotelDirectory[code]).filter(Boolean);
+    const hotelHtml=hotels.length ? hotels.map(h =>
+        `<div class="hotel-box"><strong>${h.hotel}</strong><br>${h.address}<br><span>${h.transport}</span></div>`
+    ).join("") : "";
+    const schedule = groups.map(g => {
+        let body = "";
+        if(g.legs.length){
+            body = g.legs.map(l =>
+                `<div class="leg"><strong>${l[0]}</strong><p>${l[1]} → ${l[2]}</p><p>Departure: ${l[3]} &nbsp; | &nbsp; Arrival: ${l[4]}</p><p><strong>Aircraft:</strong> ${l[5] || t.aircraft}</p></div>`
+            ).join("");
+        } else {
+            body = `<p class="release-line"><strong>Release / Off Duty</strong></p>`;
+        }
+        return `<div class="day-block"><h3>DAY ${g.day}</h3>${body}</div>`;
+    }).join("");
+    const html=`<div class="card trip-detail-card"><h2>Trip ${t.id} Details</h2><div class="detail-grid"><div class="detail"><strong>Base</strong><br>${t.base}</div><div class="detail"><strong>Trip Length</strong><br>${t.days} Day${t.days>1?"s":""}</div><div class="detail"><strong>Aircraft</strong><br>${t.aircraft}</div><div class="detail"><strong>Credit</strong><br>${tripCredit(t).toFixed(1)} hrs</div><div class="detail"><strong>Captain Rate</strong><br>${formatMoney(captainRate)}/hr</div><div class="detail"><strong>Per Diem</strong><br>${formatMoney(perDiemRate)}/day</div></div><h3>Day-by-Day Schedule</h3>${schedule}${hotels.length?`<h3>Overnight Accommodation</h3>${hotelHtml}`:""}<h3>Pay</h3><div class="pay-box"><p><strong>Credit Hours:</strong> ${tripCredit(t).toFixed(1)}</p><p><strong>Captain Trip Pay:</strong> ${formatMoney(tripCredit(t)*captainRate)}</p><p><strong>Per Diem:</strong> ${formatMoney(t.days*perDiemRate)}</p><p class="total-pay"><strong>Total Trip Earnings:</strong> ${formatMoney(tripPay(t))}</p></div><p class="pay-note">Viavia virtual pilot pay scale. Trip credit uses a ${dailyCreditGuarantee.toFixed(1)}-hour daily minimum.</p><button onclick="bidTrip('${t.id}')">Bid for Trip</button> <button class="secondary" onclick="this.closest('.trip-detail-card').remove()">Close</button></div>`;
+    document.getElementById("activeBid").insertAdjacentHTML("beforebegin",html);
+    window.scrollTo({top:document.getElementById("activeBid").previousElementSibling.offsetTop,behavior:"smooth"});
+}
+
+function bidTrip(id){
+    const awarded=getAwarded();
+    if(awarded.some(x=>x.id===id)){alert("You already have this trip.");return}
+    let bids=getBids();
+    if(bids.some(x=>x.id===id)){alert("You already bid this trip.");return}
+    const t=trips.find(x=>x.id===id);
+    bids.push({id:id,submitted:new Date().toLocaleString()});
+    localStorage.setItem("viaviaBids",JSON.stringify(bids));
+    /* Current pilot is seniority #1, so the bid is awarded immediately. */
+    awarded.push(t);
+    localStorage.setItem("viaviaAwardedTrips",JSON.stringify(awarded));
+    bids=bids.filter(x=>x.id!==id);
+    localStorage.setItem("viaviaBids",JSON.stringify(bids));
+    alert("Trip "+id+" has been awarded to you.");
+    renderAll();
+}
+
+function renderActiveBid(){
+    const bids=getBids();
+    const box=document.getElementById("activeBid");
+    document.getElementById("profileBidStatus").textContent=bids.length?bids.length+" pending":"No active bid";
+    if(!bids.length){box.innerHTML="<p>No active bids. Your seniority #1 awards eligible bids immediately in this prototype.</p>";return}
+    box.innerHTML=bids.map(b=>`<p><strong>Trip ${b.id}</strong> — Pending Award</p>`).join("");
+}
+
+function renderMyTrips(){
+    const awarded=getAwarded();
+    document.getElementById("tripCount").textContent=awarded.length+" awarded";
+    if(!awarded.length){document.getElementById("myTrips").innerHTML="No awarded trips yet.";return}
+    document.getElementById("myTrips").innerHTML=awarded.map(t=>`<div class="trip-card"><h3>Trip ${t.id} — ${t.base}</h3><p><strong>${t.days} Day${t.days>1?"s":""}</strong> · ${t.legs.length} Legs · ${t.aircraft}</p><p><strong>Credit:</strong> ${tripCredit(t).toFixed(1)} hrs &nbsp; <strong>Total Pay:</strong> ${formatMoney(tripPay(t))}</p><p><strong>Overnight:</strong> ${t.overnight}</p><button onclick="viewTrip('${t.id}')">View Trip</button><button class="secondary" onclick="completeTrip('${t.id}')">Mark Completed</button></div>`).join("");
+}
+
+function completeTrip(id){
+    const awarded=getAwarded();
+    const index=awarded.findIndex(x=>x.id===id);
+    if(index<0)return;
+    const t=awarded[index];
+    let history=JSON.parse(localStorage.getItem("viaviaHistory")||"[]");
+    history.push({id:t.id,completed:new Date().toLocaleString(),creditHours:tripCredit(t),totalPay:tripPay(t),legs:t.legs});
+    localStorage.setItem("viaviaHistory",JSON.stringify(history));
+    awarded.splice(index,1);
+    localStorage.setItem("viaviaAwardedTrips",JSON.stringify(awarded));
+    renderAll();
+}
+
+function renderPay(){
+    const awarded=getAwarded();
+    const history=JSON.parse(localStorage.getItem("viaviaHistory")||"[]");
+    const all=awarded.concat(history);
+    document.getElementById("payTrips").textContent=all.length;
+    document.getElementById("payHours").textContent=all.reduce((s,t)=>s+Number(t.creditHours||t.payHours||t.hours||0),0).toFixed(1);
+    document.getElementById("payMoney").textContent=all.reduce((s,t)=>s+Number(t.totalPay||t.pay||0),0).toFixed(0);
+}
+
+function renderHistory(){
+    const h=JSON.parse(localStorage.getItem("viaviaHistory")||"[]");
+    document.getElementById("history").innerHTML=h.length?h.map(t=>`<p><strong>Trip ${t.id}</strong> — Completed ${t.completed} — ${Number(t.creditHours||t.hours||0).toFixed(1)} credit hrs — ${formatMoney(t.totalPay||t.pay||0)}</p>`).join(""):"No completed trips recorded.";
+}
+
+function renderAll(){renderTrips();renderActiveBid();renderMyTrips();renderPay();renderHistory()}
+renderAll();
+</script>
+</body>
+</html>
