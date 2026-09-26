@@ -499,7 +499,6 @@ footer {
         <div class="filter-grid">
 
             <div class="filter-group">
-
                 <label for="baseFilter">Base</label>
 
                 <select id="baseFilter" onchange="renderPairings()">
@@ -508,11 +507,9 @@ footer {
                     <option value="RSW">RSW</option>
                     <option value="SMF">SMF</option>
                 </select>
-
             </div>
 
             <div class="filter-group">
-
                 <label for="fleetFilter">Aircraft</label>
 
                 <select id="fleetFilter" onchange="renderPairings()">
@@ -521,11 +518,9 @@ footer {
                     <option value="A320">A320</option>
                     <option value="A321">A321</option>
                 </select>
-
             </div>
 
             <div class="filter-group">
-
                 <label for="lengthFilter">Trip Length</label>
 
                 <select id="lengthFilter" onchange="renderPairings()">
@@ -533,11 +528,9 @@ footer {
                     <option value="2">2 Legs</option>
                     <option value="3">3 Legs</option>
                 </select>
-
             </div>
 
             <div class="filter-group">
-
                 <label for="searchFilter">Search</label>
 
                 <input
@@ -546,7 +539,6 @@ footer {
                     placeholder="Trip code, flight, route..."
                     oninput="renderPairings()"
                 >
-
             </div>
 
         </div>
@@ -573,43 +565,42 @@ footer {
     Viavia Airlines · Pilot Operations · Your destination, via us!
 </footer>
 
-<script src="viavia-schedule.js"></script>
+<script src="viavia-schedule.js?v=20260926"></script>
 
 <script>
 
 /* ============================================================
    VIAVIA AVAILABLE BIDS
+   Version: 2026-09-26
    ============================================================ */
 
 const STORAGE_KEY = "viaviaBids";
 const PILOT_ID = "PILOT-001";
 const PILOT_NAME = "Captain";
+const GATE_PENDING = "TBD — Gate assignment pending";
 
+
+/* ============================================================
+   STORAGE
+   ============================================================ */
 
 function getBids() {
 
     try {
 
-        const raw =
-            localStorage.getItem(STORAGE_KEY);
+        const raw = localStorage.getItem(STORAGE_KEY);
 
         if (!raw) {
             return [];
         }
 
-        const parsed =
-            JSON.parse(raw);
+        const parsed = JSON.parse(raw);
 
-        return Array.isArray(parsed)
-            ? parsed
-            : [];
+        return Array.isArray(parsed) ? parsed : [];
 
     } catch (error) {
 
-        console.error(
-            "Unable to read Viavia bids:",
-            error
-        );
+        console.error("Unable to read Viavia bids:", error);
 
         return [];
 
@@ -628,29 +619,14 @@ function saveBids(bids) {
 }
 
 
-function updateStorageStatus() {
-
-    const count =
-        getBids().length;
-
-    const element =
-        document.getElementById("storageCount");
-
-    if (element) {
-
-        element.textContent =
-            ` · ${count} bid${count === 1 ? "" : "s"} currently stored`;
-
-    }
-
-}
-
+/* ============================================================
+   MASTER SCHEDULE
+   ============================================================ */
 
 function getPairings() {
 
     if (
-        typeof generateViaviaPairings !==
-        "function"
+        typeof generateViaviaPairings !== "function"
     ) {
 
         console.error(
@@ -661,9 +637,22 @@ function getPairings() {
 
     }
 
-    return generateViaviaPairings({
-        maxLegs: 3
-    }) || [];
+    try {
+
+        return generateViaviaPairings({
+            maxLegs: 3
+        }) || [];
+
+    } catch (error) {
+
+        console.error(
+            "Unable to generate Viavia pairings:",
+            error
+        );
+
+        return [];
+
+    }
 
 }
 
@@ -686,6 +675,469 @@ function getPairingFlights(pairing) {
 }
 
 
+/* ============================================================
+   FLIGHT NUMBER NORMALIZATION
+   ============================================================ */
+
+function normalizeFlightNumber(value) {
+
+    return String(value || "")
+        .trim()
+        .toUpperCase();
+
+}
+
+
+function getBidFlightNumbers(bid) {
+
+    if (
+        Array.isArray(bid?.flightNumbers) &&
+        bid.flightNumbers.length
+    ) {
+
+        return bid.flightNumbers
+            .map(normalizeFlightNumber)
+            .filter(Boolean);
+
+    }
+
+    if (
+        Array.isArray(bid?.flights) &&
+        bid.flights.length
+    ) {
+
+        return bid.flights
+            .map(
+                flight =>
+                    normalizeFlightNumber(
+                        flight?.flightNumber
+                    )
+            )
+            .filter(Boolean);
+
+    }
+
+    if (bid?.assignedFlights) {
+
+        if (
+            Array.isArray(bid.assignedFlights)
+        ) {
+
+            return bid.assignedFlights
+                .map(item =>
+                    normalizeFlightNumber(
+                        typeof item === "string"
+                            ? item
+                            : item?.flightNumber
+                    )
+                )
+                .filter(Boolean);
+
+        }
+
+    }
+
+    return [];
+
+}
+
+
+/* ============================================================
+   BID → MASTER PAIRING REPAIR
+   ============================================================ */
+
+function findMasterPairingForBid(bid) {
+
+    const pairings = getPairings();
+
+    if (!pairings.length) {
+        return null;
+    }
+
+
+    /*
+     * 1. Existing authoritative pairing ID.
+     */
+
+    const directId =
+        normalizeTripCode(
+            bid?.pairingId ||
+            bid?.tripId ||
+            bid?.tripNumber ||
+            bid?.assignedTrip
+        );
+
+    if (directId) {
+
+        const direct =
+            pairings.find(
+                pairing =>
+                    getPairingCode(pairing) ===
+                    directId
+            );
+
+        if (direct) {
+            return direct;
+        }
+
+    }
+
+
+    /*
+     * 2. Match by exact flight-number sequence.
+     */
+
+    const bidFlights =
+        getBidFlightNumbers(bid);
+
+    if (bidFlights.length) {
+
+        const exact =
+            pairings.find(
+                pairing => {
+
+                    const pairingFlights =
+                        getPairingFlights(pairing)
+                            .map(
+                                flight =>
+                                    normalizeFlightNumber(
+                                        flight.flightNumber
+                                    )
+                            );
+
+                    if (
+                        pairingFlights.length !==
+                        bidFlights.length
+                    ) {
+                        return false;
+                    }
+
+                    return pairingFlights.every(
+                        (number, index) =>
+                            number ===
+                            bidFlights[index]
+                    );
+
+                }
+            );
+
+        if (exact) {
+            return exact;
+        }
+
+    }
+
+
+    /*
+     * 3. Match by unordered flight set as a
+     * recovery method for older stored bids.
+     */
+
+    if (bidFlights.length) {
+
+        const bidSet =
+            new Set(bidFlights);
+
+        const recovered =
+            pairings.find(
+                pairing => {
+
+                    const pairingFlights =
+                        getPairingFlights(pairing)
+                            .map(
+                                flight =>
+                                    normalizeFlightNumber(
+                                        flight.flightNumber
+                                    )
+                            );
+
+                    if (
+                        pairingFlights.length !==
+                        bidFlights.length
+                    ) {
+                        return false;
+                    }
+
+                    return pairingFlights.every(
+                        number =>
+                            bidSet.has(number)
+                    );
+
+                }
+            );
+
+        if (recovered) {
+            return recovered;
+        }
+
+    }
+
+    return null;
+
+}
+
+
+function normalizeTripCode(value) {
+
+    const text =
+        String(value || "")
+            .trim()
+            .toUpperCase();
+
+    return /^TRIP-\d{3}$/.test(text)
+        ? text
+        : "";
+
+}
+
+
+/* ============================================================
+   AUTOMATIC STORAGE MIGRATION
+   ============================================================ */
+
+function repairStoredBids() {
+
+    const bids =
+        getBids();
+
+    if (!bids.length) {
+        return;
+    }
+
+    let changed = false;
+    let removed = 0;
+
+    const repaired = [];
+
+    for (const bid of bids) {
+
+        /*
+         * Only repair actual bid records.
+         */
+        if (!bid || typeof bid !== "object") {
+
+            changed = true;
+            removed++;
+            continue;
+
+        }
+
+
+        /*
+         * If a bid already has an authoritative trip ID,
+         * leave it alone unless we can strengthen its data.
+         */
+
+        let pairing =
+            findMasterPairingForBid(bid);
+
+
+        /*
+         * Completely malformed old bid:
+         *
+         * No trip ID
+         * No flight numbers
+         * No flights
+         *
+         * There is no legitimate way to reconstruct it.
+         *
+         * Remove it instead of allowing an
+         * "Unassigned Trip" into Crew Scheduling.
+         */
+
+        const hasIdentity =
+            Boolean(
+                normalizeTripCode(
+                    bid.pairingId ||
+                    bid.tripId ||
+                    bid.tripNumber
+                )
+            );
+
+        const hasFlights =
+            getBidFlightNumbers(bid).length > 0;
+
+        if (
+            !pairing &&
+            !hasIdentity &&
+            !hasFlights
+        ) {
+
+            changed = true;
+            removed++;
+
+            continue;
+
+        }
+
+
+        /*
+         * If we successfully matched the bid to the
+         * authoritative schedule, rewrite its identity
+         * and flight snapshot.
+         */
+
+        if (pairing) {
+
+            const authoritativeId =
+                getPairingCode(pairing);
+
+            const flights =
+                getPairingFlights(pairing);
+
+            const authoritativeFlights =
+                flights.map(
+                    flight => ({
+
+                        flightNumber:
+                            flight.flightNumber,
+
+                        origin:
+                            flight.origin,
+
+                        destination:
+                            flight.destination,
+
+                        departure:
+                            flight.departure,
+
+                        arrival:
+                            flight.arrival,
+
+                        nextDay:
+                            Boolean(
+                                flight.nextDay
+                            ),
+
+                        aircraft:
+                            flight.aircraft,
+
+                        base:
+                            flight.base
+
+                    })
+                );
+
+            const existingNumbers =
+                getBidFlightNumbers(bid);
+
+            const authoritativeNumbers =
+                flights.map(
+                    flight =>
+                        normalizeFlightNumber(
+                            flight.flightNumber
+                        )
+                );
+
+            const needsIdentity =
+                bid.pairingId !==
+                authoritativeId ||
+                bid.tripId !==
+                authoritativeId ||
+                bid.tripNumber !==
+                authoritativeId;
+
+            const needsFlights =
+                JSON.stringify(
+                    existingNumbers
+                ) !==
+                JSON.stringify(
+                    authoritativeNumbers
+                );
+
+            if (
+                needsIdentity ||
+                needsFlights ||
+                !Array.isArray(bid.flights)
+            ) {
+
+                bid.pairingId =
+                    authoritativeId;
+
+                bid.tripId =
+                    authoritativeId;
+
+                bid.tripNumber =
+                    authoritativeId;
+
+                bid.assignedTrip =
+                    bid.awarded
+                        ? authoritativeId
+                        : (
+                            bid.assignedTrip ||
+                            null
+                        );
+
+                bid.flightNumbers =
+                    authoritativeNumbers;
+
+                bid.flights =
+                    authoritativeFlights;
+
+                bid.route =
+                    pairing.route ||
+                    (
+                        flights.length
+                            ? `${flights[0].origin} → ${flights[flights.length - 1].destination}`
+                            : ""
+                    );
+
+                bid.base =
+                    pairing.base ||
+                    bid.base ||
+                    "";
+
+                bid.legCount =
+                    flights.length;
+
+                bid.aircraft =
+                    Array.from(
+                        new Set(
+                            flights
+                                .map(
+                                    flight =>
+                                        flight.aircraft
+                                )
+                                .filter(Boolean)
+                        )
+                    );
+
+                bid.updatedAt =
+                    new Date().toISOString();
+
+                changed = true;
+
+            }
+
+        }
+
+        repaired.push(bid);
+
+    }
+
+
+    if (changed) {
+
+        saveBids(repaired);
+
+        console.log(
+            "Viavia bid migration complete.",
+            {
+                originalCount: bids.length,
+                finalCount: repaired.length,
+                removedMalformedBids: removed
+            }
+        );
+
+    }
+
+}
+
+
+/* ============================================================
+   PAIRING INFORMATION
+   ============================================================ */
+
 function getPairingAircraft(pairing) {
 
     if (
@@ -699,7 +1151,10 @@ function getPairingAircraft(pairing) {
     return [
         ...new Set(
             getPairingFlights(pairing)
-                .map(flight => flight.aircraft)
+                .map(
+                    flight =>
+                        flight.aircraft
+                )
                 .filter(Boolean)
         )
     ];
@@ -766,6 +1221,7 @@ function getPairingDuration(pairing) {
         total +=
             arrival - departure;
 
+
         if (i < flights.length - 1) {
 
             const connection =
@@ -831,10 +1287,18 @@ function escapeHtml(value) {
 }
 
 
+/* ============================================================
+   EXISTING BID
+   ============================================================ */
+
 function getExistingBid(pairing) {
 
     const code =
         getPairingCode(pairing);
+
+    if (!code) {
+        return null;
+    }
 
     return getBids().find(
         bid =>
@@ -843,11 +1307,15 @@ function getExistingBid(pairing) {
                 bid?.tripId ||
                 bid?.tripNumber ||
                 ""
-            ) === String(code)
+            ) === code
     ) || null;
 
 }
 
+
+/* ============================================================
+   SUBMIT BID
+   ============================================================ */
 
 function submitBid(pairingCode) {
 
@@ -864,12 +1332,13 @@ function submitBid(pairingCode) {
     if (!pairing) {
 
         alert(
-            "Unable to find this pairing."
+            "Unable to find this pairing in the master schedule."
         );
 
         return;
 
     }
+
 
     const flights =
         getPairingFlights(pairing);
@@ -884,6 +1353,7 @@ function submitBid(pairingCode) {
 
     }
 
+
     let bids =
         getBids();
 
@@ -892,7 +1362,8 @@ function submitBid(pairingCode) {
 
     if (
         existingBid &&
-        existingBid.status !== "denied"
+        String(existingBid.status).toLowerCase() !==
+        "denied"
     ) {
 
         alert(
@@ -902,6 +1373,7 @@ function submitBid(pairingCode) {
         return;
 
     }
+
 
     const firstFlight =
         flights[0];
@@ -914,6 +1386,7 @@ function submitBid(pairingCode) {
 
     const pairingId =
         getPairingCode(pairing);
+
 
     let connectionMinutes = 0;
 
@@ -935,8 +1408,10 @@ function submitBid(pairingCode) {
 
     }
 
+
     const now =
         new Date().toISOString();
+
 
     const bid = {
 
@@ -979,13 +1454,11 @@ function submitBid(pairingCode) {
         flightNumbers:
             flights.map(
                 flight =>
-                    flight.flightNumber
+                    normalizeFlightNumber(
+                        flight.flightNumber
+                    )
             ),
 
-        /*
-         * COMPLETE SNAPSHOT OF THE BIDDED TRIP.
-         * Crew Scheduling uses this information directly.
-         */
         flights:
             flights.map(
                 flight => ({
@@ -1046,7 +1519,7 @@ function submitBid(pairingCode) {
             ),
 
         gateStatus:
-            "TBD — Gate assignment pending",
+            GATE_PENDING,
 
         status:
             "submitted",
@@ -1083,9 +1556,11 @@ function submitBid(pairingCode) {
 
     };
 
+
     /*
-     * Replace a previously denied bid.
+     * Remove only the previous denied bid.
      */
+
     if (existingBid) {
 
         bids =
@@ -1096,6 +1571,7 @@ function submitBid(pairingCode) {
             );
 
     }
+
 
     bids.push(bid);
 
@@ -1108,11 +1584,14 @@ function submitBid(pairingCode) {
     );
 
     renderPairings();
-
     renderSubmittedBids();
 
 }
 
+
+/* ============================================================
+   MESSAGE
+   ============================================================ */
 
 function showMessage(message) {
 
@@ -1138,6 +1617,30 @@ function showMessage(message) {
         },
         5000
     );
+
+}
+
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+
+function updateStorageStatus() {
+
+    const count =
+        getBids().length;
+
+    const element =
+        document.getElementById(
+            "storageCount"
+        );
+
+    if (element) {
+
+        element.textContent =
+            ` · ${count} bid${count === 1 ? "" : "s"} currently stored`;
+
+    }
 
 }
 
@@ -1173,6 +1676,7 @@ function renderPairings() {
 
     const pairings =
         getPairings();
+
 
     const filtered =
         pairings.filter(
@@ -1242,6 +1746,7 @@ function renderPairings() {
             }
         );
 
+
     if (!filtered.length) {
 
         list.innerHTML = `
@@ -1255,6 +1760,7 @@ function renderPairings() {
 
     }
 
+
     list.innerHTML =
         filtered
             .map(renderPairing)
@@ -1262,6 +1768,10 @@ function renderPairings() {
 
 }
 
+
+/* ============================================================
+   TRIP CARD
+   ============================================================ */
 
 function renderPairing(pairing) {
 
@@ -1289,10 +1799,12 @@ function renderPairing(pairing) {
 
     const isSubmitted =
         Boolean(existingBid) &&
-        existingBid.status !== "denied";
+        String(existingBid.status).toLowerCase() !==
+        "denied";
 
     const isTrip001 =
         pairingCode === "TRIP-001";
+
 
     const buttonHtml =
         isSubmitted
@@ -1312,6 +1824,7 @@ function renderPairing(pairing) {
                     Bid This Trip
                 </button>
             `;
+
 
     return `
 
@@ -1345,6 +1858,7 @@ function renderPairing(pairing) {
                 </div>
 
             </div>
+
 
             <div class="route">
 
@@ -1381,6 +1895,7 @@ function renderPairing(pairing) {
 
             </div>
 
+
             <div class="info-grid">
 
                 <div class="info">
@@ -1400,7 +1915,9 @@ function renderPairing(pairing) {
                 <div class="info">
                     <div class="info-label">Aircraft</div>
                     <div class="info-value">
-                        ${escapeHtml(aircraft.join(" / "))}
+                        ${escapeHtml(
+                            aircraft.join(" / ")
+                        )}
                     </div>
                 </div>
 
@@ -1421,6 +1938,7 @@ function renderPairing(pairing) {
                 </div>
 
             </div>
+
 
             <div class="legs">
 
@@ -1474,13 +1992,15 @@ function renderPairing(pairing) {
 
             </div>
 
+
             <div class="gate">
 
                 <strong>Gate:</strong>
 
-                TBD — Gate assignment pending
+                ${GATE_PENDING}
 
             </div>
+
 
             <div class="actions">
 
@@ -1517,6 +2037,10 @@ function renderPairing(pairing) {
 }
 
 
+/* ============================================================
+   SUBMITTED BIDS
+   ============================================================ */
+
 function renderSubmittedBids() {
 
     const container =
@@ -1536,6 +2060,7 @@ function renderSubmittedBids() {
                 "submitted"
         );
 
+
     if (!submitted.length) {
 
         container.innerHTML = `
@@ -1547,6 +2072,7 @@ function renderSubmittedBids() {
         return;
 
     }
+
 
     container.innerHTML =
         submitted
@@ -1590,11 +2116,17 @@ function renderSubmittedBids() {
 }
 
 
+/* ============================================================
+   STORAGE EVENT
+   ============================================================ */
+
 window.addEventListener(
     "storage",
     event => {
 
         if (event.key === STORAGE_KEY) {
+
+            repairStoredBids();
 
             updateStorageStatus();
             renderPairings();
@@ -1606,6 +2138,10 @@ window.addEventListener(
 );
 
 
+/* ============================================================
+   DEBUG
+   ============================================================ */
+
 window.viaviaAvailableBidsDebug =
 function() {
 
@@ -1614,6 +2150,10 @@ function() {
 
     const pairings =
         getPairings();
+
+    console.log(
+        "Viavia Available Bids version: 2026-09-26"
+    );
 
     console.log(
         "Viavia origin:",
@@ -1631,14 +2171,32 @@ function() {
     );
 
     return {
+        version:
+            "2026-09-26",
+
         origin:
             window.location.origin,
+
         bids,
         pairings
     };
 
 };
 
+
+/* ============================================================
+   INITIALIZATION
+   ============================================================ */
+
+/*
+ * IMPORTANT:
+ * Run the migration BEFORE rendering anything.
+ *
+ * This removes the old malformed "Unassigned Trip"
+ * bid and repairs any recoverable bids.
+ */
+
+repairStoredBids();
 
 updateStorageStatus();
 renderPairings();
