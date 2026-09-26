@@ -336,13 +336,24 @@
 
     <script>
 
-if (localStorage.getItem("viaviaBid") === "Trip 001") {
+    if (localStorage.getItem("viaviaBid") === "Trip 001") {
 
-    document.getElementById("my-bid").style.display = "block";
+        document.getElementById("my-bid").style.display = "block";
 
-}
+    }
 
-</script>
+
+    function awardTrip() {
+
+        localStorage.setItem("viaviaAwardedTrip", "Trip 001");
+
+        localStorage.removeItem("viaviaBid");
+
+        alert("Trip 001 has been awarded to you.");
+
+    }
+
+    </script>
 
 
 
