@@ -294,6 +294,12 @@
 <script>
     const map = L.map('route-map').setView([35, -95], 4);
 
+    const routeStyle = {
+         color: '#5b247a',
+         weight: 2.5,
+         opacity: 0.75
+    };
+
     L.marker([26.5362, -81.7552])
         .addTo(map)
         .bindPopup("<b>RSW — Fort Myers, FL</b><br>Viavia Airlines Base");
@@ -305,10 +311,10 @@
     L.marker([38.6951, -121.5908])
         .addTo(map)
         .bindPopup("<b>SMF — Sacramento, CA</b><br>Viavia Airlines Base");
-    L.polyline([
+   L.polyline([
         [26.5362, -81.7552],
         [33.6407, -84.4277]
-    ]).addTo(map);
+   ], routeStyle).addTo(map);
 
     L.polyline([[26.5362, -81.7552], [32.8968, -97.0380]]).addTo(map); // RSW → DFW
     L.polyline([[26.5362, -81.7552], [36.0801, -115.1522]]).addTo(map); // RSW → LAS
