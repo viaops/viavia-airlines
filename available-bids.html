@@ -1,5 +1,5 @@
-```html
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -13,7 +13,7 @@ body{
     margin:0;
     font-family:Arial,Helvetica,sans-serif;
     background:#f7f4fa;
-    color:#24142f;
+    color:#24142f
 }
 
 header{
@@ -23,25 +23,25 @@ header{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:20px;
+    gap:20px
 }
 
 .brand{
     display:flex;
-    align-items:center;
+    align-items:center
 }
 
 .brand img{
     height:58px;
     width:auto;
-    display:block;
+    display:block
 }
 
 nav{
     display:flex;
     flex-wrap:wrap;
     gap:8px;
-    justify-content:flex-end;
+    justify-content:flex-end
 }
 
 nav a{
@@ -49,63 +49,63 @@ nav a{
     text-decoration:none;
     font-weight:700;
     padding:9px 12px;
-    border-radius:8px;
+    border-radius:8px
 }
 
 nav a:hover,
 nav a.active{
-    background:rgba(255,255,255,.55);
+    background:rgba(255,255,255,.55)
 }
 
 .hero{
     background:linear-gradient(135deg,#5b247a,#7d4b9b);
     color:white;
-    padding:38px 40px;
+    padding:38px 40px
 }
 
 .hero-inner{
     max-width:1150px;
-    margin:auto;
+    margin:auto
 }
 
 .hero h1{
     margin:0 0 8px;
-    font-size:36px;
+    font-size:36px
 }
 
 .hero p{
     margin:0;
     font-size:16px;
-    opacity:.92;
+    opacity:.92
 }
 
 .container{
     max-width:1150px;
     margin:28px auto 50px;
-    padding:0 20px;
+    padding:0 20px
 }
 
 .card{
     background:white;
     border:1px solid #e1d7e9;
     border-radius:14px;
-    box-shadow:0 4px 14px rgba(60,30,80,.06);
+    box-shadow:0 4px 14px rgba(60,30,80,.06)
 }
 
 .filters{
     padding:20px;
-    margin-bottom:24px;
+    margin-bottom:24px
 }
 
 .filters h2{
     margin:0 0 16px;
-    color:#5b247a;
+    color:#5b247a
 }
 
 .filter-grid{
     display:grid;
     grid-template-columns:repeat(4,1fr);
-    gap:12px;
+    gap:12px
 }
 
 .field label{
@@ -115,7 +115,7 @@ nav a.active{
     color:#6e6474;
     margin-bottom:6px;
     text-transform:uppercase;
-    letter-spacing:.04em;
+    letter-spacing:.04em
 }
 
 .field select,
@@ -126,7 +126,7 @@ nav a.active{
     border-radius:8px;
     background:white;
     color:#24142f;
-    font-size:14px;
+    font-size:14px
 }
 
 .button{
@@ -138,61 +138,61 @@ nav a.active{
     border-radius:9px;
     padding:10px 15px;
     font-weight:700;
-    cursor:pointer;
+    cursor:pointer
 }
 
 .button:hover{
-    background:#481c61;
+    background:#481c61
 }
 
 .button.secondary{
     background:#eee6f3;
-    color:#5b247a;
+    color:#5b247a
 }
 
 .button.secondary:hover{
-    background:#e2d6eb;
+    background:#e2d6eb
 }
 
 .filter-actions{
     margin-top:14px;
     display:flex;
-    gap:8px;
+    gap:8px
 }
 
 .section-title{
     color:#5b247a;
-    margin:28px 0 14px;
+    margin:28px 0 14px
 }
 
 .bid-layout{
     display:grid;
     grid-template-columns:1fr 330px;
-    gap:18px;
+    gap:18px
 }
 
 .trip{
     padding:20px;
-    margin-bottom:14px;
+    margin-bottom:14px
 }
 
 .trip-header{
     display:flex;
     justify-content:space-between;
     align-items:flex-start;
-    gap:15px;
+    gap:15px
 }
 
 .trip-number{
     font-size:20px;
     font-weight:700;
-    color:#5b247a;
+    color:#5b247a
 }
 
 .trip-meta{
     color:#6e6474;
     font-size:13px;
-    margin-top:4px;
+    margin-top:4px
 }
 
 .status{
@@ -202,12 +202,7 @@ nav a.active{
     padding:6px 9px;
     border-radius:7px;
     font-size:12px;
-    font-weight:700;
-}
-
-.status.closing{
-    background:#fff0d8;
-    color:#8a5a00;
+    font-weight:700
 }
 
 .route{
@@ -219,13 +214,13 @@ nav a.active{
     display:grid;
     grid-template-columns:1fr auto 1fr;
     align-items:center;
-    gap:15px;
+    gap:15px
 }
 
 .airport{
     font-size:22px;
     font-weight:700;
-    color:#5b247a;
+    color:#5b247a
 }
 
 .airport small{
@@ -233,99 +228,103 @@ nav a.active{
     font-size:12px;
     color:#75687c;
     font-weight:400;
-    margin-top:3px;
+    margin-top:3px
+}
+
+.route .return{
+    text-align:right
 }
 
 .arrow{
     color:#8d7b99;
-    font-size:20px;
+    font-size:20px
 }
 
 .trip-info{
     display:grid;
     grid-template-columns:repeat(4,1fr);
     gap:10px;
-    margin-bottom:16px;
+    margin-bottom:16px
 }
 
 .info{
     background:#f8f4fb;
     border:1px solid #e4d9eb;
     border-radius:8px;
-    padding:11px;
+    padding:11px
 }
 
 .info-label{
     font-size:11px;
     color:#75687c;
     text-transform:uppercase;
-    letter-spacing:.04em;
+    letter-spacing:.04em
 }
 
 .info-value{
     margin-top:4px;
     font-weight:700;
-    color:#5b247a;
+    color:#5b247a
 }
 
 .trip-actions{
     display:flex;
     gap:8px;
-    flex-wrap:wrap;
+    flex-wrap:wrap
 }
 
 .details{
     display:none;
     margin-top:16px;
     border-top:1px solid #e5dbea;
-    padding-top:16px;
+    padding-top:16px
 }
 
 .details.open{
-    display:block;
+    display:block
 }
 
 .leg{
     display:grid;
-    grid-template-columns:80px 1fr 1fr 100px;
+    grid-template-columns:100px 1fr 1fr 100px;
     gap:10px;
     padding:10px 0;
     border-bottom:1px solid #eee7f2;
-    font-size:13px;
+    font-size:13px
 }
 
 .leg:last-child{
-    border-bottom:0;
+    border-bottom:0
 }
 
 .leg strong{
-    color:#5b247a;
+    color:#5b247a
 }
 
-.details-note{
-    margin-top:14px;
-    color:#6e6474;
+.detail-note{
+    margin:14px 0 0;
+    color:#75687c;
     font-size:13px;
-    line-height:1.5;
+    line-height:1.5
 }
 
 .sidebar{
     padding:20px;
     height:max-content;
     position:sticky;
-    top:15px;
+    top:15px
 }
 
 .sidebar h2{
     margin:0 0 15px;
     color:#5b247a;
-    font-size:20px;
+    font-size:20px
 }
 
 .empty{
     color:#75687c;
     font-size:14px;
-    line-height:1.5;
+    line-height:1.5
 }
 
 .my-bid{
@@ -333,24 +332,24 @@ nav a.active{
     border-radius:9px;
     padding:12px;
     margin-bottom:10px;
-    background:#faf7fc;
+    background:#faf7fc
 }
 
 .my-bid-number{
     color:#5b247a;
-    font-weight:700;
+    font-weight:700
 }
 
 .priority{
     font-size:12px;
     color:#75687c;
-    margin-top:3px;
+    margin-top:3px
 }
 
 .bid-buttons{
     display:flex;
     gap:6px;
-    margin-top:9px;
+    margin-top:9px
 }
 
 .small-button{
@@ -361,105 +360,99 @@ nav a.active{
     font-size:12px;
     font-weight:700;
     background:#eee6f3;
-    color:#5b247a;
+    color:#5b247a
 }
 
 .small-button.remove{
     background:#f5e6e6;
-    color:#8a3333;
+    color:#8a3333
 }
 
 .no-results{
     padding:30px;
     text-align:center;
-    color:#75687c;
+    color:#75687c
 }
 
-.schedule-status{
-    margin:0 0 18px;
-    padding:13px 16px;
-    border-radius:9px;
-    background:#f8f4fb;
+.notice{
+    background:#faf7fc;
     border:1px solid #e4d9eb;
+    border-radius:10px;
+    padding:14px 16px;
+    margin-bottom:18px;
     color:#62586a;
     font-size:13px;
+    line-height:1.5
 }
 
-.schedule-status strong{
-    color:#5b247a;
-}
-
-.unmatched{
-    background:#fffaf0;
-    border:1px solid #ead9ad;
-    color:#725b20;
-    padding:10px 12px;
-    border-radius:8px;
-    margin-top:12px;
-    font-size:13px;
+.notice strong{
+    color:#5b247a
 }
 
 footer{
     text-align:center;
     color:#776d7e;
     font-size:13px;
-    padding:28px 20px 40px;
+    padding:28px 20px 40px
 }
 
 @media(max-width:950px){
-
     .filter-grid{
-        grid-template-columns:repeat(2,1fr);
+        grid-template-columns:repeat(2,1fr)
     }
 
     .bid-layout{
-        grid-template-columns:1fr;
+        grid-template-columns:1fr
     }
 
     .sidebar{
-        position:static;
+        position:static
     }
 }
 
 @media(max-width:650px){
-
     header{
         padding:14px 20px;
         align-items:flex-start;
-        flex-direction:column;
+        flex-direction:column
     }
 
     nav{
-        justify-content:flex-start;
+        justify-content:flex-start
     }
 
     .hero{
-        padding:30px 20px;
+        padding:30px 20px
     }
 
     .hero h1{
-        font-size:30px;
+        font-size:30px
     }
 
     .filter-grid,
     .trip-info{
-        grid-template-columns:1fr;
+        grid-template-columns:1fr
     }
 
     .route{
         grid-template-columns:1fr;
-        text-align:center;
+        text-align:center
+    }
+
+    .route .return{
+        text-align:center
     }
 
     .arrow{
-        transform:rotate(90deg);
+        transform:rotate(90deg)
     }
 
     .leg{
-        grid-template-columns:1fr 1fr;
+        grid-template-columns:1fr 1fr
     }
 }
 </style>
+
 </head>
 
 <body>
@@ -467,37 +460,27 @@ footer{
 <header>
 
 <a class="brand" href="pilot-center.html">
-    <img src="viavia-logo.png" alt="Viavia Airlines">
+<img src="viavia-logo.png" alt="Viavia Airlines">
 </a>
 
 <nav>
-    <a href="pilot-center.html">Pilot Center</a>
-    <a class="active" href="available-bids.html">Available Bids</a>
-    <a href="crew-calendar.html">Crew Calendar</a>
-    <a href="flight-planning.html">Flight Planning</a>
-    <a href="index.html">Main Site</a>
+<a href="pilot-center.html">Pilot Center</a>
+<a class="active" href="available-bids.html">Available Bids</a>
+<a href="crew-calendar.html">Crew Calendar</a>
+<a href="flight-planning.html">Flight Planning</a>
+<a href="index.html">Main Site</a>
 </nav>
 
 </header>
 
-
 <section class="hero">
-
 <div class="hero-inner">
-
 <h1>Available Bids</h1>
-
-<p>
-Review open Viavia pairings and submit your trip preferences.
-</p>
-
+<p>Review open Viavia pairings and submit your trip preferences.</p>
 </div>
-
 </section>
 
-
 <main class="container">
-
 
 <section class="card filters">
 
@@ -506,117 +489,694 @@ Review open Viavia pairings and submit your trip preferences.
 <div class="filter-grid">
 
 <div class="field">
-
 <label>Base</label>
-
 <select id="baseFilter">
-
 <option value="all">All Bases</option>
-<option value="DFW">DFW — Dallas–Fort Worth</option>
-<option value="RSW">RSW — Fort Myers</option>
-<option value="SMF">SMF — Sacramento</option>
-
 </select>
-
 </div>
 
-
 <div class="field">
-
 <label>Fleet</label>
-
 <select id="fleetFilter">
-
 <option value="all">All Fleets</option>
 <option value="A319">A319</option>
 <option value="A320">A320</option>
 <option value="A321">A321</option>
-
 </select>
-
 </div>
 
-
 <div class="field">
-
 <label>Trip Length</label>
-
 <select id="lengthFilter">
-
 <option value="all">Any Length</option>
 <option value="1">1 Day</option>
 <option value="2">2 Days</option>
+<option value="3">3 Days</option>
+<option value="4">4 Days</option>
 </select>
-
 </div>
-
 
 <div class="field">
-
 <label>Search</label>
-
-<input
-    id="searchFilter"
-    type="text"
-    placeholder="Trip number, flight, or airport"
->
-
+<input id="searchFilter" type="text" placeholder="Trip number or airport">
 </div>
 
 </div>
-
 
 <div class="filter-actions">
 
 <button class="button" onclick="applyFilters()">
-    Apply Filters
+Apply Filters
 </button>
 
 <button class="button secondary" onclick="resetFilters()">
-    Reset
+Reset
 </button>
 
 </div>
 
 </section>
 
-
-<div class="schedule-status">
-    <strong>Master Schedule:</strong>
-    Available trips are generated directly from Viavia's 131-leg master schedule.
-    Pilot bases are DFW, RSW, and SMF.
+<div class="notice">
+<strong>Viavia Pilot Bidding:</strong>
+Available trips are generated directly from the Viavia master flight schedule. Only complete pairings that originate and return to a Viavia pilot base are displayed. Gate assignments are not shown until the applicable 12-hour assignment window.
 </div>
-
 
 <div class="bid-layout">
 
-
 <section>
 
-<h2 class="section-title">
-Open Trips
-</h2>
+<h2 class="section-title">Open Trips</h2>
 
 <div id="tripList"></div>
 
-<div
-    id="noResults"
-    class="card no-results"
-    style="display:none"
->
-    No trips match your current filters.
+<div id="noResults" class="card no-results" style="display:none">
+No trips match your current filters.
 </div>
 
 </section>
 
-
 <aside class="card sidebar">
 
-<h2>
-My Bids
-</h2>
+<h2>My Bids</h2>
 
 <div id="myBids">
+<p class="empty">
+You have not submitted any bids yet.
+<br><br>
+Select <strong>Bid This Trip</strong> on an available pairing to add it to your bid list.
+</p>
+</div>
+
+</aside>
+
+</div>
+
+</main>
+
+<footer>
+Viavia Airlines · Pilot Center · Your destination, via us!
+</footer>
+
+<script src="viavia-schedule.js"></script>
+
+<script>
+
+let bids = JSON.parse(
+    localStorage.getItem("viaviaBids") || "[]"
+);
+
+let generatedTrips = [];
+
+
+/* ============================================================
+   TIME / FLIGHT HELPERS
+============================================================ */
+
+function timeToMinutes(time){
+
+    if(!time) return 0;
+
+    const parts = time.split(":");
+
+    return (
+        parseInt(parts[0],10) * 60 +
+        parseInt(parts[1],10)
+    );
+}
+
+
+function flightDurationMinutes(flight){
+
+    let departure = timeToMinutes(flight.departure);
+    let arrival = timeToMinutes(flight.arrival);
+
+    if(flight.nextDay || arrival < departure){
+        arrival += 1440;
+    }
+
+    return arrival - departure;
+}
+
+
+function formatDuration(minutes){
+
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+
+    return `${hours}:${String(mins).padStart(2,"0")}`;
+}
+
+
+/* ============================================================
+   PAIRING GENERATION
+============================================================ */
+
+function buildPairings(){
+
+    const flights = VIAVIA_SCHEDULE.flights;
+    const bases = VIAVIA_SCHEDULE.airline.pilotBases;
+
+    const pairings = [];
+
+    /*
+       Trip 001 is an existing Viavia trip and must remain:
+       RSW → MDE → RSW
+       VIA1757 / VIA1758
+    */
+
+    const trip001Outbound =
+        flights.find(f => f.flightNumber === "VIA1757");
+
+    const trip001Return =
+        flights.find(f => f.flightNumber === "VIA1758");
+
+    if(trip001Outbound && trip001Return){
+
+        pairings.push(
+            createPairing(
+                "Trip 001",
+                trip001Outbound,
+                trip001Return
+            )
+        );
+    }
+
+
+    /*
+       Track return flights so one scheduled return
+       is not assigned to multiple pairings.
+    */
+
+    const usedReturnFlights =
+        new Set(["VIA1758"]);
+
+
+    /*
+       Generate the remaining pairings.
+
+       We intentionally use a non-mutating sorted list
+       of possible returns.
+    */
+
+    bases.forEach(base => {
+
+        const outboundFlights =
+            flights
+            .filter(f =>
+                f.base === base &&
+                f.origin === base &&
+                f.flightNumber !== "VIA1757"
+            )
+            .sort((a,b) =>
+                timeToMinutes(a.departure) -
+                timeToMinutes(b.departure)
+            );
+
+
+        outboundFlights.forEach(outbound => {
+
+            const possibleReturns =
+                flights
+                .filter(returnFlight =>
+                    returnFlight.base === base &&
+                    returnFlight.destination === base &&
+                    returnFlight.origin === outbound.destination &&
+                    !usedReturnFlights.has(
+                        returnFlight.flightNumber
+                    )
+                )
+                .sort((a,b) =>
+                    timeToMinutes(a.departure) -
+                    timeToMinutes(b.departure)
+                );
+
+
+            /*
+               Choose the earliest return that departs
+               after the outbound arrives.
+
+               This prevents impossible same-time pairings.
+            */
+
+            const validReturns =
+                possibleReturns.filter(returnFlight => {
+
+                    const outboundArrival =
+                        timeToMinutes(outbound.arrival) +
+                        (outbound.nextDay ? 1440 : 0);
+
+                    let returnDeparture =
+                        timeToMinutes(returnFlight.departure);
+
+                    /*
+                       For a return after midnight, allow
+                       the return to be considered on the
+                       following day when necessary.
+                    */
+
+                    if(
+                        returnFlight.nextDay ||
+                        returnDeparture < timeToMinutes(outbound.arrival)
+                    ){
+                        returnDeparture += 1440;
+                    }
+
+                    return returnDeparture >= outboundArrival;
+                });
+
+
+            if(validReturns.length === 0){
+                return;
+            }
+
+
+            const returnFlight =
+                validReturns[0];
+
+
+            usedReturnFlights.add(
+                returnFlight.flightNumber
+            );
+
+
+            const tripNumber =
+                `Trip ${String(pairings.length + 1).padStart(3,"0")}`;
+
+
+            pairings.push(
+                createPairing(
+                    tripNumber,
+                    outbound,
+                    returnFlight
+                )
+            );
+
+        });
+
+    });
+
+
+    return pairings;
+}
+
+
+/* ============================================================
+   CREATE PAIRING
+============================================================ */
+
+function createPairing(
+    tripNumber,
+    outbound,
+    returnFlight
+){
+
+    const creditMinutes =
+        flightDurationMinutes(outbound) +
+        flightDurationMinutes(returnFlight);
+
+
+    const overnight =
+        returnFlight.nextDay ||
+        timeToMinutes(returnFlight.arrival) <
+        timeToMinutes(outbound.departure);
+
+
+    return {
+
+        id:tripNumber,
+
+        tripNumber:tripNumber,
+
+        base:outbound.base,
+
+        fleet:outbound.aircraft,
+
+        origin:outbound.origin,
+
+        destination:returnFlight.destination,
+
+        outbound:outbound,
+
+        returnFlight:returnFlight,
+
+        legs:[
+            outbound,
+            returnFlight
+        ],
+
+        creditMinutes:creditMinutes,
+
+        credit:formatDuration(creditMinutes),
+
+        overnight:overnight,
+
+        days:overnight ? 2 : 1
+
+    };
+}
+
+
+/* ============================================================
+   RENDER BASE FILTERS
+============================================================ */
+
+function renderBaseFilters(){
+
+    const select =
+        document.getElementById("baseFilter");
+
+
+    VIAVIA_SCHEDULE.airline.pilotBases.forEach(base => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = base;
+
+        option.textContent =
+            `${base} Base`;
+
+        select.appendChild(option);
+
+    });
+
+}
+
+
+/* ============================================================
+   RENDER TRIPS
+============================================================ */
+
+function renderTrips(){
+
+    generatedTrips = buildPairings();
+
+    const container =
+        document.getElementById("tripList");
+
+
+    container.innerHTML = "";
+
+
+    generatedTrips.forEach(trip => {
+
+        const card =
+            document.createElement("div");
+
+        card.className = "card trip";
+
+        card.dataset.base = trip.base;
+
+        card.dataset.fleet = trip.fleet;
+
+        card.dataset.length =
+            String(trip.days);
+
+        card.dataset.search =
+            [
+                trip.tripNumber,
+                trip.outbound.flightNumber,
+                trip.returnFlight.flightNumber,
+                trip.origin,
+                trip.outbound.destination,
+                trip.returnFlight.destination
+            ]
+            .join(" ")
+            .toLowerCase();
+
+
+        const alreadyBid =
+            bids.includes(trip.tripNumber);
+
+
+        card.innerHTML = `
+
+<div class="trip-header">
+
+<div>
+
+<div class="trip-number">
+${trip.tripNumber}
+</div>
+
+<div class="trip-meta">
+${trip.base} Base ·
+${trip.days}-Day Pairing ·
+${trip.fleet}
+</div>
+
+</div>
+
+<span class="status">
+${alreadyBid ? "BID SUBMITTED" : "OPEN"}
+</span>
+
+</div>
+
+
+<div class="route">
+
+<div>
+
+<div class="airport">
+${trip.origin}
+</div>
+
+<small>
+Report ${trip.outbound.departure}
+</small>
+
+</div>
+
+
+<div class="arrow">
+→
+</div>
+
+
+<div class="return">
+
+<div class="airport">
+${trip.returnFlight.destination}
+</div>
+
+<small>
+Release ${trip.returnFlight.arrival}
+</small>
+
+</div>
+
+</div>
+
+
+<div class="trip-info">
+
+<div class="info">
+
+<div class="info-label">
+Flights
+</div>
+
+<div class="info-value">
+${trip.outbound.flightNumber}
+<br>
+${trip.returnFlight.flightNumber}
+</div>
+
+</div>
+
+
+<div class="info">
+
+<div class="info-label">
+Credit
+</div>
+
+<div class="info-value">
+${trip.credit}
+</div>
+
+</div>
+
+
+<div class="info">
+
+<div class="info-label">
+Layovers
+</div>
+
+<div class="info-value">
+${trip.overnight ? "1" : "0"}
+</div>
+
+</div>
+
+
+<div class="info">
+
+<div class="info-label">
+Aircraft
+</div>
+
+<div class="info-value">
+${trip.fleet}
+</div>
+
+</div>
+
+</div>
+
+
+<div class="trip-actions">
+
+<button
+class="button"
+onclick="submitBid('${trip.tripNumber}')"
+${alreadyBid ? "disabled" : ""}
+>
+${alreadyBid ? "Bid Submitted" : "Bid This Trip"}
+</button>
+
+<button
+class="button secondary"
+onclick="toggleDetails('${trip.tripNumber.replace(/\s/g,"")}')"
+>
+Trip Details
+</button>
+
+</div>
+
+
+<div
+class="details"
+id="${trip.tripNumber.replace(/\s/g,"")}"
+>
+
+<div class="leg">
+
+<strong>LEG 1</strong>
+
+<span>
+${trip.outbound.flightNumber}
+</span>
+
+<span>
+${trip.outbound.origin}
+→
+${trip.outbound.destination}
+</span>
+
+<span>
+${trip.outbound.departure}
+–
+${trip.outbound.arrival}
+${trip.outbound.nextDay ? "+1" : ""}
+</span>
+
+</div>
+
+
+<div class="leg">
+
+<strong>LEG 2</strong>
+
+<span>
+${trip.returnFlight.flightNumber}
+</span>
+
+<span>
+${trip.returnFlight.origin}
+→
+${trip.returnFlight.destination}
+</span>
+
+<span>
+${trip.returnFlight.departure}
+–
+${trip.returnFlight.arrival}
+${trip.returnFlight.nextDay ? "+1" : ""}
+</span>
+
+</div>
+
+
+<p class="detail-note">
+
+Aircraft:
+<strong>${trip.fleet}</strong><br>
+
+Gate:
+<strong>
+${VIAVIA_SCHEDULE.operations.gatePendingText}
+</strong>
+
+until the applicable 12-hour assignment window.
+
+</p>
+
+</div>
+
+`;
+
+
+        container.appendChild(card);
+
+    });
+
+
+    applyFilters();
+
+}
+
+
+/* ============================================================
+   BID FUNCTIONS
+============================================================ */
+
+function submitBid(trip){
+
+    if(bids.includes(trip)){
+
+        alert(
+            trip +
+            " is already in your bid list."
+        );
+
+        return;
+    }
+
+
+    bids.push(trip);
+
+    localStorage.setItem(
+        "viaviaBids",
+        JSON.stringify(bids)
+    );
+
+
+    renderBids();
+
+    renderTrips();
+
+
+    alert(
+        trip +
+        " has been added to your bid list."
+    );
+
+}
+
+
+function renderBids(){
+
+    const container =
+        document.getElementById("myBids");
+
+
+    if(bids.length === 0){
+
+        container.innerHTML = `
 
 <p class="empty">
 
@@ -630,880 +1190,63 @@ on an available pairing to add it to your bid list.
 
 </p>
 
-</div>
-
-</aside>
-
-</div>
-
-</main>
-
-
-<footer>
-Viavia Airlines · Pilot Center · Your destination, via us!
-</footer>
-
-
-<!-- ============================================================
-     MASTER VIAVIA SCHEDULE
-============================================================ -->
-
-<script src="viavia-schedule.js"></script>
-
-
-<script>
-
-/* ============================================================
-   AVAILABLE BIDS
-   Uses viavia-schedule.js as the single source of truth.
-============================================================ */
-
-
-/* ------------------------------------------------------------
-   Pilot bid storage
------------------------------------------------------------- */
-
-let bids = JSON.parse(
-    localStorage.getItem("viaviaBids") || "[]"
-);
-
-
-/* ------------------------------------------------------------
-   Airport names
------------------------------------------------------------- */
-
-const airportNames = {
-
-    DFW: "Dallas–Fort Worth",
-
-    RSW: "Fort Myers",
-
-    SMF: "Sacramento",
-
-    ATL: "Atlanta",
-
-    BWI: "Baltimore",
-
-    CLT: "Charlotte",
-
-    CMH: "Columbus",
-
-    EYW: "Key West",
-
-    FLL: "Fort Lauderdale",
-
-    JAX: "Jacksonville",
-
-    JFK: "New York JFK",
-
-    LAS: "Las Vegas",
-
-    LAX: "Los Angeles",
-
-    LGA: "New York LaGuardia",
-
-    MIA: "Miami",
-
-    MCO: "Orlando",
-
-    MKE: "Milwaukee",
-
-    SEA: "Seattle",
-
-    SJU: "San Juan",
-
-    SNA: "Orange County",
-
-    TUS: "Tucson",
-
-    VPS: "Destin–Fort Walton Beach",
-
-    CTG: "Cartagena",
-
-    LIT: "Little Rock",
-
-    MDE: "Medellín",
-
-    PTY: "Panama City",
-
-    PUJ: "Punta Cana",
-
-    SDQ: "Santo Domingo",
-
-    SXM: "St. Maarten",
-
-    XPL: "Palmerola",
-
-    MFR: "Medford",
-
-    SBA: "Santa Barbara"
-};
-
-
-/* ------------------------------------------------------------
-   Utility functions
------------------------------------------------------------- */
-
-function airportName(code){
-
-    return airportNames[code] || code;
-
-}
-
-
-function timeToMinutes(time){
-
-    const parts = time.split(":");
-
-    return (
-        Number(parts[0]) * 60 +
-        Number(parts[1])
-    );
-
-}
-
-
-function formatDuration(start,end,nextDay=false){
-
-    let startMinutes = timeToMinutes(start);
-
-    let endMinutes = timeToMinutes(end);
-
-    if(nextDay || endMinutes < startMinutes){
-
-        endMinutes += 24 * 60;
-
-    }
-
-    const duration = endMinutes - startMinutes;
-
-    const hours = Math.floor(duration / 60);
-
-    const minutes = duration % 60;
-
-    return `${hours}:${String(minutes).padStart(2,"0")}`;
-
-}
-
-
-function getTripDays(firstFlight,returnFlight){
-
-    if(returnFlight.nextDay){
-
-        return 2;
-
-    }
-
-    return 1;
-
-}
-
-
-/* ------------------------------------------------------------
-   Build pairings
------------------------------------------------------------- */
-
-/*
-   Each pairing begins at a Viavia pilot base.
-
-   The return must:
-   - originate at the outbound destination
-   - return to the same pilot base
-   - depart after the outbound arrives
-
-   Returns are never reused.
-
-   This intentionally leaves unmatched flights open instead
-   of inventing flights that do not exist in the master schedule.
-*/
-
-function buildPairings(){
-
-    const flights = VIAVIA_SCHEDULE.flights;
-
-    const pairings = [];
-
-    const usedReturnFlights = new Set();
-
-    const bases = VIAVIA_SCHEDULE.airline.pilotBases;
-
-
-    bases.forEach(base => {
-
-        const outboundFlights = flights
-            .filter(flight =>
-                flight.base === base &&
-                flight.origin === base
-            )
-            .sort((a,b) =>
-                timeToMinutes(a.departure) -
-                timeToMinutes(b.departure)
-            );
-
-
-        outboundFlights.forEach(outbound => {
-
-            const possibleReturns = flights
-                .filter(returnFlight =>
-
-                    returnFlight.destination === base &&
-
-                    returnFlight.origin === outbound.destination &&
-
-                    !usedReturnFlights.has(
-                        returnFlight.flightNumber
-                    )
-                )
-                .sort((a,b) => {
-
-                    /*
-                       Non-mutating sorted candidate list.
-                    */
-
-                    return (
-                        timeToMinutes(a.departure) -
-                        timeToMinutes(b.departure)
-                    );
-
-                });
-
-
-            const outboundArrival =
-                timeToMinutes(outbound.arrival);
-
-
-            let returnFlight = possibleReturns.find(
-                candidate => {
-
-                    let returnDeparture =
-                        timeToMinutes(
-                            candidate.departure
-                        );
-
-                    /*
-                       A return with nextDay=true is automatically
-                       considered to be on the following day.
-                    */
-
-                    if(candidate.nextDay){
-
-                        returnDeparture += 24 * 60;
-
-                    }
-
-                    return returnDeparture >= outboundArrival;
-
-                }
-            );
-
-
-            /*
-               If there is no same-day return, look for a
-               next-day return.
-            */
-
-            if(!returnFlight){
-
-                returnFlight = possibleReturns.find(
-                    candidate => candidate.nextDay
-                );
-
-            }
-
-
-            if(returnFlight){
-
-                usedReturnFlights.add(
-                    returnFlight.flightNumber
-                );
-
-            }
-
-
-            pairings.push({
-
-                id:
-                    `TRIP-${String(pairings.length + 1).padStart(3,"0")}`,
-
-                base,
-
-                outbound,
-
-                returnFlight: returnFlight || null,
-
-                days:
-                    returnFlight
-                        ? getTripDays(
-                            outbound,
-                            returnFlight
-                        )
-                        : 1,
-
-                complete:
-                    Boolean(returnFlight)
-
-            });
-
-        });
-
-    });
-
-
-    return pairings;
-
-}
-
-
-/* ------------------------------------------------------------
-   Generate trip number
------------------------------------------------------------- */
-
-function tripNumber(index){
-
-    return `Trip ${String(index + 1).padStart(3,"0")}`;
-
-}
-
-
-/* ------------------------------------------------------------
-   Render available trips
------------------------------------------------------------- */
-
-function renderTrips(){
-
-    const container =
-        document.getElementById("tripList");
-
-    container.innerHTML = "";
-
-
-    const pairings = buildPairings();
-
-
-    pairings.forEach((pairing,index) => {
-
-        /*
-           Only complete pairings are offered as normal
-           bid trips.
-
-           Unmatched flights are not turned into fake trips.
-        */
-
-        if(!pairing.complete){
-
-            return;
-
-        }
-
-
-        const outbound =
-            pairing.outbound;
-
-        const returnFlight =
-            pairing.returnFlight;
-
-
-        const trip =
-            document.createElement("div");
-
-        trip.className =
-            "card trip";
-
-
-        const tripId =
-            tripNumber(index);
-
-
-        const searchText = [
-
-            tripId,
-
-            outbound.flightNumber,
-
-            returnFlight.flightNumber,
-
-            outbound.origin,
-
-            outbound.destination,
-
-            returnFlight.origin,
-
-            returnFlight.destination,
-
-            airportName(outbound.destination)
-
-        ]
-        .join(" ")
-        .toLowerCase();
-
-
-        trip.dataset.base =
-            pairing.base;
-
-        trip.dataset.fleet =
-            outbound.aircraft;
-
-        trip.dataset.length =
-            pairing.days;
-
-        trip.dataset.search =
-            searchText;
-
-
-        const durationOut =
-            formatDuration(
-                outbound.departure,
-                outbound.arrival,
-                outbound.nextDay
-            );
-
-
-        const durationReturn =
-            formatDuration(
-                returnFlight.departure,
-                returnFlight.arrival,
-                returnFlight.nextDay
-            );
-
-
-        const totalCredit =
-            calculateCredit(
-                outbound,
-                returnFlight
-            );
-
-
-        const overnightText =
-            pairing.days > 1
-                ? "Overnight"
-                : "No Overnight";
-
-
-        trip.innerHTML = `
-
-            <div class="trip-header">
-
-                <div>
-
-                    <div class="trip-number">
-                        ${tripId}
-                    </div>
-
-                    <div class="trip-meta">
-                        ${pairing.base} Base ·
-                        ${pairing.days}-Day Pairing ·
-                        ${outbound.aircraft}
-                    </div>
-
-                </div>
-
-                <span class="status">
-                    OPEN
-                </span>
-
-            </div>
-
-
-            <div class="route">
-
-                <div>
-
-                    <div class="airport">
-                        ${outbound.origin}
-
-                        <small>
-                            ${airportName(outbound.origin)}
-                            · Report before ${outbound.departure}
-                        </small>
-                    </div>
-
-                </div>
-
-
-                <div class="arrow">
-                    →
-                </div>
-
-
-                <div>
-
-                    <div class="airport">
-                        ${returnFlight.destination}
-
-                        <small>
-                            ${airportName(returnFlight.destination)}
-                            · Release after ${returnFlight.arrival}
-                        </small>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="trip-info">
-
-                <div class="info">
-
-                    <div class="info-label">
-                        Route
-                    </div>
-
-                    <div class="info-value">
-                        ${outbound.origin}
-                        →
-                        ${outbound.destination}
-                    </div>
-
-                </div>
-
-
-                <div class="info">
-
-                    <div class="info-label">
-                        Credit
-                    </div>
-
-                    <div class="info-value">
-                        ${totalCredit}
-                    </div>
-
-                </div>
-
-
-                <div class="info">
-
-                    <div class="info-label">
-                        Layovers
-                    </div>
-
-                    <div class="info-value">
-                        ${pairing.days > 1 ? "1" : "0"}
-                    </div>
-
-                </div>
-
-
-                <div class="info">
-
-                    <div class="info-label">
-                        Aircraft
-                    </div>
-
-                    <div class="info-value">
-                        ${outbound.aircraft}
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="trip-actions">
-
-                <button
-                    class="button"
-                    onclick="submitBid('${tripId}')"
-                >
-                    Bid This Trip
-                </button>
-
-
-                <button
-                    class="button secondary"
-                    onclick="toggleDetails('${pairing.id}')"
-                >
-                    Trip Details
-                </button>
-
-            </div>
-
-
-            <div
-                class="details"
-                id="${pairing.id}"
-            >
-
-                <div class="leg">
-
-                    <strong>LEG 1</strong>
-
-                    <span>
-                        ${outbound.flightNumber}
-                    </span>
-
-                    <span>
-                        ${outbound.origin}
-                        ${outbound.departure}
-                    </span>
-
-                    <span>
-                        ${outbound.destination}
-                        ${outbound.arrival}
-                    </span>
-
-                </div>
-
-
-                <div class="leg">
-
-                    <strong>LEG 2</strong>
-
-                    <span>
-                        ${returnFlight.flightNumber}
-                    </span>
-
-                    <span>
-                        ${returnFlight.origin}
-                        ${returnFlight.departure}
-                    </span>
-
-                    <span>
-                        ${returnFlight.destination}
-                        ${returnFlight.arrival}
-                    </span>
-
-                </div>
-
-
-                <p class="details-note">
-
-                    <strong>
-                        Flight times:
-                    </strong>
-
-                    ${durationOut}
-                    outbound /
-                    ${durationReturn}
-                    return.
-
-                    ${overnightText}.
-
-                    <br><br>
-
-                    <strong>
-                        Gate:
-                    </strong>
-
-                    ${VIAVIA_SCHEDULE.operations.gatePendingText}
-
-                    until the applicable
-                    12-hour assignment window.
-
-                </p>
-
-            </div>
-
-        `;
-
-
-        container.appendChild(trip);
-
-    });
-
-
-    applyFilters();
-
-}
-
-
-/* ------------------------------------------------------------
-   Calculate credited flight time
------------------------------------------------------------- */
-
-function calculateCredit(
-    outbound,
-    returnFlight
-){
-
-    const first =
-        durationMinutes(
-            outbound.departure,
-            outbound.arrival,
-            outbound.nextDay
-        );
-
-
-    const second =
-        durationMinutes(
-            returnFlight.departure,
-            returnFlight.arrival,
-            returnFlight.nextDay
-        );
-
-
-    const total =
-        first + second;
-
-
-    const hours =
-        Math.floor(total / 60);
-
-    const minutes =
-        total % 60;
-
-
-    return `${hours}:${String(minutes).padStart(2,"0")}`;
-
-}
-
-
-function durationMinutes(
-    start,
-    end,
-    nextDay=false
-){
-
-    let startMinutes =
-        timeToMinutes(start);
-
-    let endMinutes =
-        timeToMinutes(end);
-
-
-    if(nextDay || endMinutes < startMinutes){
-
-        endMinutes += 1440;
-
-    }
-
-
-    return endMinutes - startMinutes;
-
-}
-
-
-/* ------------------------------------------------------------
-   Submit bid
------------------------------------------------------------- */
-
-function submitBid(trip){
-
-    if(bids.includes(trip)){
-
-        alert(
-            trip +
-            " is already in your bid list."
-        );
+`;
 
         return;
-
-    }
-
-
-    bids.push(trip);
-
-
-    localStorage.setItem(
-        "viaviaBids",
-        JSON.stringify(bids)
-    );
-
-
-    renderBids();
-
-
-    alert(
-        trip +
-        " has been added to your bid list."
-    );
-
-}
-
-
-/* ------------------------------------------------------------
-   Render My Bids
------------------------------------------------------------- */
-
-function renderBids(){
-
-    const container =
-        document.getElementById("myBids");
-
-
-    if(bids.length === 0){
-
-        container.innerHTML = `
-
-            <p class="empty">
-
-                You have not submitted any bids yet.
-
-                <br><br>
-
-                Select
-                <strong>Bid This Trip</strong>
-                on an available pairing to add it to
-                your bid list.
-
-            </p>
-
-        `;
-
-        return;
-
     }
 
 
     container.innerHTML = "";
 
 
-    bids.forEach((trip,index) => {
+    bids.forEach((trip,index)=>{
 
         const item =
             document.createElement("div");
 
-
-        item.className =
-            "my-bid";
+        item.className = "my-bid";
 
 
         item.innerHTML = `
 
-            <div class="my-bid-number">
+<div class="my-bid-number">
 
-                #${index + 1}
-                ·
-                ${trip}
+#${index + 1} · ${trip}
 
-            </div>
+</div>
 
+<div class="priority">
 
-            <div class="priority">
+Bid Priority ${index + 1}
 
-                Bid Priority ${index + 1}
+</div>
 
-            </div>
+<div class="bid-buttons">
 
+<button
+class="small-button"
+onclick="moveBid(${index},-1)"
+>
+↑
+</button>
 
-            <div class="bid-buttons">
+<button
+class="small-button"
+onclick="moveBid(${index},1)"
+>
+↓
+</button>
 
-                <button
-                    class="small-button"
-                    onclick="moveBid(${index},-1)"
-                >
-                    ↑
-                </button>
+<button
+class="small-button remove"
+onclick="removeBid(${index})"
+>
+Remove
+</button>
 
+</div>
 
-                <button
-                    class="small-button"
-                    onclick="moveBid(${index},1)"
-                >
-                    ↓
-                </button>
-
-
-                <button
-                    class="small-button remove"
-                    onclick="removeBid(${index})"
-                >
-                    Remove
-                </button>
-
-            </div>
-
-        `;
+`;
 
 
         container.appendChild(item);
@@ -1512,10 +1255,6 @@ function renderBids(){
 
 }
 
-
-/* ------------------------------------------------------------
-   Move bid priority
------------------------------------------------------------- */
 
 function moveBid(index,direction){
 
@@ -1527,22 +1266,15 @@ function moveBid(index,direction){
         newIndex < 0 ||
         newIndex >= bids.length
     ){
-
         return;
-
     }
 
 
-    const temp =
-        bids[index];
+    const temp = bids[index];
 
+    bids[index] = bids[newIndex];
 
-    bids[index] =
-        bids[newIndex];
-
-
-    bids[newIndex] =
-        temp;
+    bids[newIndex] = temp;
 
 
     localStorage.setItem(
@@ -1555,10 +1287,6 @@ function moveBid(index,direction){
 
 }
 
-
-/* ------------------------------------------------------------
-   Remove bid
------------------------------------------------------------- */
 
 function removeBid(index){
 
@@ -1573,67 +1301,51 @@ function removeBid(index){
 
     renderBids();
 
+    renderTrips();
+
 }
 
 
-/* ------------------------------------------------------------
-   Trip details
------------------------------------------------------------- */
+/* ============================================================
+   DETAILS
+============================================================ */
 
 function toggleDetails(id){
 
     const details =
         document.getElementById(id);
 
-
-    if(!details){
-
-        return;
-
+    if(details){
+        details.classList.toggle("open");
     }
-
-
-    details.classList.toggle("open");
 
 }
 
 
-/* ------------------------------------------------------------
-   Apply filters
------------------------------------------------------------- */
+/* ============================================================
+   FILTERS
+============================================================ */
 
 function applyFilters(){
 
     const base =
-        document.getElementById(
-            "baseFilter"
-        ).value;
-
+        document.getElementById("baseFilter").value;
 
     const fleet =
-        document.getElementById(
-            "fleetFilter"
-        ).value;
-
+        document.getElementById("fleetFilter").value;
 
     const length =
-        document.getElementById(
-            "lengthFilter"
-        ).value;
-
+        document.getElementById("lengthFilter").value;
 
     const search =
-        document.getElementById(
-            "searchFilter"
-        ).value
+        document.getElementById("searchFilter")
+        .value
         .toLowerCase()
         .trim();
 
 
     const trips =
-        document.querySelectorAll(
-            ".trip"
-        );
+        document.querySelectorAll(".trip");
 
 
     let visible = 0;
@@ -1658,9 +1370,7 @@ function applyFilters(){
 
         const matchesSearch =
             !search ||
-            trip.dataset.search.includes(
-                search
-            );
+            trip.dataset.search.includes(search);
 
 
         if(
@@ -1670,65 +1380,47 @@ function applyFilters(){
             matchesSearch
         ){
 
-            trip.style.display =
-                "block";
+            trip.style.display = "block";
 
             visible++;
 
         }else{
 
-            trip.style.display =
-                "none";
+            trip.style.display = "none";
 
         }
 
     });
 
 
-    document.getElementById(
-        "noResults"
-    ).style.display =
+    document.getElementById("noResults").style.display =
         visible === 0
-            ? "block"
-            : "none";
+        ? "block"
+        : "none";
 
 }
 
 
-/* ------------------------------------------------------------
-   Reset filters
------------------------------------------------------------- */
-
 function resetFilters(){
 
-    document.getElementById(
-        "baseFilter"
-    ).value = "all";
+    document.getElementById("baseFilter").value = "all";
 
+    document.getElementById("fleetFilter").value = "all";
 
-    document.getElementById(
-        "fleetFilter"
-    ).value = "all";
+    document.getElementById("lengthFilter").value = "all";
 
-
-    document.getElementById(
-        "lengthFilter"
-    ).value = "all";
-
-
-    document.getElementById(
-        "searchFilter"
-    ).value = "";
-
+    document.getElementById("searchFilter").value = "";
 
     applyFilters();
 
 }
 
 
-/* ------------------------------------------------------------
-   Initial page load
------------------------------------------------------------- */
+/* ============================================================
+   INITIALIZE
+============================================================ */
+
+renderBaseFilters();
 
 renderTrips();
 
@@ -1738,5 +1430,3 @@ renderBids();
 
 </body>
 </html>
-```
-
