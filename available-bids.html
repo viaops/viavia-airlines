@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -346,6 +345,20 @@ nav a.active {
     font-weight: 700;
 }
 
+.storage-status {
+    background: white;
+    border: 1px solid #e1d7e9;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    color: #62586a;
+    font-size: 13px;
+}
+
+.storage-status strong {
+    color: #5b247a;
+}
+
 .sidebar {
     margin-top: 25px;
     background: white;
@@ -473,6 +486,12 @@ footer {
 
     <div id="bidMessage" class="bid-message"></div>
 
+    <div class="storage-status">
+        <strong>Bid System:</strong>
+        Connected to Viavia pilot bid storage.
+        <span id="storageCount"></span>
+    </div>
+
     <section class="filters">
 
         <h2>Filter Trips</h2>
@@ -481,89 +500,45 @@ footer {
 
             <div class="filter-group">
 
-                <label for="baseFilter">
-                    Base
-                </label>
+                <label for="baseFilter">Base</label>
 
                 <select id="baseFilter" onchange="renderPairings()">
-
-                    <option value="ALL">
-                        All Bases
-                    </option>
-
-                    <option value="DFW">
-                        DFW
-                    </option>
-
-                    <option value="RSW">
-                        RSW
-                    </option>
-
-                    <option value="SMF">
-                        SMF
-                    </option>
-
+                    <option value="ALL">All Bases</option>
+                    <option value="DFW">DFW</option>
+                    <option value="RSW">RSW</option>
+                    <option value="SMF">SMF</option>
                 </select>
 
             </div>
 
             <div class="filter-group">
 
-                <label for="fleetFilter">
-                    Aircraft
-                </label>
+                <label for="fleetFilter">Aircraft</label>
 
                 <select id="fleetFilter" onchange="renderPairings()">
-
-                    <option value="ALL">
-                        All Aircraft
-                    </option>
-
-                    <option value="A319">
-                        A319
-                    </option>
-
-                    <option value="A320">
-                        A320
-                    </option>
-
-                    <option value="A321">
-                        A321
-                    </option>
-
+                    <option value="ALL">All Aircraft</option>
+                    <option value="A319">A319</option>
+                    <option value="A320">A320</option>
+                    <option value="A321">A321</option>
                 </select>
 
             </div>
 
             <div class="filter-group">
 
-                <label for="lengthFilter">
-                    Trip Length
-                </label>
+                <label for="lengthFilter">Trip Length</label>
 
                 <select id="lengthFilter" onchange="renderPairings()">
-
-                    <option value="ALL">
-                        All Lengths
-                    </option>
-
-                    <option value="2">
-                        2 Legs
-                    </option>
-
-                    <option value="3">
-                        3 Legs
-                    </option>
-
+                    <option value="ALL">All Lengths</option>
+                    <option value="2">2 Legs</option>
+                    <option value="3">3 Legs</option>
                 </select>
 
             </div>
 
             <div class="filter-group">
 
-                <label for="searchFilter">
-                    Search
-                </label>
+                <label for="searchFilter">Search</label>
 
                 <input
                     id="searchFilter"
@@ -586,9 +561,7 @@ footer {
 
     <section class="sidebar">
 
-        <h2>
-            My Submitted Bids
-        </h2>
+        <h2>My Submitted Bids</h2>
 
         <div id="submittedBids"></div>
 
@@ -600,34 +573,32 @@ footer {
     Viavia Airlines · Pilot Operations · Your destination, via us!
 </footer>
 
-
 <script src="viavia-schedule.js"></script>
 
 <script>
 
 /* ============================================================
    VIAVIA AVAILABLE BIDS
-   Uses viavia-schedule.js as the single source of truth.
-============================================================ */
+   ============================================================ */
 
+const STORAGE_KEY = "viaviaBids";
+const PILOT_ID = "PILOT-001";
+const PILOT_NAME = "Captain";
 
-/* ------------------------------------------------------------
-   Storage
------------------------------------------------------------- */
 
 function getBids() {
 
     try {
 
-        const stored =
-            localStorage.getItem("viaviaBids");
+        const raw =
+            localStorage.getItem(STORAGE_KEY);
 
-        if (!stored) {
+        if (!raw) {
             return [];
         }
 
         const parsed =
-            JSON.parse(stored);
+            JSON.parse(raw);
 
         return Array.isArray(parsed)
             ? parsed
@@ -641,23 +612,39 @@ function getBids() {
         );
 
         return [];
+
     }
+
 }
 
 
 function saveBids(bids) {
 
     localStorage.setItem(
-        "viaviaBids",
+        STORAGE_KEY,
         JSON.stringify(bids)
     );
 
 }
 
 
-/* ------------------------------------------------------------
-   Pairings
------------------------------------------------------------- */
+function updateStorageStatus() {
+
+    const count =
+        getBids().length;
+
+    const element =
+        document.getElementById("storageCount");
+
+    if (element) {
+
+        element.textContent =
+            ` · ${count} bid${count === 1 ? "" : "s"} currently stored`;
+
+    }
+
+}
+
 
 function getPairings() {
 
@@ -671,74 +658,58 @@ function getPairings() {
         );
 
         return [];
+
     }
 
     return generateViaviaPairings({
         maxLegs: 3
-    });
+    }) || [];
+
 }
 
 
-/* ------------------------------------------------------------
-   Pairing helpers
------------------------------------------------------------- */
-
 function getPairingCode(pairing) {
 
-    /*
-     * IMPORTANT:
-     * The master schedule calls this property
-     * "pairingId", NOT "id".
-     */
-
-    return (
-        pairing.pairingId ||
-        ""
+    return String(
+        pairing?.pairingId || ""
     );
+
 }
 
 
 function getPairingFlights(pairing) {
 
-    if (
-        Array.isArray(pairing.flights)
-    ) {
+    return Array.isArray(pairing?.flights)
+        ? pairing.flights
+        : [];
 
-        return pairing.flights;
-    }
-
-    return [];
 }
 
 
 function getPairingAircraft(pairing) {
 
     if (
-        Array.isArray(pairing.aircraft)
+        Array.isArray(pairing?.aircraft)
     ) {
 
         return pairing.aircraft;
-    }
 
-    const flights =
-        getPairingFlights(pairing);
+    }
 
     return [
         ...new Set(
-            flights
-                .map(
-                    flight =>
-                        flight.aircraft
-                )
+            getPairingFlights(pairing)
+                .map(flight => flight.aircraft)
                 .filter(Boolean)
         )
     ];
+
 }
 
 
 function getPairingRoute(pairing) {
 
-    if (pairing.route) {
+    if (pairing?.route) {
         return pairing.route;
     }
 
@@ -754,12 +725,9 @@ function getPairingRoute(pairing) {
         " → " +
         flights[flights.length - 1].destination
     );
+
 }
 
-
-/* ------------------------------------------------------------
-   Duration
------------------------------------------------------------- */
 
 function getPairingDuration(pairing) {
 
@@ -772,7 +740,11 @@ function getPairingDuration(pairing) {
 
     let total = 0;
 
-    for (let i = 0; i < flights.length; i++) {
+    for (
+        let i = 0;
+        i < flights.length;
+        i++
+    ) {
 
         const flight =
             flights[i];
@@ -788,7 +760,7 @@ function getPairingDuration(pairing) {
             );
 
         if (arrival < departure) {
-            arrival += 24 * 60;
+            arrival += 1440;
         }
 
         total +=
@@ -808,11 +780,15 @@ function getPairingDuration(pairing) {
             ) {
 
                 total += connection;
+
             }
+
         }
+
     }
 
     return total;
+
 }
 
 
@@ -827,74 +803,51 @@ function formatDuration(minutes) {
     ) {
 
         return "—";
+
     }
 
     const hours =
-        Math.floor(
-            value / 60
-        );
+        Math.floor(value / 60);
 
     const mins =
         value % 60;
 
-    if (hours === 0) {
-        return `${mins} min`;
-    }
+    return hours
+        ? `${hours}h ${mins}m`
+        : `${mins} min`;
 
-    return `${hours}h ${mins}m`;
 }
 
-
-/* ------------------------------------------------------------
-   HTML safety
------------------------------------------------------------- */
 
 function escapeHtml(value) {
 
-    return String(
-        value ?? ""
-    )
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
 }
 
-
-/* ------------------------------------------------------------
-   Existing bid detection
------------------------------------------------------------- */
 
 function getExistingBid(pairing) {
 
     const code =
         getPairingCode(pairing);
 
-    const bids =
-        getBids();
-
-    return bids.find(
-        bid => {
-
-            const bidCode =
-                bid.pairingId ||
-                bid.tripId ||
-                bid.tripNumber ||
-                "";
-
-            return (
-                String(bidCode) ===
-                String(code)
-            );
-        }
+    return getBids().find(
+        bid =>
+            String(
+                bid?.pairingId ||
+                bid?.tripId ||
+                bid?.tripNumber ||
+                ""
+            ) === String(code)
     ) || null;
+
 }
 
-
-/* ------------------------------------------------------------
-   Submit bid
------------------------------------------------------------- */
 
 function submitBid(pairingCode) {
 
@@ -904,9 +857,7 @@ function submitBid(pairingCode) {
     const pairing =
         pairings.find(
             item =>
-                String(
-                    getPairingCode(item)
-                ) ===
+                getPairingCode(item) ===
                 String(pairingCode)
         );
 
@@ -917,34 +868,8 @@ function submitBid(pairingCode) {
         );
 
         return;
+
     }
-
-    const existingBid =
-        getExistingBid(pairing);
-
-    if (existingBid) {
-
-        if (
-            existingBid.status ===
-            "denied"
-        ) {
-
-            /*
-             * A denied bid can be submitted again.
-             */
-
-        } else {
-
-            alert(
-                "You have already submitted this bid."
-            );
-
-            return;
-        }
-    }
-
-    let bids =
-        getBids();
 
     const flights =
         getPairingFlights(pairing);
@@ -956,24 +881,39 @@ function submitBid(pairingCode) {
         );
 
         return;
+
+    }
+
+    let bids =
+        getBids();
+
+    const existingBid =
+        getExistingBid(pairing);
+
+    if (
+        existingBid &&
+        existingBid.status !== "denied"
+    ) {
+
+        alert(
+            "You have already submitted this bid."
+        );
+
+        return;
+
     }
 
     const firstFlight =
         flights[0];
 
     const lastFlight =
-        flights[
-            flights.length - 1
-        ];
+        flights[flights.length - 1];
 
     const aircraft =
         getPairingAircraft(pairing);
 
     const pairingId =
         getPairingCode(pairing);
-
-    const durationMinutes =
-        getPairingDuration(pairing);
 
     let connectionMinutes = 0;
 
@@ -989,20 +929,19 @@ function submitBid(pairingCode) {
                 flights[i + 1]
             );
 
-        if (
-            connection !== null
-        ) {
-
-            connectionMinutes +=
-                connection;
+        if (connection !== null) {
+            connectionMinutes += connection;
         }
+
     }
+
+    const now =
+        new Date().toISOString();
 
     const bid = {
 
         bidId:
-            "BID-" +
-            Date.now(),
+            "BID-" + Date.now(),
 
         pairingId:
             pairingId,
@@ -1013,11 +952,11 @@ function submitBid(pairingCode) {
         tripNumber:
             pairingId,
 
-        pilotName:
-            "Captain",
-
         pilotId:
-            "PILOT-001",
+            PILOT_ID,
+
+        pilotName:
+            PILOT_NAME,
 
         pilotStatus:
             "Captain",
@@ -1043,6 +982,10 @@ function submitBid(pairingCode) {
                     flight.flightNumber
             ),
 
+        /*
+         * COMPLETE SNAPSHOT OF THE BIDDED TRIP.
+         * Crew Scheduling uses this information directly.
+         */
         flights:
             flights.map(
                 flight => ({
@@ -1089,7 +1032,7 @@ function submitBid(pairingCode) {
             lastFlight.arrival,
 
         durationMinutes:
-            durationMinutes,
+            getPairingDuration(pairing),
 
         connectionMinutes:
             connectionMinutes,
@@ -1121,10 +1064,10 @@ function submitBid(pairingCode) {
             false,
 
         submittedAt:
-            new Date().toISOString(),
+            now,
 
         updatedAt:
-            new Date().toISOString(),
+            now,
 
         awardedAt:
             null,
@@ -1140,27 +1083,25 @@ function submitBid(pairingCode) {
 
     };
 
-
     /*
-     * If there was a denied bid for the same
-     * pairing, replace that record instead of
-     * creating a duplicate.
+     * Replace a previously denied bid.
      */
-
     if (existingBid) {
 
         bids =
             bids.filter(
-                bid =>
-                    bid !==
-                    existingBid
+                item =>
+                    item.bidId !==
+                    existingBid.bidId
             );
-    }
 
+    }
 
     bids.push(bid);
 
     saveBids(bids);
+
+    updateStorageStatus();
 
     showMessage(
         `${pairingId} submitted successfully. Crew Scheduling will review the bid.`
@@ -1169,12 +1110,9 @@ function submitBid(pairingCode) {
     renderPairings();
 
     renderSubmittedBids();
+
 }
 
-
-/* ------------------------------------------------------------
-   Message
------------------------------------------------------------- */
 
 function showMessage(message) {
 
@@ -1196,19 +1134,13 @@ function showMessage(message) {
 
     setTimeout(
         () => {
-
-            box.style.display =
-                "none";
-
+            box.style.display = "none";
         },
         5000
     );
+
 }
 
-
-/* ------------------------------------------------------------
-   Render pairings
------------------------------------------------------------- */
 
 function renderPairings() {
 
@@ -1239,34 +1171,24 @@ function renderPairings() {
         .toLowerCase()
         .trim();
 
-
     const pairings =
         getPairings();
-
 
     const filtered =
         pairings.filter(
             pairing => {
 
                 const flights =
-                    getPairingFlights(
-                        pairing
-                    );
+                    getPairingFlights(pairing);
 
                 const aircraft =
-                    getPairingAircraft(
-                        pairing
-                    );
+                    getPairingAircraft(pairing);
 
                 const code =
-                    getPairingCode(
-                        pairing
-                    );
+                    getPairingCode(pairing);
 
                 const route =
-                    getPairingRoute(
-                        pairing
-                    );
+                    getPairingRoute(pairing);
 
                 const flightNumbers =
                     flights
@@ -1284,25 +1206,17 @@ function renderPairings() {
                         )
                         .join(" ");
 
-
                 const matchesBase =
                     base === "ALL" ||
                     pairing.base === base;
 
-
                 const matchesFleet =
                     fleet === "ALL" ||
-                    aircraft.includes(
-                        fleet
-                    );
-
+                    aircraft.includes(fleet);
 
                 const matchesLength =
                     length === "ALL" ||
-                    String(
-                        flights.length
-                    ) === length;
-
+                    String(flights.length) === length;
 
                 const searchable =
                     (
@@ -1313,143 +1227,91 @@ function renderPairings() {
                         flightNumbers +
                         " " +
                         airports
-                    )
-                    .toLowerCase();
-
-
-                const matchesSearch =
-                    !search ||
-                    searchable.includes(
-                        search
-                    );
-
+                    ).toLowerCase();
 
                 return (
                     matchesBase &&
                     matchesFleet &&
                     matchesLength &&
-                    matchesSearch
+                    (
+                        !search ||
+                        searchable.includes(search)
+                    )
                 );
+
             }
         );
-
 
     if (!filtered.length) {
 
         list.innerHTML = `
-
             <div class="no-results">
-
-                <h2>
-                    No Available Pairings
-                </h2>
-
-                <p>
-                    No pairings match the current filters.
-                </p>
-
+                <h2>No Available Pairings</h2>
+                <p>No pairings match the current filters.</p>
             </div>
-
         `;
 
         return;
-    }
 
+    }
 
     list.innerHTML =
         filtered
-            .map(
-                renderPairing
-            )
+            .map(renderPairing)
             .join("");
+
 }
 
-
-/* ------------------------------------------------------------
-   Render individual pairing
------------------------------------------------------------- */
 
 function renderPairing(pairing) {
 
     const flights =
-        getPairingFlights(
-            pairing
-        );
+        getPairingFlights(pairing);
 
     if (!flights.length) {
         return "";
     }
 
-
     const pairingCode =
-        getPairingCode(
-            pairing
-        );
-
+        getPairingCode(pairing);
 
     const firstFlight =
         flights[0];
 
-
     const lastFlight =
-        flights[
-            flights.length - 1
-        ];
-
+        flights[flights.length - 1];
 
     const aircraft =
-        getPairingAircraft(
-            pairing
-        );
-
+        getPairingAircraft(pairing);
 
     const existingBid =
-        getExistingBid(
-            pairing
-        );
-
+        getExistingBid(pairing);
 
     const isSubmitted =
-        !!existingBid &&
-        existingBid.status !==
-            "denied";
-
+        Boolean(existingBid) &&
+        existingBid.status !== "denied";
 
     const isTrip001 =
-        pairingCode ===
-        "TRIP-001";
+        pairingCode === "TRIP-001";
 
-
-    let buttonHtml;
-
-
-    if (isSubmitted) {
-
-        buttonHtml = `
-
-            <button
-                class="button secondary"
-                disabled
-            >
-                Bid Submitted
-            </button>
-
-        `;
-
-    } else {
-
-        buttonHtml = `
-
-            <button
-                class="button"
-                onclick="submitBid('${escapeHtml(pairingCode)}')"
-            >
-                Bid This Trip
-            </button>
-
-        `;
-    }
-
+    const buttonHtml =
+        isSubmitted
+            ? `
+                <button
+                    class="button secondary"
+                    disabled
+                >
+                    Bid Submitted
+                </button>
+            `
+            : `
+                <button
+                    class="button"
+                    onclick="submitBid('${escapeHtml(pairingCode)}')"
+                >
+                    Bid This Trip
+                </button>
+            `;
 
     return `
 
@@ -1460,196 +1322,105 @@ function renderPairing(pairing) {
                 <div>
 
                     <div class="trip-code">
-
-                        ${escapeHtml(
-                            pairingCode
-                        )}
-
+                        ${escapeHtml(pairingCode)}
                     </div>
 
                     <div class="trip-title">
-
                         ${escapeHtml(
                             getPairingRoute(pairing)
                         )}
-
                     </div>
 
                     <div class="trip-subtitle">
-
-                        ${escapeHtml(
-                            pairing.base
-                        )}
-                        Base
-                        ·
+                        ${escapeHtml(pairing.base)}
+                        Base ·
                         ${flights.length}
                         Legs
-
                     </div>
 
                 </div>
 
-
                 <div class="badge">
-
-                    ${
-                        isTrip001
-                            ? "Permanent Trip"
-                            : "Available"
-                    }
-
+                    ${isTrip001 ? "Permanent Trip" : "Available"}
                 </div>
 
             </div>
-
 
             <div class="route">
 
                 <div>
 
                     <div class="airport">
-
-                        ${escapeHtml(
-                            firstFlight.origin
-                        )}
-
+                        ${escapeHtml(firstFlight.origin)}
                     </div>
 
                     <div class="time">
-
                         Departure
-                        ${escapeHtml(
-                            firstFlight.departure
-                        )}
-
+                        ${escapeHtml(firstFlight.departure)}
                     </div>
 
                 </div>
-
 
                 <div class="arrow">
                     →
                 </div>
 
-
                 <div>
 
                     <div class="airport">
-
-                        ${escapeHtml(
-                            lastFlight.destination
-                        )}
-
+                        ${escapeHtml(lastFlight.destination)}
                     </div>
 
                     <div class="time">
-
                         Arrival
-                        ${escapeHtml(
-                            lastFlight.arrival
-                        )}
-
-                        ${
-                            lastFlight.nextDay
-                                ? " +1"
-                                : ""
-                        }
-
+                        ${escapeHtml(lastFlight.arrival)}
+                        ${lastFlight.nextDay ? " +1" : ""}
                     </div>
 
                 </div>
 
             </div>
-
 
             <div class="info-grid">
 
                 <div class="info">
-
-                    <div class="info-label">
-                        Trip Code
-                    </div>
-
+                    <div class="info-label">Trip Code</div>
                     <div class="info-value">
-
-                        ${escapeHtml(
-                            pairingCode
-                        )}
-
+                        ${escapeHtml(pairingCode)}
                     </div>
-
                 </div>
 
-
                 <div class="info">
-
-                    <div class="info-label">
-                        Base
-                    </div>
-
+                    <div class="info-label">Base</div>
                     <div class="info-value">
-
-                        ${escapeHtml(
-                            pairing.base
-                        )}
-
+                        ${escapeHtml(pairing.base)}
                     </div>
-
                 </div>
 
-
                 <div class="info">
-
-                    <div class="info-label">
-                        Aircraft
-                    </div>
-
+                    <div class="info-label">Aircraft</div>
                     <div class="info-value">
-
-                        ${escapeHtml(
-                            aircraft.join(" / ")
-                        )}
-
+                        ${escapeHtml(aircraft.join(" / "))}
                     </div>
-
                 </div>
 
-
                 <div class="info">
-
-                    <div class="info-label">
-                        Legs
-                    </div>
-
+                    <div class="info-label">Legs</div>
                     <div class="info-value">
-
                         ${flights.length}
-
                     </div>
-
                 </div>
 
-
                 <div class="info">
-
-                    <div class="info-label">
-                        Trip Duration
-                    </div>
-
+                    <div class="info-label">Trip Duration</div>
                     <div class="info-value">
-
                         ${formatDuration(
-                            getPairingDuration(
-                                pairing
-                            )
+                            getPairingDuration(pairing)
                         )}
-
                     </div>
-
                 </div>
 
             </div>
-
 
             <div class="legs">
 
@@ -1657,88 +1428,63 @@ function renderPairing(pairing) {
                     Flight Schedule
                 </div>
 
-
                 ${
-                    flights
-                        .map(
-                            flight => `
+                    flights.map(
+                        flight => `
 
-                                <div class="leg">
+                            <div class="leg">
 
-                                    <strong>
+                                <strong>
+                                    ${escapeHtml(
+                                        flight.flightNumber
+                                    )}
+                                </strong>
 
-                                        ${escapeHtml(
-                                            flight.flightNumber
-                                        )}
+                                <span>
+                                    ${escapeHtml(
+                                        flight.origin
+                                    )}
+                                    →
+                                    ${escapeHtml(
+                                        flight.destination
+                                    )}
+                                </span>
 
-                                    </strong>
+                                <span>
+                                    ${escapeHtml(
+                                        flight.departure
+                                    )}
+                                    –
+                                    ${escapeHtml(
+                                        flight.arrival
+                                    )}
+                                    ${flight.nextDay ? " +1" : ""}
+                                </span>
 
+                                <span>
+                                    ${escapeHtml(
+                                        flight.aircraft
+                                    )}
+                                </span>
 
-                                    <span>
-
-                                        ${escapeHtml(
-                                            flight.origin
-                                        )}
-                                        →
-                                        ${escapeHtml(
-                                            flight.destination
-                                        )}
-
-                                    </span>
-
-
-                                    <span>
-
-                                        ${escapeHtml(
-                                            flight.departure
-                                        )}
-                                        –
-                                        ${escapeHtml(
-                                            flight.arrival
-                                        )}
-
-                                        ${
-                                            flight.nextDay
-                                                ? " +1"
-                                                : ""
-                                        }
-
-                                    </span>
-
-
-                                    <span>
-
-                                        ${escapeHtml(
-                                            flight.aircraft
-                                        )}
-
-                                    </span>
-
-                                </div>
-
-                            `
-                        )
-                        .join("")
+                            </div>
+                        `
+                    ).join("")
                 }
 
             </div>
 
-
             <div class="gate">
 
-                <strong>
-                    Gate:
-                </strong>
+                <strong>Gate:</strong>
 
                 TBD — Gate assignment pending
 
             </div>
 
-
             <div class="actions">
 
                 ${buttonHtml}
-
 
                 <a
                     class="button secondary"
@@ -1748,7 +1494,6 @@ function renderPairing(pairing) {
                 >
                     Flight Planning
                 </a>
-
 
                 ${
                     isTrip001
@@ -1768,12 +1513,9 @@ function renderPairing(pairing) {
         </article>
 
     `;
+
 }
 
-
-/* ------------------------------------------------------------
-   Submitted bids
------------------------------------------------------------- */
 
 function renderSubmittedBids() {
 
@@ -1782,10 +1524,8 @@ function renderSubmittedBids() {
             "submittedBids"
         );
 
-
     const bids =
         getBids();
-
 
     const submitted =
         bids.filter(
@@ -1796,22 +1536,17 @@ function renderSubmittedBids() {
                 "submitted"
         );
 
-
     if (!submitted.length) {
 
         container.innerHTML = `
-
             <p style="color:#75687c;">
-
                 You have no submitted bids.
-
             </p>
-
         `;
 
         return;
-    }
 
+    }
 
     container.innerHTML =
         submitted
@@ -1824,134 +1559,92 @@ function renderSubmittedBids() {
                         bid.tripNumber ||
                         "Trip";
 
-
                     return `
 
                         <div class="submitted-bid">
 
                             <strong>
-
-                                ${escapeHtml(
-                                    code
-                                )}
-
+                                ${escapeHtml(code)}
                             </strong>
 
-
                             <small>
-
                                 ${escapeHtml(
                                     bid.route || ""
                                 )}
-
                                 ·
-
                                 ${escapeHtml(
                                     bid.base || ""
                                 )}
-
                                 ·
-
                                 Pending Crew Scheduling
-
                             </small>
 
                         </div>
 
                     `;
+
                 }
             )
             .join("");
+
 }
 
-
-/* ------------------------------------------------------------
-   Storage listener
------------------------------------------------------------- */
 
 window.addEventListener(
     "storage",
     event => {
 
-        if (
-            event.key ===
-            "viaviaBids"
-        ) {
+        if (event.key === STORAGE_KEY) {
 
+            updateStorageStatus();
             renderPairings();
-
             renderSubmittedBids();
+
         }
+
     }
 );
 
 
-/* ------------------------------------------------------------
-   Debug helper
------------------------------------------------------------- */
-
 window.viaviaAvailableBidsDebug =
 function() {
-
-    const pairings =
-        getPairings();
 
     const bids =
         getBids();
 
+    const pairings =
+        getPairings();
 
     console.log(
-        "VIAVIA PAIRINGS:",
+        "Viavia origin:",
+        window.location.origin
+    );
+
+    console.log(
+        "Viavia bids:",
+        bids
+    );
+
+    console.log(
+        "Viavia pairings:",
         pairings
     );
 
-
-    console.log(
-        "VIAVIA BIDS:",
-        bids
-    );
-
-
-    console.table(
-        pairings.map(
-            pairing => ({
-
-                tripCode:
-                    pairing.pairingId,
-
-                base:
-                    pairing.base,
-
-                route:
-                    pairing.route,
-
-                flights:
-                    pairing.flightNumbers.join(
-                        " / "
-                    )
-
-            })
-        )
-    );
-
-
     return {
-        pairings,
-        bids
+        origin:
+            window.location.origin,
+        bids,
+        pairings
     };
+
 };
 
 
-/* ------------------------------------------------------------
-   Initial page load
------------------------------------------------------------- */
-
+updateStorageStatus();
 renderPairings();
-
 renderSubmittedBids();
 
 </script>
 
 </body>
 </html>
-```
