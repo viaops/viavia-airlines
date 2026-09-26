@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viavia Airlines — Pilot Center</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f7f4fa;color:#24142f}
+header{background:#c6b4d9;padding:16px 40px;border-bottom:1px solid #b8a5cb;display:flex;align-items:center;justify-content:space-between;gap:20px}.brand{display:flex;align-items:center}.brand img{height:58px;width:auto;display:block}nav{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}nav a{color:#24142f;text-decoration:none;font-weight:700;padding:9px 12px;border-radius:8px}nav a:hover,nav a.active{background:rgba(255,255,255,.55)}
+.hero{background:linear-gradient(135deg,#5b247a,#7d4b9b);color:white;padding:42px 40px}.hero-inner{max-width:1150px;margin:auto}.hero h1{margin:0 0 8px;font-size:38px}.hero p{margin:0;font-size:17px;opacity:.92}
+.container{max-width:1150px;margin:28px auto 50px;padding:0 20px}.welcome,.card{background:white;border:1px solid #e1d7e9;border-radius:14px;box-shadow:0 4px 14px rgba(60,30,80,.06)}.welcome{padding:22px;margin-bottom:22px}.welcome h2,.section-title{color:#5b247a}.welcome h2{margin:0 0 8px}.muted{color:#6e6474}.section-title{margin:28px 0 14px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{padding:20px}.card h3{margin:0 0 8px;color:#5b247a}.card p{margin:0 0 16px;line-height:1.5;color:#62586a}.button{display:inline-block;background:#5b247a;color:white;text-decoration:none;border:0;border-radius:9px;padding:10px 15px;font-weight:700}.button:hover{background:#481c61}.button.secondary{background:#eee6f3;color:#5b247a}.button.secondary:hover{background:#e2d6eb}
+.status-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}.status{background:#f8f4fb;border:1px solid #e4d9eb;border-radius:10px;padding:14px}.status .label{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#75687c;margin-bottom:5px}.status .value{font-size:18px;font-weight:700;color:#5b247a}.assignment{border-left:5px solid #5b247a;background:#faf7fc;padding:16px 18px;border-radius:8px}
+footer{text-align:center;color:#776d7e;font-size:13px;padding:28px 20px 40px}@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}.status-grid{grid-template-columns:repeat(2,1fr)}header{align-items:flex-start;flex-direction:column}nav{justify-content:flex-start}}@media(max-width:600px){.grid,.status-grid{grid-template-columns:1fr}.hero{padding:32px 20px}.hero h1{font-size:30px}header{padding:14px 20px}}
+</style>
+</head>
+<body>
+<header><a class="brand" href="index.html"><img src="viavia-logo.png" alt="Viavia Airlines"></a><nav><a class="active" href="pilot-center.html">Pilot Center</a><a href="available-bids.html">Available Bids</a><a href="crew-calendar.html">Crew Calendar</a><a href="flight-planning.html">Flight Planning</a><a href="index.html">Main Site</a></nav></header>
+<section class="hero"><div class="hero-inner"><h1>Pilot Center</h1><p>Your central hub for Viavia pilot operations.</p></div></section>
+<main class="container">
+<section class="welcome"><h2>Welcome, Captain</h2><p class="muted">Welcome to the Viavia Airlines Pilot Center. Manage your trips, bidding, schedule, flight planning, and pilot information from one place.</p><div class="status-grid"><div class="status"><div class="label">Position</div><div class="value">Captain</div></div><div class="status"><div class="label">Status</div><div class="value">Check Airman</div></div><div class="status"><div class="label">Seniority</div><div class="value">#1</div></div><div class="status"><div class="label">Fleet</div><div class="value">A319 / A320 / A321</div></div></div></section>
+<h2 class="section-title">Your Operations</h2><div class="grid">
+<div class="card"><h3>📋 Available Bids</h3><p>View pre-built Viavia trips available for bidding. Filter by base, aircraft, and trip length.</p><a class="button" href="available-bids.html">View Available Bids</a></div>
+<div class="card"><h3>📅 Crew Calendar</h3><p>View awarded trips, days off, training, check rides, and other scheduled pilot assignments.</p><a class="button" href="crew-calendar.html">Open Crew Calendar</a></div>
+<div class="card"><h3>✈️ Flight Planning</h3><p>Access detailed flight information before departure, including report times, gates, aircraft, routing, and operational information.</p><a class="button" href="flight-planning.html">Open Flight Planning</a></div>
+<div class="card"><h3>🧳 My Trips</h3><p>View your awarded trips, complete trip details, overnights, hotels, transportation, and upcoming assignments.</p><a class="button secondary" href="available-bids.html">View My Trips</a></div>
+<div class="card"><h3>💰 Pay &amp; Hours</h3><p>Review credited hours, Captain pay, per diem, premiums, and accumulated trip earnings.</p><a class="button secondary" href="available-bids.html">View Pay</a></div>
+<div class="card"><h3>📜 Flight History</h3><p>Review completed Viavia trips and your previous flight activity.</p><a class="button secondary" href="available-bids.html">View History</a></div>
+<div class="card"><h3>👤 Pilot Profile</h3><p>View your pilot position, seniority number, base, fleet, qualifications, and other pilot information.</p><a class="button secondary" href="available-bids.html">Pilot Profile</a></div>
+<div class="card"><h3>🏨 Crew Hotels</h3><p>View Viavia-designated overnight hotels, addresses, and crew transportation information.</p><a class="button secondary" href="available-bids.html">Crew Hotels</a></div>
+<div class="card"><h3>🎓 Training / Check Airman</h3><p>Access training events, check rides, line checks, recurrent training, and other Check Airman assignments.</p><a class="button secondary" href="available-bids.html">Training</a></div>
+</div>
+<h2 class="section-title">Upcoming Assignment</h2><section class="welcome"><div class="assignment"><strong>No upcoming assignment displayed yet.</strong><p class="muted" style="margin:7px 0 0">Once a trip is awarded, your next assignment will appear here with the report time, trip number, and quick access to Flight Planning.</p></div></section>
+<h2 class="section-title">Pilot Operations</h2><section class="welcome"><p style="margin-top:0"><strong>Gate assignment rule:</strong> Viavia gates are not assigned until at least 12 hours before scheduled aircraft departure. Before that window, Flight Planning will display <strong>TBD — Gate assignment pending</strong>.</p><p class="muted" style="margin-bottom:0">Once inside the 12-hour window, Flight Planning can display the assigned gate from Viavia's approved airport gate pool.</p></section>
+</main><footer>Viavia Airlines · Pilot Center · Your destination, via us!</footer>
+</body>
+</html>
