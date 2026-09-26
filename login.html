@@ -1,1 +1,1413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
 
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Viavia | Pilot Login</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --purple: #7357ff;
+      --purple-dark: #5d43e8;
+      --purple-soft: #eeeaff;
+      --lavender: #b7a8ff;
+
+      --text: #17171c;
+      --muted: #72727d;
+
+      --border: #e7e7ed;
+      --background: #f6f6f9;
+      --white: #ffffff;
+
+      --success-bg: #eaf8ef;
+      --success-text: #1e6c3d;
+
+      --error-bg: #fff0f0;
+      --error-text: #a32d2d;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+
+      background:
+        radial-gradient(
+          circle at top left,
+          rgba(115, 87, 255, 0.16),
+          transparent 32%
+        ),
+        radial-gradient(
+          circle at bottom right,
+          rgba(183, 168, 255, 0.18),
+          transparent 35%
+        ),
+        var(--background);
+
+      color: var(--text);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns:
+        minmax(360px, 0.95fr)
+        minmax(500px, 1.05fr);
+    }
+
+    /* ======================================================
+       LEFT BRAND PANEL
+       ====================================================== */
+
+    .brand-panel {
+      position: relative;
+      overflow: hidden;
+
+      padding: 52px;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+
+      background:
+        linear-gradient(
+          145deg,
+          #5d43e8 0%,
+          #765cff 50%,
+          #9986ff 100%
+        );
+
+      color: white;
+    }
+
+    .brand-panel::before {
+      content: "";
+      position: absolute;
+
+      width: 420px;
+      height: 420px;
+
+      right: -190px;
+      top: -130px;
+
+      border-radius: 50%;
+
+      border:
+        1px solid
+        rgba(255, 255, 255, 0.18);
+    }
+
+    .brand-panel::after {
+      content: "";
+      position: absolute;
+
+      width: 520px;
+      height: 520px;
+
+      left: -260px;
+      bottom: -310px;
+
+      border-radius: 50%;
+
+      background:
+        rgba(255, 255, 255, 0.06);
+    }
+
+    .brand-top,
+    .brand-copy,
+    .brand-footer {
+      position: relative;
+      z-index: 2;
+    }
+
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo {
+      max-width: 180px;
+      max-height: 70px;
+      object-fit: contain;
+    }
+
+    .portal-label {
+      padding-left: 16px;
+      border-left:
+        1px solid
+        rgba(255, 255, 255, 0.35);
+
+      font-size: 13px;
+      font-weight: 700;
+
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .brand-copy {
+      max-width: 560px;
+    }
+
+    .eyebrow {
+      margin-bottom: 18px;
+
+      font-size: 13px;
+      font-weight: 800;
+
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+
+      opacity: 0.8;
+    }
+
+    .brand-copy h1 {
+      font-size: clamp(44px, 5vw, 76px);
+      line-height: 0.98;
+      letter-spacing: -0.045em;
+
+      margin-bottom: 24px;
+    }
+
+    .brand-copy p {
+      max-width: 500px;
+
+      font-size: 18px;
+      line-height: 1.65;
+
+      color:
+        rgba(255, 255, 255, 0.86);
+    }
+
+    .brand-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+
+      font-size: 13px;
+
+      color:
+        rgba(255, 255, 255, 0.7);
+    }
+
+    /* ======================================================
+       LOGIN PANEL
+       ====================================================== */
+
+    .login-panel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: 50px 30px;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .mobile-logo {
+      display: none;
+      margin-bottom: 38px;
+    }
+
+    .mobile-logo img {
+      max-width: 160px;
+      max-height: 65px;
+      object-fit: contain;
+    }
+
+    .login-header {
+      margin-bottom: 32px;
+    }
+
+    .login-header h2 {
+      margin-bottom: 10px;
+
+      font-size: 34px;
+      line-height: 1.1;
+
+      letter-spacing: -0.035em;
+    }
+
+    .login-header p {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ======================================================
+       TABS
+       ====================================================== */
+
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+
+      margin-bottom: 30px;
+
+      padding: 5px;
+
+      border-radius: 13px;
+
+      background: #ececf1;
+    }
+
+    .tab {
+      border: 0;
+      border-radius: 9px;
+
+      padding: 12px 16px;
+
+      background: transparent;
+
+      color: var(--muted);
+
+      font-weight: 700;
+
+      transition:
+        background 0.2s,
+        color 0.2s,
+        box-shadow 0.2s;
+    }
+
+    .tab.active {
+      background: white;
+      color: var(--text);
+
+      box-shadow:
+        0 2px 8px
+        rgba(20, 20, 30, 0.08);
+    }
+
+    /* ======================================================
+       FORMS
+       ====================================================== */
+
+    .auth-form {
+      display: none;
+    }
+
+    .auth-form.active {
+      display: block;
+    }
+
+    .field {
+      margin-bottom: 19px;
+    }
+
+    .field label {
+      display: block;
+
+      margin-bottom: 8px;
+
+      font-size: 13px;
+      font-weight: 750;
+
+      color: #44444d;
+    }
+
+    .field input {
+      width: 100%;
+
+      padding: 14px 15px;
+
+      border:
+        1px solid
+        var(--border);
+
+      border-radius: 11px;
+
+      background: white;
+
+      color: var(--text);
+
+      outline: none;
+
+      transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+    }
+
+    .field input:focus {
+      border-color: var(--purple);
+
+      box-shadow:
+        0 0 0 4px
+        rgba(115, 87, 255, 0.11);
+    }
+
+    .field input::placeholder {
+      color: #aaaab3;
+    }
+
+    .password-wrap {
+      position: relative;
+    }
+
+    .password-wrap input {
+      padding-right: 75px;
+    }
+
+    .password-toggle {
+      position: absolute;
+
+      right: 12px;
+      top: 50%;
+
+      transform: translateY(-50%);
+
+      border: 0;
+      background: transparent;
+
+      color: var(--purple);
+
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .primary-button {
+      width: 100%;
+
+      margin-top: 5px;
+
+      padding: 15px 18px;
+
+      border: 0;
+      border-radius: 11px;
+
+      background: var(--purple);
+
+      color: white;
+
+      font-weight: 800;
+
+      transition:
+        background 0.2s,
+        transform 0.15s;
+    }
+
+    .primary-button:hover {
+      background: var(--purple-dark);
+    }
+
+    .primary-button:active {
+      transform: scale(0.99);
+    }
+
+    .primary-button:disabled {
+      cursor: wait;
+      opacity: 0.65;
+    }
+
+    .form-note {
+      margin-top: 18px;
+
+      font-size: 12px;
+      line-height: 1.55;
+
+      color: var(--muted);
+    }
+
+    /* ======================================================
+       MESSAGES
+       ====================================================== */
+
+    .message {
+      display: none;
+
+      margin-bottom: 22px;
+
+      padding: 13px 15px;
+
+      border-radius: 10px;
+
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .message.error {
+      background: var(--error-bg);
+      color: var(--error-text);
+    }
+
+    .message.success {
+      background: var(--success-bg);
+      color: var(--success-text);
+    }
+
+    /* ======================================================
+       STATUS
+       ====================================================== */
+
+    .system-status {
+      margin-top: 34px;
+
+      padding-top: 24px;
+
+      border-top:
+        1px solid
+        var(--border);
+
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      gap: 20px;
+
+      font-size: 12px;
+
+      color: var(--muted);
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+
+      border-radius: 50%;
+
+      background: #35b76f;
+
+      box-shadow:
+        0 0 0 4px
+        rgba(53, 183, 111, 0.11);
+    }
+
+    /* ======================================================
+       RESPONSIVE
+       ====================================================== */
+
+    @media (max-width: 900px) {
+      .page {
+        display: block;
+      }
+
+      .brand-panel {
+        display: none;
+      }
+
+      .login-panel {
+        min-height: 100vh;
+
+        padding:
+          40px
+          22px;
+      }
+
+      .mobile-logo {
+        display: block;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .login-header h2 {
+        font-size: 30px;
+      }
+
+      .login-panel {
+        align-items: flex-start;
+
+        padding-top: 35px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="page">
+
+    <!-- ====================================================
+         BRAND SIDE
+         ==================================================== -->
+
+    <section class="brand-panel">
+
+      <div class="brand-top">
+        <div class="logo-wrap">
+
+          <img
+            src="viavia-logo.png"
+            alt="Viavia Airlines"
+            class="logo"
+          >
+
+          <div class="portal-label">
+            Pilot Portal
+          </div>
+
+        </div>
+      </div>
+
+
+      <div class="brand-copy">
+
+        <div class="eyebrow">
+          Viavia Virtual Airlines
+        </div>
+
+        <h1>
+          Your destination,<br>
+          via us!
+        </h1>
+
+        <p>
+          Sign in to access Viavia Operations,
+          view available trips, manage your awarded
+          schedule, and prepare for upcoming flights.
+        </p>
+
+      </div>
+
+
+      <div class="brand-footer">
+
+        <span>
+          VIA · Nexus
+        </span>
+
+        <span>
+          DFW · RSW · SMF
+        </span>
+
+      </div>
+
+    </section>
+
+
+    <!-- ====================================================
+         AUTH SIDE
+         ==================================================== -->
+
+    <section class="login-panel">
+
+      <div class="login-container">
+
+        <div class="mobile-logo">
+          <img
+            src="viavia-logo.png"
+            alt="Viavia Airlines"
+          >
+        </div>
+
+
+        <div class="login-header">
+
+          <h2 id="pageTitle">
+            Welcome back
+          </h2>
+
+          <p id="pageDescription">
+            Sign in with your Viavia pilot account.
+          </p>
+
+        </div>
+
+
+        <div
+          id="message"
+          class="message"
+        ></div>
+
+
+        <!-- =================================================
+             TABS
+             ================================================= -->
+
+        <div class="tabs">
+
+          <button
+            type="button"
+            class="tab active"
+            id="loginTab"
+          >
+            Sign In
+          </button>
+
+          <button
+            type="button"
+            class="tab"
+            id="signupTab"
+          >
+            Create Account
+          </button>
+
+        </div>
+
+
+        <!-- =================================================
+             LOGIN FORM
+             ================================================= -->
+
+        <form
+          id="loginForm"
+          class="auth-form active"
+        >
+
+          <div class="field">
+
+            <label for="loginEmail">
+              Email address
+            </label>
+
+            <input
+              id="loginEmail"
+              type="email"
+              autocomplete="email"
+              placeholder="pilot@example.com"
+              required
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label for="loginPassword">
+              Password
+            </label>
+
+            <div class="password-wrap">
+
+              <input
+                id="loginPassword"
+                type="password"
+                autocomplete="current-password"
+                placeholder="Enter your password"
+                required
+              >
+
+              <button
+                type="button"
+                class="password-toggle"
+                data-target="loginPassword"
+              >
+                Show
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <button
+            type="submit"
+            class="primary-button"
+            id="loginButton"
+          >
+            Sign In
+          </button>
+
+        </form>
+
+
+        <!-- =================================================
+             SIGNUP FORM
+             ================================================= -->
+
+        <form
+          id="signupForm"
+          class="auth-form"
+        >
+
+          <div class="field">
+
+            <label for="signupName">
+              Pilot name
+            </label>
+
+            <input
+              id="signupName"
+              type="text"
+              autocomplete="name"
+              placeholder="Your name"
+              maxlength="80"
+              required
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label for="signupEmail">
+              Email address
+            </label>
+
+            <input
+              id="signupEmail"
+              type="email"
+              autocomplete="email"
+              placeholder="pilot@example.com"
+              required
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label for="signupPassword">
+              Password
+            </label>
+
+            <div class="password-wrap">
+
+              <input
+                id="signupPassword"
+                type="password"
+                autocomplete="new-password"
+                placeholder="At least 8 characters"
+                minlength="8"
+                required
+              >
+
+              <button
+                type="button"
+                class="password-toggle"
+                data-target="signupPassword"
+              >
+                Show
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div class="field">
+
+            <label for="signupPasswordConfirm">
+              Confirm password
+            </label>
+
+            <div class="password-wrap">
+
+              <input
+                id="signupPasswordConfirm"
+                type="password"
+                autocomplete="new-password"
+                placeholder="Enter your password again"
+                minlength="8"
+                required
+              >
+
+              <button
+                type="button"
+                class="password-toggle"
+                data-target="signupPasswordConfirm"
+              >
+                Show
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <button
+            type="submit"
+            class="primary-button"
+            id="signupButton"
+          >
+            Create Pilot Account
+          </button>
+
+
+          <p class="form-note">
+            Your email address must be verified before
+            you can access Viavia Operations.
+          </p>
+
+        </form>
+
+
+        <div class="system-status">
+
+          <div class="status-indicator">
+
+            <span class="status-dot"></span>
+
+            <span>
+              Viavia Operations
+            </span>
+
+          </div>
+
+          <span>
+            Secure pilot access
+          </span>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ======================================================
+       SUPABASE
+       ====================================================== -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+  <script src="viavia-supabase.js"></script>
+
+
+  <!-- ======================================================
+       LOGIN PAGE LOGIC
+       ====================================================== -->
+
+  <script>
+    const loginTab =
+      document.getElementById("loginTab");
+
+    const signupTab =
+      document.getElementById("signupTab");
+
+    const loginForm =
+      document.getElementById("loginForm");
+
+    const signupForm =
+      document.getElementById("signupForm");
+
+    const message =
+      document.getElementById("message");
+
+    const pageTitle =
+      document.getElementById("pageTitle");
+
+    const pageDescription =
+      document.getElementById("pageDescription");
+
+
+    /* ======================================================
+       REDIRECT
+       ====================================================== */
+
+    function getRedirectDestination() {
+
+      const params =
+        new URLSearchParams(
+          window.location.search
+        );
+
+      const requested =
+        params.get("redirect");
+
+      /*
+         Only allow local relative pages.
+
+         This prevents login.html from being used as
+         an open redirect to an outside website.
+      */
+      if (
+        requested &&
+        !requested.startsWith("http://") &&
+        !requested.startsWith("https://") &&
+        !requested.startsWith("//")
+      ) {
+        return requested;
+      }
+
+      return "pilot-center.html";
+    }
+
+
+    /* ======================================================
+       MESSAGES
+       ====================================================== */
+
+    function clearMessage() {
+
+      message.textContent = "";
+
+      message.className =
+        "message";
+    }
+
+
+    function showMessage(
+      text,
+      type = "error"
+    ) {
+
+      message.textContent = text;
+
+      message.className =
+        `message show ${type}`;
+    }
+
+
+    /* ======================================================
+       TAB SWITCHING
+       ====================================================== */
+
+    function showLogin() {
+
+      clearMessage();
+
+      loginTab.classList.add("active");
+      signupTab.classList.remove("active");
+
+      loginForm.classList.add("active");
+      signupForm.classList.remove("active");
+
+      pageTitle.textContent =
+        "Welcome back";
+
+      pageDescription.textContent =
+        "Sign in with your Viavia pilot account.";
+    }
+
+
+    function showSignup() {
+
+      clearMessage();
+
+      signupTab.classList.add("active");
+      loginTab.classList.remove("active");
+
+      signupForm.classList.add("active");
+      loginForm.classList.remove("active");
+
+      pageTitle.textContent =
+        "Join the flight deck";
+
+      pageDescription.textContent =
+        "Create your Viavia pilot account.";
+    }
+
+
+    loginTab.addEventListener(
+      "click",
+      showLogin
+    );
+
+
+    signupTab.addEventListener(
+      "click",
+      showSignup
+    );
+
+
+    /* ======================================================
+       PASSWORD VISIBILITY
+       ====================================================== */
+
+    document
+      .querySelectorAll(".password-toggle")
+      .forEach(button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const targetId =
+              button.dataset.target;
+
+            const input =
+              document.getElementById(
+                targetId
+              );
+
+            if (
+              input.type === "password"
+            ) {
+
+              input.type = "text";
+
+              button.textContent =
+                "Hide";
+
+            } else {
+
+              input.type =
+                "password";
+
+              button.textContent =
+                "Show";
+            }
+          }
+        );
+      });
+
+
+    /* ======================================================
+       LOGIN
+       ====================================================== */
+
+    loginForm.addEventListener(
+      "submit",
+      async event => {
+
+        event.preventDefault();
+
+        clearMessage();
+
+        const email =
+          document
+            .getElementById("loginEmail")
+            .value;
+
+        const password =
+          document
+            .getElementById("loginPassword")
+            .value;
+
+        const button =
+          document.getElementById(
+            "loginButton"
+          );
+
+        button.disabled = true;
+        button.textContent =
+          "Signing in...";
+
+        try {
+
+          await ViaviaAuth.signIn(
+            email,
+            password
+          );
+
+          showMessage(
+            "Sign in successful. Opening Viavia Operations...",
+            "success"
+          );
+
+          window.location.replace(
+            getRedirectDestination()
+          );
+
+        } catch (error) {
+
+          console.error(
+            "Viavia login error:",
+            error
+          );
+
+          showMessage(
+            getFriendlyAuthError(error)
+          );
+
+        } finally {
+
+          button.disabled = false;
+
+          button.textContent =
+            "Sign In";
+        }
+      }
+    );
+
+
+    /* ======================================================
+       SIGN UP
+       ====================================================== */
+
+    signupForm.addEventListener(
+      "submit",
+      async event => {
+
+        event.preventDefault();
+
+        clearMessage();
+
+        const displayName =
+          document
+            .getElementById("signupName")
+            .value
+            .trim();
+
+        const email =
+          document
+            .getElementById("signupEmail")
+            .value
+            .trim();
+
+        const password =
+          document
+            .getElementById("signupPassword")
+            .value;
+
+        const confirmPassword =
+          document
+            .getElementById(
+              "signupPasswordConfirm"
+            )
+            .value;
+
+        const button =
+          document.getElementById(
+            "signupButton"
+          );
+
+
+        if (
+          password !== confirmPassword
+        ) {
+
+          showMessage(
+            "The passwords do not match."
+          );
+
+          return;
+        }
+
+
+        if (
+          password.length < 8
+        ) {
+
+          showMessage(
+            "Your password must be at least 8 characters."
+          );
+
+          return;
+        }
+
+
+        button.disabled = true;
+
+        button.textContent =
+          "Creating account...";
+
+
+        try {
+
+          const result =
+            await ViaviaAuth.signUp(
+              email,
+              password,
+              displayName
+            );
+
+
+          /*
+             With Confirm Email enabled in Supabase,
+             signUp normally returns a user but no
+             active session until verification.
+          */
+
+          if (
+            result &&
+            result.session
+          ) {
+
+            showMessage(
+              "Pilot account created. Opening Viavia Operations...",
+              "success"
+            );
+
+            window.location.replace(
+              getRedirectDestination()
+            );
+
+            return;
+          }
+
+
+          showMessage(
+            "Pilot account created. Check your email and confirm your address, then return here to sign in.",
+            "success"
+          );
+
+
+          signupForm.reset();
+
+        } catch (error) {
+
+          console.error(
+            "Viavia signup error:",
+            error
+          );
+
+          showMessage(
+            getFriendlyAuthError(error)
+          );
+
+        } finally {
+
+          button.disabled = false;
+
+          button.textContent =
+            "Create Pilot Account";
+        }
+      }
+    );
+
+
+    /* ======================================================
+       FRIENDLY AUTH ERRORS
+       ====================================================== */
+
+    function getFriendlyAuthError(error) {
+
+      if (!error) {
+        return (
+          "Something went wrong. " +
+          "Please try again."
+        );
+      }
+
+      const raw =
+        String(
+          error.message || error
+        ).toLowerCase();
+
+
+      if (
+        raw.includes(
+          "invalid login credentials"
+        )
+      ) {
+
+        return (
+          "The email address or password " +
+          "is incorrect."
+        );
+      }
+
+
+      if (
+        raw.includes(
+          "email not confirmed"
+        )
+      ) {
+
+        return (
+          "Your email address has not " +
+          "been confirmed yet. Check your " +
+          "email for the verification link."
+        );
+      }
+
+
+      if (
+        raw.includes(
+          "user already registered"
+        )
+      ) {
+
+        return (
+          "An account already exists " +
+          "with that email address."
+        );
+      }
+
+
+      if (
+        raw.includes(
+          "password"
+        ) &&
+        raw.includes(
+          "characters"
+        )
+      ) {
+
+        return (
+          "That password does not meet " +
+          "the account security requirements."
+        );
+      }
+
+
+      if (
+        raw.includes(
+          "rate limit"
+        )
+      ) {
+
+        return (
+          "Too many attempts were made. " +
+          "Please wait a moment and try again."
+        );
+      }
+
+
+      return (
+        error.message ||
+        "Authentication failed. Please try again."
+      );
+    }
+
+
+    /* ======================================================
+       ALREADY LOGGED IN
+       ====================================================== */
+
+    async function checkExistingSession() {
+
+      try {
+
+        const session =
+          await ViaviaAuth.getSession();
+
+        if (
+          session &&
+          session.user
+        ) {
+
+          window.location.replace(
+            getRedirectDestination()
+          );
+        }
+
+      } catch (error) {
+
+        console.error(
+          "Viavia session check failed:",
+          error
+        );
+      }
+    }
+
+
+    checkExistingSession();
+
+  </script>
+
+</body>
+</html>
