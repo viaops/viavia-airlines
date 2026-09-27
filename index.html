@@ -69,52 +69,68 @@
 
         /* HERO */
         .hero {
-            background: linear-gradient(135deg, #6d4a91, #3d2857);
+            position: relative;
+            min-height: 640px;
+
+            background-image:
+                linear-gradient(
+                    rgba(61, 45, 90, 0.48),
+                    rgba(45, 28, 66, 0.68)
+                ),
+                url("./viavia-cockpit.png");
+
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+
             color: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
             text-align: center;
-            padding: 120px 20px;
+            padding: 80px 20px;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1100px;
+            width: 100%;
         }
 
         .hero h1 {
-            font-size: 58px;
+            font-size: 64px;
+            line-height: 1.05;
             font-weight: 800;
-            margin: 0 0 15px;
+            margin: 0 0 25px;
+            text-shadow: 0 3px 15px rgba(0,0,0,0.35);
         }
 
         .hero p {
-            font-size: 23px;
-            margin: 0 0 35px;
+            font-size: 24px;
+            font-weight: 400;
+            margin: 0 0 38px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.45);
         }
 
         .hero-button {
             display: inline-block;
             background: white;
             color: #5b247a;
-            padding: 15px 30px;
+            padding: 16px 32px;
             border-radius: 8px;
             text-decoration: none;
             font-weight: 700;
+            font-size: 17px;
             transition: 0.2s ease;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.16);
         }
 
         .hero-button:hover {
             background: #f3edf7;
-            transform: translateY(-1px);
-        }
-
-        /* COCKPIT IMAGE */
-        .cockpit-section {
-            width: 100%;
-            background: #120c18;
-            overflow: hidden;
-        }
-
-        .cockpit-section img {
-            display: block;
-            width: 100%;
-            height: 560px;
-            object-fit: cover;
-            object-position: center;
+            transform: translateY(-2px);
         }
 
         /* SECTIONS */
@@ -206,29 +222,31 @@
             }
 
             .hero {
-                padding: 90px 20px;
+                min-height: 540px;
+                padding: 70px 20px;
             }
 
             .hero h1 {
-                font-size: 42px;
+                font-size: 46px;
             }
 
-            .cockpit-section img {
-                height: 400px;
+            .hero p {
+                font-size: 21px;
             }
         }
 
         @media (max-width: 550px) {
+            .hero {
+                min-height: 470px;
+                background-position: center center;
+            }
+
             .hero h1 {
-                font-size: 36px;
+                font-size: 37px;
             }
 
             .hero p {
                 font-size: 19px;
-            }
-
-            .cockpit-section img {
-                height: 280px;
             }
 
             .section {
@@ -264,24 +282,19 @@
     <!-- HERO -->
     <section class="hero">
 
-        <h1>Your destination, via us!</h1>
+        <div class="hero-content">
 
-        <p>Welcome aboard Viavia Airlines.</p>
+            <h1>Your destination, via us!</h1>
 
-        <a href="destinations.html" class="hero-button">
-            Explore Viavia
-        </a>
+            <p>
+                Welcome aboard Viavia Airlines.
+            </p>
 
-    </section>
+            <a href="destinations.html" class="hero-button">
+                Explore Viavia
+            </a>
 
-
-    <!-- COCKPIT IMAGE -->
-    <section class="cockpit-section">
-
-        <img
-            src="./viavia-cockpit.png"
-            alt="Airbus cockpit at sunset"
-        >
+        </div>
 
     </section>
 
