@@ -645,13 +645,6 @@ async function claimViaviaTrip(
 
 /* ============================================================
    DROP TRIP
-
-   The assignment is preserved in the database and its status
-   becomes "cancelled".
-
-   Viavia's availability queries already exclude cancelled
-   assignments. Therefore the same trip/date becomes available
-   to another pilot immediately after the drop succeeds.
    ============================================================ */
 
 async function dropViaviaTrip(
@@ -692,13 +685,6 @@ async function dropViaviaTrip(
       operatingDate
     );
 
-
-  /*
-   * Find the active assignment first.
-   *
-   * The authenticated user ID is used here so the browser
-   * cannot use this helper to drop another pilot's assignment.
-   */
 
   const {
     data: assignment,
@@ -756,11 +742,6 @@ async function dropViaviaTrip(
 
   }
 
-
-  /*
-   * Keep the historical row.
-   * Only its operational status changes.
-   */
 
   const {
     data,
@@ -1477,3 +1458,53 @@ async function getViaviaFlightGateAssignments(
 
   return data || [];
 }
+
+
+/* ============================================================
+   GLOBAL VIAVIA API
+   ============================================================ */
+
+window.ViaviaAuth = {
+  getUser: getViaviaUser,
+  getSession: getViaviaSession,
+  signUp: signUpViaviaPilot,
+  signIn: signInViaviaPilot,
+  signOut: signOutViaviaPilot,
+  requireAuth: requireViaviaAuth
+};
+
+
+window.ViaviaPilots = {
+  getProfile: getViaviaPilotProfile,
+  updateProfile: updateViaviaPilotProfile
+};
+
+
+window.ViaviaTrips = {
+  normalizeDate: normalizeViaviaOperatingDate,
+  getAssignedTrips: getViaviaAssignedTrips,
+  isAssigned: isViaviaTripAssigned,
+  claim: claimViaviaTrip,
+  drop: dropViaviaTrip,
+  getMyTrips: getMyViaviaTrips,
+  getMyTripsForDate: getMyViaviaTripsForDate,
+  getMyTrip: getMyViaviaTrip,
+  getAvailability: getViaviaTripAvailability
+};
+
+
+window.ViaviaGates = {
+  normalizeAirport: normalizeViaviaAirport,
+  normalizeFlightNumber: normalizeViaviaFlightNumber,
+  normalizeTimestamp: normalizeViaviaTimestamp,
+  getGatePool: getViaviaGatePool,
+  getAllGatePools: getAllViaviaGatePools,
+  getGateAssignment: getViaviaGateAssignment,
+  getAirportGateAssignments: getViaviaAirportGateAssignments,
+  getFlightGateAssignments: getViaviaFlightGateAssignments
+};
+
+
+console.log(
+  "Viavia Operations: Supabase helpers loaded."
+);
