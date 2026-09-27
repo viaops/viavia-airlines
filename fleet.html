@@ -1,1 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>Fleet | Viavia Airlines</title>
+
+    <!-- MAVEN PRO -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Maven Pro", sans-serif;
+            background: #f7f4fa;
+            color: #24142f;
+        }
+
+        /* HEADER */
+        header {
+            background: #bcaace;
+            padding: 18px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5dff0;
+        }
+
+        .logo img {
+            height: 90px;
+            width: auto;
+            display: block;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            color: #3d2857;
+            text-decoration: none;
+            margin-left: 30px;
+            font-weight: 700;
+        }
+
+        nav a:hover {
+            color: #6d4a91;
+        }
+
+        .pilot-button {
+            background: #3d2d5a;
+            color: white !important;
+            padding: 12px 20px;
+            border-radius: 7px;
+        }
+
+        .pilot-button:hover {
+            background: #32244a;
+            color: white !important;
+        }
+
+        /* PAGE TITLE */
+        .page-title {
+            background: linear-gradient(135deg, #6d4a91, #3d2857);
+            color: white;
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .page-title h1 {
+            font-size: 48px;
+            font-weight: 800;
+            margin: 0 0 12px;
+        }
+
+        .page-title p {
+            font-size: 20px;
+            margin: 0;
+        }
+
+        /* FLEET INTRO */
+        .section {
+            padding: 70px 8%;
+            text-align: center;
+        }
+
+        .section h2 {
+            font-size: 36px;
+            font-weight: 800;
+            margin: 0 0 15px;
+        }
+
+        .section-intro {
+            max-width: 760px;
+            margin: 0 auto;
+            line-height: 1.7;
+            font-size: 17px;
+        }
+
+        /* FLEET TOTAL */
+        .fleet-total {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            background: #ebe2f2;
+            color: #3d2d5a;
+            padding: 14px 24px;
+            border-radius: 30px;
+            margin-top: 30px;
+            font-weight: 700;
+        }
+
+        .fleet-total strong {
+            font-size: 24px;
+        }
+
+        /* AIRCRAFT CARDS */
+        .fleet-grid {
+            max-width: 1100px;
+            margin: 50px auto 0;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+        }
+
+        .aircraft-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+            text-align: left;
+        }
+
+        .aircraft-top {
+            background: linear-gradient(135deg, #c9b7da, #e7dcef);
+            min-height: 190px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        .aircraft-name {
+            font-size: 30px;
+            font-weight: 800;
+            color: #3d2d5a;
+            text-align: center;
+        }
+
+        .aircraft-info {
+            padding: 28px;
+        }
+
+        .aircraft-info h3 {
+            color: #3d2d5a;
+            font-size: 25px;
+            margin: 0 0 8px;
+        }
+
+        .aircraft-count {
+            color: #6d4a91;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .aircraft-info p {
+            line-height: 1.65;
+            margin: 0;
+            color: #55465f;
+        }
+
+        /* FLEET BREAKDOWN */
+        .breakdown {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 5px 18px rgba(0,0,0,0.07);
+        }
+
+        .breakdown-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr 80px;
+            align-items: center;
+            gap: 20px;
+            padding: 18px 0;
+            border-bottom: 1px solid #eee7f3;
+            text-align: left;
+        }
+
+        .breakdown-row:last-child {
+            border-bottom: none;
+        }
+
+        .breakdown-type {
+            font-weight: 700;
+            color: #3d2d5a;
+        }
+
+        .bar {
+            height: 10px;
+            background: #eee8f3;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: #6d4a91;
+            border-radius: 20px;
+        }
+
+        .bar-a319 {
+            width: 35.14%;
+        }
+
+        .bar-a320 {
+            width: 100%;
+        }
+
+        .bar-a321 {
+            width: 67.57%;
+        }
+
+        .breakdown-count {
+            text-align: right;
+            font-weight: 700;
+            color: #5b247a;
+        }
+
+        /* FOOTER */
+        footer {
+            background: #24142f;
+            color: white;
+            text-align: center;
+            padding: 35px;
+            margin-top: 40px;
+        }
+
+        footer p {
+            margin: 6px;
+        }
+
+        /* MOBILE */
+        @media (max-width: 900px) {
+            .fleet-grid {
+                grid-template-columns: 1fr;
+                max-width: 600px;
+            }
+        }
+
+        @media (max-width: 850px) {
+            header {
+                padding: 18px 25px;
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            nav {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            nav a {
+                margin-left: 0;
+                padding: 8px 10px;
+            }
+
+            .logo img {
+                height: 80px;
+            }
+
+            .page-title h1 {
+                font-size: 40px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .section {
+                padding: 55px 20px;
+            }
+
+            .breakdown {
+                padding: 25px 20px;
+            }
+
+            .breakdown-row {
+                grid-template-columns: 1fr 55px;
+                gap: 12px;
+            }
+
+            .bar {
+                grid-column: 1 / 3;
+                grid-row: 2;
+            }
+
+            .breakdown-count {
+                grid-column: 2;
+                grid-row: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- HEADER -->
+    <header>
+
+        <div class="logo">
+            <a href="index.html">
+                <img src="./viavia-logo.png" alt="Viavia Airlines">
+            </a>
+        </div>
+
+        <nav>
+            <a href="about.html">About</a>
+            <a href="destinations.html">Destinations</a>
+            <a href="fleet.html">Fleet</a>
+            <a href="resources.html">Resources</a>
+            <a href="join.html">Join</a>
+            <a href="login.html" class="pilot-button">Pilot Center</a>
+        </nav>
+
+    </header>
+
+
+    <!-- PAGE TITLE -->
+    <section class="page-title">
+
+        <h1>Our Fleet</h1>
+
+        <p>Meet the Airbus aircraft that power the Viavia network.</p>
+
+    </section>
+
+
+    <!-- FLEET -->
+    <section class="section">
+
+        <h2>The Viavia Fleet</h2>
+
+        <p class="section-intro">
+            Viavia operates an all-Airbus A320-family fleet, giving our network
+            the flexibility to serve everything from shorter domestic routes
+            to longer flights across the Caribbean and Latin America.
+        </p>
+
+        <div class="fleet-total">
+            <strong>75</strong>
+            <span>Aircraft in the Viavia fleet</span>
+        </div>
+
+
+        <div class="fleet-grid">
+
+            <!-- A319 -->
+            <article class="aircraft-card">
+
+                <div class="aircraft-top">
+                    <div class="aircraft-name">
+                        Airbus<br>A319-132
+                    </div>
+                </div>
+
+                <div class="aircraft-info">
+
+                    <h3>Airbus A319-132</h3>
+
+                    <div class="aircraft-count">
+                        13 aircraft
+                    </div>
+
+                    <p>
+                        The smallest aircraft in the Viavia fleet, the A319
+                        provides flexibility across routes where the capacity
+                        of the larger A320 and A321 is not required.
+                    </p>
+
+                </div>
+
+            </article>
+
+
+            <!-- A320 -->
+            <article class="aircraft-card">
+
+                <div class="aircraft-top">
+                    <div class="aircraft-name">
+                        Airbus<br>A320-232
+                    </div>
+                </div>
+
+                <div class="aircraft-info">
+
+                    <h3>Airbus A320-232</h3>
+
+                    <div class="aircraft-count">
+                        37 aircraft
+                    </div>
+
+                    <p>
+                        The A320 is the largest part of the Viavia fleet and
+                        serves as the backbone of our network across a wide
+                        variety of domestic and international routes.
+                    </p>
+
+                </div>
+
+            </article>
+
+
+            <!-- A321 -->
+            <article class="aircraft-card">
+
+                <div class="aircraft-top">
+                    <div class="aircraft-name">
+                        Airbus<br>A321-232
+                    </div>
+                </div>
+
+                <div class="aircraft-info">
+
+                    <h3>Airbus A321-232</h3>
+
+                    <div class="aircraft-count">
+                        25 aircraft
+                    </div>
+
+                    <p>
+                        The A321 provides Viavia with additional capacity for
+                        high-demand routes while retaining the commonality of
+                        our Airbus A320-family operation.
+                    </p>
+
+                </div>
+
+            </article>
+
+        </div>
+
+    </section>
+
+
+    <!-- BREAKDOWN -->
+    <section class="section">
+
+        <h2>Fleet Breakdown</h2>
+
+        <p class="section-intro">
+            Viavia's 75-aircraft fleet is divided across three Airbus
+            A320-family variants.
+        </p>
+
+        <div class="breakdown">
+
+            <div class="breakdown-row">
+
+                <div class="breakdown-type">
+                    Airbus A319-132
+                </div>
+
+                <div class="bar">
+                    <div class="bar-fill bar-a319"></div>
+                </div>
+
+                <div class="breakdown-count">
+                    13
+                </div>
+
+            </div>
+
+
+            <div class="breakdown-row">
+
+                <div class="breakdown-type">
+                    Airbus A320-232
+                </div>
+
+                <div class="bar">
+                    <div class="bar-fill bar-a320"></div>
+                </div>
+
+                <div class="breakdown-count">
+                    37
+                </div>
+
+            </div>
+
+
+            <div class="breakdown-row">
+
+                <div class="breakdown-type">
+                    Airbus A321-232
+                </div>
+
+                <div class="bar">
+                    <div class="bar-fill bar-a321"></div>
+                </div>
+
+                <div class="breakdown-count">
+                    25
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- FOOTER -->
+    <footer>
+
+        <p>© 2026 Viavia Airlines</p>
+
+        <p>Your destination, via us!</p>
+
+    </footer>
+
+</body>
+</html>
