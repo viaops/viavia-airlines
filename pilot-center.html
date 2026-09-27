@@ -8,10 +8,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link
-    href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700;800;900&display=swap"
-    rel="stylesheet"
->
+<link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
 * {
@@ -24,14 +21,12 @@
     --purple-light: #bcaace;
     --purple-pale: #f4eff8;
     --purple-border: #e3d9eb;
-
     --text: #24142f;
     --muted: #716778;
-
     --background: #f7f4fa;
     --white: #ffffff;
-
     --green: #36a765;
+    --green-dark: #21844d;
 }
 
 html {
@@ -52,22 +47,17 @@ textarea {
     font-family: inherit;
 }
 
-/* ============================================================
-   HEADER
-   ============================================================ */
+/* HEADER */
 
 header {
     min-height: 126px;
     padding: 20px 4.5%;
-
     background: var(--purple-light);
-
     border-bottom: 1px solid rgba(61,45,90,.12);
 
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     gap: 35px;
 }
 
@@ -96,16 +86,12 @@ nav a,
 nav button {
     border: 0;
     background: transparent;
-
     color: var(--purple);
     text-decoration: none;
-
     font-size: 15px;
     font-weight: 700;
-
     padding: 13px 15px;
     border-radius: 9px;
-
     cursor: pointer;
 
     transition:
@@ -133,42 +119,71 @@ nav button.sign-out:hover {
     color: white;
 }
 
-/* ============================================================
-   HERO
-   ============================================================ */
+/* CREW PORTAL HERO */
 
 .hero {
-    background: var(--purple);
-    color: white;
+    position: relative;
 
-    padding: 58px 6%;
+    background:
+        linear-gradient(
+            rgba(61,45,90,.30),
+            rgba(61,45,90,.30)
+        ),
+        url("./crew-portal-bg.png");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    color: white;
+    padding: 68px 6%;
+
+    overflow: hidden;
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(45,32,64,.22),
+            rgba(61,45,90,.04)
+        );
+
+    pointer-events: none;
 }
 
 .hero-inner {
+    position: relative;
+    z-index: 2;
+
     max-width: 1380px;
     margin: 0 auto;
 }
 
 .hero-label {
-    margin-bottom: 10px;
-
+    margin-bottom: 12px;
     font-size: 13px;
     font-weight: 800;
-
     text-transform: uppercase;
     letter-spacing: .14em;
+    color: rgba(255,255,255,.90);
 
-    color: rgba(255,255,255,.72);
+    text-shadow: 0 2px 8px rgba(0,0,0,.18);
 }
 
 .hero h1 {
-    margin: 0 0 10px;
+    margin: 0 0 12px;
 
     font-size: clamp(38px, 4vw, 58px);
     line-height: 1;
-
     font-weight: 800;
     letter-spacing: -.035em;
+
+    text-shadow: 0 3px 12px rgba(0,0,0,.20);
 }
 
 .hero p {
@@ -176,26 +191,22 @@ nav button.sign-out:hover {
 
     font-size: 19px;
     line-height: 1.6;
+    color: rgba(255,255,255,.95);
 
-    color: rgba(255,255,255,.87);
+    text-shadow: 0 2px 8px rgba(0,0,0,.20);
 }
 
-/* ============================================================
-   MAIN
-   ============================================================ */
+/* MAIN */
 
 .container {
     width: min(1380px, calc(100% - 60px));
     margin: 34px auto 60px;
 }
 
-/* ============================================================
-   CONNECTION BAR
-   ============================================================ */
+/* CONNECTION */
 
 .connection-status {
     background: white;
-
     border: 1px solid var(--purple-border);
     border-radius: 14px;
 
@@ -222,17 +233,13 @@ nav button.sign-out:hover {
 .connection-dot {
     width: 10px;
     height: 10px;
-
     border-radius: 50%;
-
     background: #aaa;
 }
 
 .connection-dot.connected {
     background: var(--green);
-
-    box-shadow:
-        0 0 0 5px rgba(54,167,101,.12);
+    box-shadow: 0 0 0 5px rgba(54,167,101,.12);
 }
 
 .connection-status strong {
@@ -244,15 +251,12 @@ nav button.sign-out:hover {
     font-weight: 600;
 }
 
-/* ============================================================
-   ERROR
-   ============================================================ */
+/* ERROR */
 
 .error-box {
     display: none;
 
     background: #fff0f0;
-
     border: 1px solid #efc6c6;
     border-radius: 12px;
 
@@ -262,16 +266,12 @@ nav button.sign-out:hover {
     margin-bottom: 22px;
 }
 
-/* ============================================================
-   PANELS
-   ============================================================ */
+/* PANELS */
 
 .panel {
     background: white;
-
     border: 1px solid var(--purple-border);
     border-radius: 18px;
-
     box-shadow: 0 7px 24px rgba(61,45,90,.055);
 }
 
@@ -287,7 +287,6 @@ nav button.sign-out:hover {
 
     font-size: 30px;
     font-weight: 800;
-
     letter-spacing: -.02em;
 }
 
@@ -304,16 +303,13 @@ nav button.sign-out:hover {
     color: var(--muted);
 }
 
-/* ============================================================
-   CREW STATUS
-   ============================================================ */
+/* STATUS */
 
 .status-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
 
     gap: 14px;
-
     margin-top: 25px;
 }
 
@@ -321,7 +317,6 @@ nav button.sign-out:hover {
     min-width: 0;
 
     background: var(--purple-pale);
-
     border: 1px solid var(--purple-border);
     border-radius: 13px;
 
@@ -349,9 +344,33 @@ nav button.sign-out:hover {
     overflow-wrap: anywhere;
 }
 
-/* ============================================================
-   SECTION HEADINGS
-   ============================================================ */
+/* ACTIVE STATUS */
+
+.status .value.active-status {
+    color: var(--green-dark);
+}
+
+.active-status-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.active-status-dot {
+    width: 9px;
+    height: 9px;
+
+    flex: 0 0 auto;
+
+    border-radius: 50%;
+
+    background: var(--green);
+
+    box-shadow:
+        0 0 0 4px rgba(54,167,101,.12);
+}
+
+/* HEADINGS */
 
 .section-header {
     display: flex;
@@ -382,16 +401,11 @@ nav button.sign-out:hover {
     font-size: 14px;
 }
 
-/* ============================================================
-   OPERATIONS GRID
-   ============================================================ */
+/* CARDS */
 
 .grid {
     display: grid;
-
-    grid-template-columns:
-        repeat(4, minmax(0, 1fr));
-
+    grid-template-columns: repeat(4, minmax(0,1fr));
     gap: 17px;
 }
 
@@ -405,8 +419,7 @@ nav button.sign-out:hover {
 
     padding: 23px;
 
-    box-shadow:
-        0 5px 18px rgba(61,45,90,.045);
+    box-shadow: 0 5px 18px rgba(61,45,90,.045);
 
     display: flex;
     flex-direction: column;
@@ -422,8 +435,7 @@ nav button.sign-out:hover {
 
     border-color: #d5c5e0;
 
-    box-shadow:
-        0 10px 28px rgba(61,45,90,.085);
+    box-shadow: 0 10px 28px rgba(61,45,90,.085);
 }
 
 .card-icon {
@@ -464,9 +476,7 @@ nav button.sign-out:hover {
     flex: 1;
 }
 
-/* ============================================================
-   BUTTONS
-   ============================================================ */
+/* BUTTONS */
 
 .button {
     display: inline-flex;
@@ -489,18 +499,10 @@ nav button.sign-out:hover {
     font-weight: 800;
 
     cursor: pointer;
-
-    transition:
-        background .18s ease,
-        transform .18s ease;
 }
 
 .button:hover {
     background: var(--purple-dark);
-}
-
-.button:active {
-    transform: scale(.98);
 }
 
 .button.secondary {
@@ -514,9 +516,7 @@ nav button.sign-out:hover {
     background: #e9e0f0;
 }
 
-/* ============================================================
-   UPCOMING ASSIGNMENT
-   ============================================================ */
+/* ASSIGNMENT */
 
 .assignment-panel {
     padding: 25px;
@@ -588,7 +588,7 @@ nav button.sign-out:hover {
 
 .assignment-details {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4,1fr);
 
     gap: 11px;
 
@@ -632,9 +632,7 @@ nav button.sign-out:hover {
     margin-top: 18px;
 }
 
-/* ============================================================
-   OPERATIONS INFORMATION
-   ============================================================ */
+/* OPERATIONS INFORMATION */
 
 .operations-information {
     padding: 28px;
@@ -676,9 +674,7 @@ nav button.sign-out:hover {
     line-height: 1.65;
 }
 
-/* ============================================================
-   FOOTER
-   ============================================================ */
+/* FOOTER */
 
 footer {
     margin-top: 65px;
@@ -693,20 +689,16 @@ footer {
     font-size: 13px;
 }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
+/* RESPONSIVE */
 
 @media (max-width: 1200px) {
 
     .grid {
-        grid-template-columns:
-            repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(3,minmax(0,1fr));
     }
 
     .status-grid {
-        grid-template-columns:
-            repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(3,minmax(0,1fr));
     }
 }
 
@@ -724,13 +716,11 @@ footer {
     }
 
     .grid {
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(2,minmax(0,1fr));
     }
 
     .assignment-details {
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(2,minmax(0,1fr));
     }
 }
 
@@ -741,7 +731,7 @@ footer {
     }
 
     .hero {
-        padding: 42px 24px;
+        padding: 50px 24px;
     }
 
     .hero h1 {
@@ -749,8 +739,7 @@ footer {
     }
 
     .container {
-        width: min(100% - 30px, 1380px);
-
+        width: min(100% - 30px,1380px);
         margin-top: 20px;
     }
 
@@ -778,29 +767,15 @@ footer {
 
 <body>
 
-<!-- ============================================================
-     HEADER
-     ============================================================ -->
-
 <header>
 
-    <a
-        class="brand"
-        href="index.html"
-        aria-label="Viavia Airlines"
-    >
-        <img
-            src="viavia-logo.png"
-            alt="Viavia Airlines"
-        >
+    <a class="brand" href="index.html" aria-label="Viavia Airlines">
+        <img src="viavia-logo.png" alt="Viavia Airlines">
     </a>
 
     <nav>
 
-        <a
-            class="active"
-            href="pilot-center.html"
-        >
+        <a class="active" href="pilot-center.html">
             Crew Portal
         </a>
 
@@ -837,9 +812,7 @@ footer {
 </header>
 
 
-<!-- ============================================================
-     HERO
-     ============================================================ -->
+<!-- CREW PORTAL HERO -->
 
 <section class="hero">
 
@@ -861,10 +834,6 @@ footer {
 
 </section>
 
-
-<!-- ============================================================
-     MAIN
-     ============================================================ -->
 
 <main class="container">
 
@@ -901,17 +870,13 @@ footer {
     </div>
 
 
-    <!-- ERROR -->
-
     <div
         id="errorBox"
         class="error-box"
     ></div>
 
 
-    <!-- ========================================================
-         WELCOME
-         ======================================================== -->
+    <!-- WELCOME -->
 
     <section class="panel welcome">
 
@@ -939,7 +904,7 @@ footer {
                     class="value"
                     id="positionValue"
                 >
-                    Pilot
+                    Captain
                 </div>
 
             </div>
@@ -951,11 +916,17 @@ footer {
                     Status
                 </div>
 
-                <div
-                    class="value"
-                    id="roleValue"
-                >
-                    Pilot
+                <div class="active-status-wrap">
+
+                    <span class="active-status-dot"></span>
+
+                    <div
+                        class="value active-status"
+                        id="statusValue"
+                    >
+                        Active
+                    </div>
+
                 </div>
 
             </div>
@@ -1014,9 +985,7 @@ footer {
     </section>
 
 
-    <!-- ========================================================
-         OPERATIONS
-         ======================================================== -->
+    <!-- OPERATIONS -->
 
     <div class="section-header">
 
@@ -1038,17 +1007,11 @@ footer {
     <div class="grid">
 
 
-        <!-- AVAILABLE TRIPS -->
-
         <div class="card">
 
-            <div class="card-icon">
-                📋
-            </div>
+            <div class="card-icon">📋</div>
 
-            <h3>
-                Available Trips
-            </h3>
+            <h3>Available Trips</h3>
 
             <p>
                 View Viavia crew pairings available to
@@ -1056,82 +1019,54 @@ footer {
                 claims are awarded automatically.
             </p>
 
-            <a
-                class="button"
-                href="available-bids.html"
-            >
+            <a class="button" href="available-bids.html">
                 View Available Trips
             </a>
 
         </div>
 
 
-        <!-- MY TRIPS -->
-
         <div class="card">
 
-            <div class="card-icon">
-                🧳
-            </div>
+            <div class="card-icon">🧳</div>
 
-            <h3>
-                My Trips
-            </h3>
+            <h3>My Trips</h3>
 
             <p>
                 View your awarded trips, operating dates,
-                flight legs, aircraft, and assignment
-                details.
+                flight legs, aircraft, and assignment details.
             </p>
 
-            <a
-                class="button"
-                href="my-trips.html"
-            >
+            <a class="button" href="my-trips.html">
                 View My Trips
             </a>
 
         </div>
 
 
-        <!-- CREW CALENDAR -->
-
         <div class="card">
 
-            <div class="card-icon">
-                📅
-            </div>
+            <div class="card-icon">📅</div>
 
-            <h3>
-                Crew Calendar
-            </h3>
+            <h3>Crew Calendar</h3>
 
             <p>
                 View your awarded trips and scheduled
                 Viavia crew activity in one calendar.
             </p>
 
-            <a
-                class="button"
-                href="crew-calendar.html"
-            >
+            <a class="button" href="crew-calendar.html">
                 Open Crew Calendar
             </a>
 
         </div>
 
 
-        <!-- FLIGHT PLANNING -->
-
         <div class="card">
 
-            <div class="card-icon">
-                ✈️
-            </div>
+            <div class="card-icon">✈️</div>
 
-            <h3>
-                Flight Planning
-            </h3>
+            <h3>Flight Planning</h3>
 
             <p>
                 Access report information, gates,
@@ -1139,27 +1074,18 @@ footer {
                 operational flight information.
             </p>
 
-            <a
-                class="button"
-                href="flight-planning.html"
-            >
+            <a class="button" href="flight-planning.html">
                 Open Flight Planning
             </a>
 
         </div>
 
 
-        <!-- PAY -->
-
         <div class="card">
 
-            <div class="card-icon">
-                💰
-            </div>
+            <div class="card-icon">💰</div>
 
-            <h3>
-                Pay &amp; Hours
-            </h3>
+            <h3>Pay &amp; Hours</h3>
 
             <p>
                 Review credited hours, pilot pay,
@@ -1167,54 +1093,36 @@ footer {
                 trip earnings.
             </p>
 
-            <a
-                class="button secondary"
-                href="my-trips.html"
-            >
+            <a class="button secondary" href="my-trips.html">
                 View Pay
             </a>
 
         </div>
 
 
-        <!-- HISTORY -->
-
         <div class="card">
 
-            <div class="card-icon">
-                📜
-            </div>
+            <div class="card-icon">📜</div>
 
-            <h3>
-                Flight History
-            </h3>
+            <h3>Flight History</h3>
 
             <p>
                 Review completed Viavia trips and
                 previous flight activity.
             </p>
 
-            <a
-                class="button secondary"
-                href="my-trips.html"
-            >
+            <a class="button secondary" href="my-trips.html">
                 View History
             </a>
 
         </div>
 
 
-        <!-- PROFILE -->
-
         <div class="card">
 
-            <div class="card-icon">
-                👤
-            </div>
+            <div class="card-icon">👤</div>
 
-            <h3>
-                Crew Profile
-            </h3>
+            <h3>Crew Profile</h3>
 
             <p>
                 View your crew name, base, seniority,
@@ -1222,27 +1130,18 @@ footer {
                 information.
             </p>
 
-            <a
-                class="button secondary"
-                href="pilot-center.html"
-            >
+            <a class="button secondary" href="pilot-center.html">
                 Crew Profile
             </a>
 
         </div>
 
 
-        <!-- RESOURCES -->
-
         <div class="card">
 
-            <div class="card-icon">
-                📚
-            </div>
+            <div class="card-icon">📚</div>
 
-            <h3>
-                Crew Resources
-            </h3>
+            <h3>Crew Resources</h3>
 
             <p>
                 Access Viavia operational resources,
@@ -1250,10 +1149,7 @@ footer {
                 crew documentation.
             </p>
 
-            <a
-                class="button secondary"
-                href="resources.html"
-            >
+            <a class="button secondary" href="resources.html">
                 View Resources
             </a>
 
@@ -1263,9 +1159,7 @@ footer {
     </div>
 
 
-    <!-- ========================================================
-         UPCOMING ASSIGNMENT
-         ======================================================== -->
+    <!-- UPCOMING ASSIGNMENT -->
 
     <div class="section-header">
 
@@ -1296,9 +1190,7 @@ footer {
     </section>
 
 
-    <!-- ========================================================
-         OPERATIONS INFORMATION
-         ======================================================== -->
+    <!-- OPERATIONS INFORMATION -->
 
     <div class="section-header">
 
@@ -1347,9 +1239,7 @@ footer {
                 least 12 hours before scheduled aircraft
                 departure. Before that window, Flight
                 Planning displays
-                <strong>
-                    TBD — Gate assignment pending
-                </strong>.
+                <strong>TBD — Gate assignment pending</strong>.
             </p>
 
         </div>
@@ -1378,24 +1268,14 @@ footer {
 </main>
 
 
-<!-- ============================================================
-     FOOTER
-     ============================================================ -->
-
 <footer>
     Viavia Airlines · Crew Portal · Your destination, via us!
 </footer>
 
 
-<!-- ============================================================
-     VIAVIA DATA
-     ============================================================ -->
-
 <script src="viavia-schedule.js?v=20260926"></script>
 
-<script
-    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script src="viavia-supabase.js?v=20260926"></script>
 
@@ -1404,20 +1284,13 @@ footer {
 "use strict";
 
 
-/* ============================================================
-   VIAVIA CREW PORTAL
-   Supabase Crew Operations
-   ============================================================ */
-
 let currentUser = null;
 let currentPilot = null;
 let myAssignments = [];
 let masterPairings = [];
 
 
-/* ============================================================
-   HTML
-   ============================================================ */
+/* HTML */
 
 function escapeHTML(value) {
 
@@ -1430,26 +1303,21 @@ function escapeHTML(value) {
 }
 
 
-/* ============================================================
-   LOCAL DATE
-   ============================================================ */
+/* LOCAL DATE */
 
 function getLocalDateString() {
 
     const now = new Date();
 
-    const year =
-        now.getFullYear();
+    const year = now.getFullYear();
 
     const month =
-        String(
-            now.getMonth() + 1
-        ).padStart(2, "0");
+        String(now.getMonth() + 1)
+            .padStart(2, "0");
 
     const day =
-        String(
-            now.getDate()
-        ).padStart(2, "0");
+        String(now.getDate())
+            .padStart(2, "0");
 
     return `${year}-${month}-${day}`;
 }
@@ -1487,9 +1355,7 @@ function formatOperatingDate(value) {
 }
 
 
-/* ============================================================
-   MASTER PAIRINGS
-   ============================================================ */
+/* MASTER PAIRINGS */
 
 function loadMasterPairings() {
 
@@ -1527,53 +1393,13 @@ function findPairing(tripId) {
 
     return masterPairings.find(
         pairing =>
-            String(
-                pairing?.pairingId || ""
-            ) ===
-            String(
-                tripId || ""
-            )
+            String(pairing?.pairingId || "") ===
+            String(tripId || "")
     ) || null;
 }
 
 
-/* ============================================================
-   CREW PROFILE
-   ============================================================ */
-
-function formatRole(role) {
-
-    const value =
-        String(
-            role || "pilot"
-        ).toLowerCase();
-
-    if (
-        value === "check_airman"
-    ) {
-        return "Check Airman";
-    }
-
-    if (
-        value === "admin"
-    ) {
-        return "Admin";
-    }
-
-    return "Pilot";
-}
-
-
-function getPosition() {
-
-    /*
-     * Captain / First Officer position is not currently
-     * stored separately in the pilots table.
-     */
-
-    return "Pilot";
-}
-
+/* CREW PROFILE */
 
 function renderPilotProfile() {
 
@@ -1585,43 +1411,37 @@ function renderPilotProfile() {
 
 
     document
-        .getElementById(
-            "welcomeName"
-        )
+        .getElementById("welcomeName")
         .textContent =
         `Welcome, ${displayName}`;
 
 
     document
-        .getElementById(
-            "accountDisplay"
-        )
+        .getElementById("accountDisplay")
         .textContent =
         displayName;
 
 
+    /*
+     * Current crew display settings:
+     * Position = Captain
+     * Status = Active
+     */
+
     document
-        .getElementById(
-            "positionValue"
-        )
+        .getElementById("positionValue")
         .textContent =
-        getPosition();
+        "Captain";
 
 
     document
-        .getElementById(
-            "roleValue"
-        )
+        .getElementById("statusValue")
         .textContent =
-        formatRole(
-            currentPilot?.role
-        );
+        "Active";
 
 
     document
-        .getElementById(
-            "seniorityValue"
-        )
+        .getElementById("seniorityValue")
         .textContent =
         currentPilot?.seniority_number
             ? `#${currentPilot.seniority_number}`
@@ -1629,18 +1449,14 @@ function renderPilotProfile() {
 
 
     document
-        .getElementById(
-            "baseValue"
-        )
+        .getElementById("baseValue")
         .textContent =
         currentPilot?.base ||
         "—";
 }
 
 
-/* ============================================================
-   AWARDED TRIPS
-   ============================================================ */
+/* AWARDED TRIPS */
 
 function getActiveAssignments() {
 
@@ -1655,17 +1471,13 @@ function getActiveAssignments() {
 function renderAwardedTripCount() {
 
     document
-        .getElementById(
-            "awardedTripsValue"
-        )
+        .getElementById("awardedTripsValue")
         .textContent =
         getActiveAssignments().length;
 }
 
 
-/* ============================================================
-   NEXT ASSIGNMENT
-   ============================================================ */
+/* NEXT ASSIGNMENT */
 
 function getNextAssignment() {
 
@@ -1693,9 +1505,7 @@ function getNextAssignment() {
                             )
                         );
 
-                    if (
-                        dateCompare !== 0
-                    ) {
+                    if (dateCompare !== 0) {
                         return dateCompare;
                     }
 
@@ -1710,16 +1520,11 @@ function getNextAssignment() {
             );
 
 
-    return (
-        futureAssignments[0] ||
-        null
-    );
+    return futureAssignments[0] || null;
 }
 
 
-/* ============================================================
-   UPCOMING ASSIGNMENT
-   ============================================================ */
+/* UPCOMING ASSIGNMENT */
 
 function renderUpcomingAssignment() {
 
@@ -1789,9 +1594,7 @@ function renderUpcomingAssignment() {
 
 
     const flights =
-        Array.isArray(
-            pairing?.flights
-        )
+        Array.isArray(pairing?.flights)
             ? pairing.flights
             : [];
 
@@ -1859,21 +1662,17 @@ function renderUpcomingAssignment() {
             <div>
 
                 <div class="assignment-code">
-
                     ${escapeHTML(
                         assignment.trip_id
                     )}
-
                 </div>
 
                 <div class="assignment-date">
-
                     ${escapeHTML(
                         formatOperatingDate(
                             assignment.operating_date
                         )
                     )}
-
                 </div>
 
             </div>
@@ -1914,11 +1713,9 @@ function renderUpcomingAssignment() {
                 </div>
 
                 <div class="assignment-detail-value">
-
                     ${escapeHTML(
                         firstFlightNumber
                     )}
-
                 </div>
 
             </div>
@@ -1931,11 +1728,9 @@ function renderUpcomingAssignment() {
                 </div>
 
                 <div class="assignment-detail-value">
-
                     ${escapeHTML(
                         departure
                     )}
-
                 </div>
 
             </div>
@@ -1948,11 +1743,9 @@ function renderUpcomingAssignment() {
                 </div>
 
                 <div class="assignment-detail-value">
-
                     ${escapeHTML(
                         aircraft
                     )}
-
                 </div>
 
             </div>
@@ -1988,33 +1781,23 @@ function renderUpcomingAssignment() {
 }
 
 
-/* ============================================================
-   CONNECTION
-   ============================================================ */
+/* CONNECTION */
 
 function showConnected() {
 
     document
-        .getElementById(
-            "connectionDot"
-        )
-        .classList.add(
-            "connected"
-        );
+        .getElementById("connectionDot")
+        .classList.add("connected");
 
 
     document
-        .getElementById(
-            "connectionText"
-        )
+        .getElementById("connectionText")
         .textContent =
         "Connected";
 }
 
 
-/* ============================================================
-   ERROR
-   ============================================================ */
+/* ERROR */
 
 function showError(message) {
 
@@ -2033,9 +1816,7 @@ function showError(message) {
 }
 
 
-/* ============================================================
-   LOAD OPERATIONS
-   ============================================================ */
+/* LOAD OPERATIONS */
 
 async function loadCrewOperations() {
 
@@ -2047,11 +1828,7 @@ async function loadCrewOperations() {
         await ViaviaTrips.getMyTrips();
 
 
-    if (
-        !Array.isArray(
-            myAssignments
-        )
-    ) {
+    if (!Array.isArray(myAssignments)) {
         myAssignments = [];
     }
 
@@ -2068,14 +1845,10 @@ async function loadCrewOperations() {
 }
 
 
-/* ============================================================
-   SIGN OUT
-   ============================================================ */
+/* SIGN OUT */
 
 document
-    .getElementById(
-        "signOutButton"
-    )
+    .getElementById("signOutButton")
     .addEventListener(
         "click",
         async () => {
@@ -2100,9 +1873,7 @@ document
     );
 
 
-/* ============================================================
-   INITIALIZE
-   ============================================================ */
+/* INITIALIZE */
 
 async function initializeCrewPortal() {
 
@@ -2139,9 +1910,7 @@ async function initializeCrewPortal() {
 }
 
 
-/* ============================================================
-   REFRESH AFTER RETURNING TO PAGE
-   ============================================================ */
+/* REFRESH */
 
 window.addEventListener(
     "pageshow",
@@ -2168,9 +1937,7 @@ window.addEventListener(
 );
 
 
-/* ============================================================
-   START
-   ============================================================ */
+/* START */
 
 initializeCrewPortal();
 
