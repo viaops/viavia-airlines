@@ -17,7 +17,7 @@ const VIAVIA_EMAIL_CONFIRM_REDIRECT =
 
 
 /* ============================================================
-   LOAD SUPABASE CLIENT
+   LOAD SUPABASE
    ============================================================ */
 
 if (!window.supabase) {
@@ -50,7 +50,8 @@ async function getViaviaUser() {
   const {
     data: { user },
     error
-  } = await viaviaSupabase.auth.getUser();
+  } =
+    await viaviaSupabase.auth.getUser();
 
   if (error) {
 
@@ -71,7 +72,8 @@ async function getViaviaSession() {
   const {
     data: { session },
     error
-  } = await viaviaSupabase.auth.getSession();
+  } =
+    await viaviaSupabase.auth.getSession();
 
   if (error) {
 
@@ -87,10 +89,6 @@ async function getViaviaSession() {
 }
 
 
-/* ============================================================
-   SIGN UP
-   ============================================================ */
-
 async function signUpViaviaPilot(
   email,
   password,
@@ -99,7 +97,9 @@ async function signUpViaviaPilot(
 
   const { data, error } =
     await viaviaSupabase.auth.signUp({
-      email: email.trim(),
+      email:
+        email.trim(),
+
       password,
 
       options: {
@@ -123,10 +123,6 @@ async function signUpViaviaPilot(
 }
 
 
-/* ============================================================
-   SIGN IN
-   ============================================================ */
-
 async function signInViaviaPilot(
   email,
   password
@@ -135,7 +131,9 @@ async function signInViaviaPilot(
   const { data, error } =
     await viaviaSupabase.auth
       .signInWithPassword({
-        email: email.trim(),
+        email:
+          email.trim(),
+
         password
       });
 
@@ -146,10 +144,6 @@ async function signInViaviaPilot(
   return data;
 }
 
-
-/* ============================================================
-   SIGN OUT
-   ============================================================ */
 
 async function signOutViaviaPilot() {
 
@@ -163,10 +157,6 @@ async function signOutViaviaPilot() {
   return true;
 }
 
-
-/* ============================================================
-   REQUIRE AUTHENTICATION
-   ============================================================ */
 
 async function requireViaviaAuth() {
 
@@ -216,7 +206,10 @@ async function getViaviaPilotProfile() {
     await viaviaSupabase
       .from("pilots")
       .select("*")
-      .eq("id", user.id)
+      .eq(
+        "id",
+        user.id
+      )
       .single();
 
   if (error) {
@@ -232,10 +225,6 @@ async function getViaviaPilotProfile() {
   return data;
 }
 
-
-/* ============================================================
-   UPDATE PILOT PROFILE
-   ============================================================ */
 
 async function updateViaviaPilotProfile(
   updates
@@ -281,8 +270,13 @@ async function updateViaviaPilotProfile(
   const { data, error } =
     await viaviaSupabase
       .from("pilots")
-      .update(allowedUpdates)
-      .eq("id", user.id)
+      .update(
+        allowedUpdates
+      )
+      .eq(
+        "id",
+        user.id
+      )
       .select()
       .single();
 
@@ -313,7 +307,8 @@ function normalizeViaviaOperatingDate(
 
 
   if (
-    typeof value === "string"
+    typeof value ===
+    "string"
   ) {
 
     const match =
@@ -374,7 +369,7 @@ function normalizeViaviaOperatingDate(
 
 
 /* ============================================================
-   GET ASSIGNED TRIPS FOR DATE
+   TRIP ASSIGNMENTS
    ============================================================ */
 
 async function getViaviaAssignedTrips(
@@ -389,7 +384,9 @@ async function getViaviaAssignedTrips(
 
   const { data, error } =
     await viaviaSupabase
-      .from("trip_assignments")
+      .from(
+        "trip_assignments"
+      )
       .select(
         `
         id,
@@ -420,14 +417,9 @@ async function getViaviaAssignedTrips(
     throw error;
   }
 
-
   return data || [];
 }
 
-
-/* ============================================================
-   CHECK ONE TRIP
-   ============================================================ */
 
 async function isViaviaTripAssigned(
   tripId,
@@ -442,7 +434,9 @@ async function isViaviaTripAssigned(
 
   const { data, error } =
     await viaviaSupabase
-      .from("trip_assignments")
+      .from(
+        "trip_assignments"
+      )
       .select(
         "id,trip_id,pilot_id,status"
       )
@@ -573,7 +567,9 @@ async function claimViaviaTrip(
         .map(
           (flight, index) => {
 
-            if (index === 0) {
+            if (
+              index === 0
+            ) {
 
               return (
                 `${flight.origin} → ` +
@@ -593,8 +589,7 @@ async function claimViaviaTrip(
     flight_numbers:
       flightNumbers,
 
-    aircraft:
-      aircraft,
+    aircraft,
 
     leg_count:
       pairing.flights.length,
@@ -610,7 +605,9 @@ async function claimViaviaTrip(
 
   const { data, error } =
     await viaviaSupabase
-      .from("trip_assignments")
+      .from(
+        "trip_assignments"
+      )
       .insert(
         assignment
       )
@@ -646,7 +643,7 @@ async function claimViaviaTrip(
 
 
 /* ============================================================
-   CURRENT PILOT'S TRIPS
+   CURRENT PILOT TRIPS
    ============================================================ */
 
 async function getMyViaviaTrips() {
@@ -666,7 +663,9 @@ async function getMyViaviaTrips() {
 
   const { data, error } =
     await viaviaSupabase
-      .from("trip_assignments")
+      .from(
+        "trip_assignments"
+      )
       .select("*")
       .eq(
         "pilot_id",
@@ -679,13 +678,13 @@ async function getMyViaviaTrips() {
       .order(
         "operating_date",
         {
-          ascending: true
+          ascending:true
         }
       )
       .order(
         "awarded_at",
         {
-          ascending: true
+          ascending:true
         }
       );
 
@@ -694,14 +693,9 @@ async function getMyViaviaTrips() {
     throw error;
   }
 
-
   return data || [];
 }
 
-
-/* ============================================================
-   CURRENT PILOT'S TRIPS FOR ONE DATE
-   ============================================================ */
 
 async function getMyViaviaTripsForDate(
   operatingDate
@@ -728,7 +722,9 @@ async function getMyViaviaTripsForDate(
 
   const { data, error } =
     await viaviaSupabase
-      .from("trip_assignments")
+      .from(
+        "trip_assignments"
+      )
       .select("*")
       .eq(
         "pilot_id",
@@ -745,7 +741,7 @@ async function getMyViaviaTripsForDate(
       .order(
         "awarded_at",
         {
-          ascending: true
+          ascending:true
         }
       );
 
@@ -754,14 +750,9 @@ async function getMyViaviaTripsForDate(
     throw error;
   }
 
-
   return data || [];
 }
 
-
-/* ============================================================
-   GET ONE CURRENT-PILOT ASSIGNMENT
-   ============================================================ */
 
 async function getMyViaviaTrip(
   tripId,
@@ -789,7 +780,9 @@ async function getMyViaviaTrip(
 
   const { data, error } =
     await viaviaSupabase
-      .from("trip_assignments")
+      .from(
+        "trip_assignments"
+      )
       .select("*")
       .eq(
         "pilot_id",
@@ -814,14 +807,9 @@ async function getMyViaviaTrip(
     throw error;
   }
 
-
   return data;
 }
 
-
-/* ============================================================
-   OWNERSHIP / AVAILABILITY CHECK
-   ============================================================ */
 
 async function getViaviaTripAvailability(
   tripId,
@@ -849,7 +837,9 @@ async function getViaviaTripAvailability(
 
   const { data, error } =
     await viaviaSupabase
-      .from("trip_assignments")
+      .from(
+        "trip_assignments"
+      )
       .select(
         `
         id,
@@ -882,9 +872,9 @@ async function getViaviaTripAvailability(
   if (!data) {
 
     return {
-      available: true,
-      mine: false,
-      assignment: null
+      available:true,
+      mine:false,
+      assignment:null
     };
 
   }
@@ -892,7 +882,7 @@ async function getViaviaTripAvailability(
 
   return {
 
-    available: false,
+    available:false,
 
     mine:
       data.pilot_id ===
@@ -907,18 +897,6 @@ async function getViaviaTripAvailability(
 
 /* ============================================================
    VIAVIA GATE SYSTEM
-
-   Supabase tables:
-
-   viavia_gate_pools
-   flight_gate_assignments
-
-   Gate assignments are shared between all pilots/devices.
-   ============================================================ */
-
-
-/* ============================================================
-   NORMALIZE AIRPORT
    ============================================================ */
 
 function normalizeViaviaAirport(
@@ -926,7 +904,8 @@ function normalizeViaviaAirport(
 ) {
 
   if (
-    typeof airport !== "string" ||
+    typeof airport !==
+      "string" ||
     !airport.trim()
   ) {
 
@@ -936,18 +915,12 @@ function normalizeViaviaAirport(
 
   }
 
+
   return airport
     .trim()
     .toUpperCase();
 }
 
-
-/* ============================================================
-   NORMALIZE FLIGHT NUMBER
-
-   Database format:
-   VIA1757
-   ============================================================ */
 
 function normalizeViaviaFlightNumber(
   flightNumber
@@ -966,22 +939,34 @@ function normalizeViaviaFlightNumber(
 
 
   let value =
-    String(flightNumber)
+    String(
+      flightNumber
+    )
       .trim()
       .toUpperCase()
-      .replace(/\s+/g, "");
+      .replace(
+        /\s+/g,
+        ""
+      );
 
 
-  if (/^\d+$/.test(value)) {
+  if (
+    /^\d+$/.test(
+      value
+    )
+  ) {
 
     value =
-      "VIA" + value;
+      "VIA" +
+      value;
 
   }
 
 
   if (
-    !/^VIA\d+$/.test(value)
+    !/^VIA\d+$/.test(
+      value
+    )
   ) {
 
     throw new Error(
@@ -996,10 +981,68 @@ function normalizeViaviaFlightNumber(
 
 
 /* ============================================================
-   GET APPROVED GATE POOL
+   TIMESTAMP NORMALIZATION
+   ============================================================ */
 
-   Example:
-   ViaviaGates.getPool("DFW")
+function normalizeViaviaTimestamp(
+  value
+) {
+
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
+
+    return null;
+  }
+
+
+  if (
+    value instanceof Date
+  ) {
+
+    if (
+      Number.isNaN(
+        value.getTime()
+      )
+    ) {
+
+      throw new Error(
+        "Invalid Viavia timestamp."
+      );
+
+    }
+
+    return value.toISOString();
+  }
+
+
+  const date =
+    new Date(
+      value
+    );
+
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+
+    throw new Error(
+      "Invalid Viavia timestamp."
+    );
+
+  }
+
+
+  return date.toISOString();
+}
+
+
+/* ============================================================
+   GATE POOLS
    ============================================================ */
 
 async function getViaviaGatePool(
@@ -1014,7 +1057,9 @@ async function getViaviaGatePool(
 
   const { data, error } =
     await viaviaSupabase
-      .from("viavia_gate_pools")
+      .from(
+        "viavia_gate_pools"
+      )
       .select(
         `
         airport,
@@ -1033,20 +1078,17 @@ async function getViaviaGatePool(
     throw error;
   }
 
-
   return data;
 }
 
-
-/* ============================================================
-   GET ALL APPROVED GATE POOLS
-   ============================================================ */
 
 async function getAllViaviaGatePools() {
 
   const { data, error } =
     await viaviaSupabase
-      .from("viavia_gate_pools")
+      .from(
+        "viavia_gate_pools"
+      )
       .select(
         `
         airport,
@@ -1057,7 +1099,7 @@ async function getAllViaviaGatePools() {
       .order(
         "airport",
         {
-          ascending: true
+          ascending:true
         }
       );
 
@@ -1066,19 +1108,34 @@ async function getAllViaviaGatePools() {
     throw error;
   }
 
-
   return data || [];
 }
 
 
 /* ============================================================
-   GET ONE EXISTING FLIGHT GATE ASSIGNMENT
+   GATE ASSIGNMENT SELECT FIELDS
+   ============================================================ */
 
-   A flight can have an assignment at its departure airport
-   and another assignment at its arrival airport.
+const VIAVIA_GATE_FIELDS = `
+  id,
+  operating_date,
+  flight_number,
+  airport,
+  gate,
+  scheduled_arrival,
+  scheduled_departure,
+  actual_gate_in,
+  actual_gate_out,
+  occupancy_status,
+  occupancy_source,
+  assigned_at,
+  created_at,
+  updated_at
+`;
 
-   Example:
-   VIA1757 / 2026-09-27 / RSW
+
+/* ============================================================
+   GET ONE GATE ASSIGNMENT
    ============================================================ */
 
 async function getViaviaGateAssignment(
@@ -1105,18 +1162,11 @@ async function getViaviaGateAssignment(
 
   const { data, error } =
     await viaviaSupabase
-      .from("flight_gate_assignments")
+      .from(
+        "flight_gate_assignments"
+      )
       .select(
-        `
-        id,
-        operating_date,
-        flight_number,
-        airport,
-        gate,
-        assigned_at,
-        created_at,
-        updated_at
-        `
+        VIAVIA_GATE_FIELDS
       )
       .eq(
         "flight_number",
@@ -1137,13 +1187,12 @@ async function getViaviaGateAssignment(
     throw error;
   }
 
-
   return data;
 }
 
 
 /* ============================================================
-   GET ALL GATE ASSIGNMENTS FOR ONE AIRPORT / DATE
+   AIRPORT GATE ASSIGNMENTS
    ============================================================ */
 
 async function getViaviaAirportGateAssignments(
@@ -1164,18 +1213,11 @@ async function getViaviaAirportGateAssignments(
 
   const { data, error } =
     await viaviaSupabase
-      .from("flight_gate_assignments")
+      .from(
+        "flight_gate_assignments"
+      )
       .select(
-        `
-        id,
-        operating_date,
-        flight_number,
-        airport,
-        gate,
-        assigned_at,
-        created_at,
-        updated_at
-        `
+        VIAVIA_GATE_FIELDS
       )
       .eq(
         "airport",
@@ -1188,7 +1230,7 @@ async function getViaviaAirportGateAssignments(
       .order(
         "assigned_at",
         {
-          ascending: true
+          ascending:true
         }
       );
 
@@ -1197,18 +1239,12 @@ async function getViaviaAirportGateAssignments(
     throw error;
   }
 
-
   return data || [];
 }
 
 
 /* ============================================================
-   GET ALL GATE ASSIGNMENTS FOR ONE FLIGHT / DATE
-
-   Useful because a flight can have:
-
-   origin gate
-   destination gate
+   FLIGHT GATE ASSIGNMENTS
    ============================================================ */
 
 async function getViaviaFlightGateAssignments(
@@ -1229,18 +1265,11 @@ async function getViaviaFlightGateAssignments(
 
   const { data, error } =
     await viaviaSupabase
-      .from("flight_gate_assignments")
+      .from(
+        "flight_gate_assignments"
+      )
       .select(
-        `
-        id,
-        operating_date,
-        flight_number,
-        airport,
-        gate,
-        assigned_at,
-        created_at,
-        updated_at
-        `
+        VIAVIA_GATE_FIELDS
       )
       .eq(
         "flight_number",
@@ -1253,7 +1282,7 @@ async function getViaviaFlightGateAssignments(
       .order(
         "airport",
         {
-          ascending: true
+          ascending:true
         }
       );
 
@@ -1262,33 +1291,31 @@ async function getViaviaFlightGateAssignments(
     throw error;
   }
 
-
   return data || [];
 }
 
 
 /* ============================================================
-   CREATE / GET SHARED GATE ASSIGNMENT
+   ATOMIC GATE ASSIGNMENT
 
-   This function:
+   Gate selection now occurs INSIDE PostgreSQL.
 
-   1. Checks for an existing assignment.
-   2. Loads the airport's approved gate pool.
-   3. Looks at gates already assigned at that airport/date.
-   4. Chooses an available approved gate.
-   5. Saves it to Supabase.
-   6. If another client created the same flight assignment
-      first, it retrieves that shared assignment.
+   This prevents two browsers/pilots from simultaneously
+   selecting the same available gate.
 
-   IMPORTANT:
-   The 12-hour eligibility decision remains in Flight Planning.
-   This helper does not decide when a gate should be released.
+   scheduledArrival and scheduledDeparture should be actual
+   timestamps/Date objects representing the expected gate
+   occupancy interval.
+
+   The database also checks live ACARS occupancy.
    ============================================================ */
 
 async function assignViaviaGate(
   flightNumber,
   operatingDate,
-  airport
+  airport,
+  scheduledArrival = null,
+  scheduledDeparture = null
 ) {
 
   const user =
@@ -1320,8 +1347,19 @@ async function assignViaviaGate(
     );
 
 
+  const arrivalTimestamp =
+    normalizeViaviaTimestamp(
+      scheduledArrival
+    );
+
+  const departureTimestamp =
+    normalizeViaviaTimestamp(
+      scheduledDeparture
+    );
+
+
   /* ----------------------------------------------------------
-     EXISTING ASSIGNMENT
+     EXISTING SHARED ASSIGNMENT
      ---------------------------------------------------------- */
 
   const existing =
@@ -1338,158 +1376,102 @@ async function assignViaviaGate(
 
 
   /* ----------------------------------------------------------
-     APPROVED AIRPORT GATE POOL
+     DATABASE ATOMIC ALLOCATOR
      ---------------------------------------------------------- */
-
-  const pool =
-    await getViaviaGatePool(
-      airportCode
-    );
-
-
-  if (
-    !pool ||
-    !Array.isArray(pool.gates) ||
-    pool.gates.length === 0
-  ) {
-
-    const noPoolError =
-      new Error(
-        `No approved Viavia gate pool exists for ${airportCode}.`
-      );
-
-    noPoolError.code =
-      "VIAVIA_NO_GATE_POOL";
-
-    throw noPoolError;
-  }
-
-
-  /* ----------------------------------------------------------
-     CURRENT ASSIGNMENTS AT AIRPORT
-     ---------------------------------------------------------- */
-
-  const airportAssignments =
-    await getViaviaAirportGateAssignments(
-      airportCode,
-      date
-    );
-
-
-  const usedGates =
-    new Set(
-      airportAssignments
-        .map(
-          assignment =>
-            String(
-              assignment.gate
-            ).toUpperCase()
-        )
-    );
-
-
-  const availableGates =
-    pool.gates.filter(
-      gate =>
-        !usedGates.has(
-          String(gate).toUpperCase()
-        )
-    );
-
-
-  /*
-     If every gate has already been assigned somewhere on that
-     operating date, allow the pool to cycle.
-
-     This is intentional for now because the current table does
-     not yet store arrival/departure occupancy timestamps.
-
-     Flight Planning will later provide the actual timing logic.
-  */
-
-  const candidateGates =
-    availableGates.length > 0
-      ? availableGates
-      : pool.gates;
-
-
-  /*
-     Deterministic selection instead of Math.random().
-
-     The same flight/date/airport combination produces a stable
-     starting position in the approved gate pool.
-  */
-
-  const seed =
-    (
-      flight +
-      date +
-      airportCode
-    )
-      .split("")
-      .reduce(
-        (total, character) =>
-          total +
-          character.charCodeAt(0),
-        0
-      );
-
-
-  const gate =
-    candidateGates[
-      seed %
-      candidateGates.length
-    ];
-
-
-  const newAssignment = {
-
-    operating_date:
-      date,
-
-    flight_number:
-      flight,
-
-    airport:
-      airportCode,
-
-    gate:
-      String(gate)
-
-  };
-
 
   const { data, error } =
-    await viaviaSupabase
-      .from("flight_gate_assignments")
-      .insert(
-        newAssignment
+    await viaviaSupabase.rpc(
+      "assign_viavia_gate",
+      {
+        p_flight_number:
+          flight,
+
+        p_operating_date:
+          date,
+
+        p_airport:
+          airportCode,
+
+        p_scheduled_arrival:
+          arrivalTimestamp,
+
+        p_scheduled_departure:
+          departureTimestamp
+      }
+    );
+
+
+  if (error) {
+
+    const message =
+      String(
+        error.message ||
+        ""
+      );
+
+
+    if (
+      message.includes(
+        "No conflict-free Viavia gate"
       )
-      .select()
-      .single();
+    ) {
+
+      const unavailableError =
+        new Error(
+          `No conflict-free Viavia gate is currently available at ${airportCode}.`
+        );
+
+      unavailableError.code =
+        "VIAVIA_NO_GATE_AVAILABLE";
+
+      throw unavailableError;
+
+    }
 
 
-  if (!error) {
-    return data;
+    if (
+      message.includes(
+        "No approved Viavia gate pool"
+      )
+    ) {
+
+      const poolError =
+        new Error(
+          `No approved Viavia gate pool exists for ${airportCode}.`
+        );
+
+      poolError.code =
+        "VIAVIA_NO_GATE_POOL";
+
+      throw poolError;
+
+    }
+
+
+    throw error;
   }
 
 
-  /* ----------------------------------------------------------
-     RACE CONDITION
+  /*
+     Depending on PostgREST serialization of a composite return
+     value, data may be an object or a one-row array.
+  */
 
-     PostgreSQL 23505 means another browser/pilot created the
-     same flight/date/airport assignment before this insert
-     completed.
+  const assignment =
+    Array.isArray(data)
+      ? data[0]
+      : data;
 
-     Retrieve the winning shared assignment.
-     ---------------------------------------------------------- */
 
-  if (
-    error.code ===
-    "23505"
-  ) {
+  if (!assignment) {
 
-    const winningAssignment =
+    /*
+       Defensive fallback:
+       if the RPC completed but no row was returned to the
+       browser, retrieve the persisted shared assignment.
+    */
+
+    const persisted =
       await getViaviaGateAssignment(
         flight,
         date,
@@ -1497,43 +1479,31 @@ async function assignViaviaGate(
       );
 
 
-    if (winningAssignment) {
-      return winningAssignment;
+    if (persisted) {
+      return persisted;
     }
 
 
-    const conflictError =
-      new Error(
-        "The gate assignment changed while it was being created."
-      );
-
-    conflictError.code =
-      "VIAVIA_GATE_ASSIGNMENT_CONFLICT";
-
-    throw conflictError;
+    throw new Error(
+      "Viavia Operations did not return the new gate assignment."
+    );
   }
 
 
-  throw error;
+  return assignment;
 }
 
 
 /* ============================================================
-   GET OR ASSIGN
-
-   Convenience function for Flight Planning.
-
-   If the gate already exists:
-       return it.
-
-   Otherwise:
-       create it.
+   GET OR ASSIGN GATE
    ============================================================ */
 
 async function getOrAssignViaviaGate(
   flightNumber,
   operatingDate,
-  airport
+  airport,
+  scheduledArrival = null,
+  scheduledDeparture = null
 ) {
 
   const existing =
@@ -1552,13 +1522,15 @@ async function getOrAssignViaviaGate(
   return await assignViaviaGate(
     flightNumber,
     operatingDate,
-    airport
+    airport,
+    scheduledArrival,
+    scheduledDeparture
   );
 }
 
 
 /* ============================================================
-   GATE DISPLAY HELPER
+   GATE DISPLAY
    ============================================================ */
 
 async function getViaviaGateDisplay(
@@ -1578,23 +1550,258 @@ async function getViaviaGateDisplay(
   if (!assignment) {
 
     return {
-      assigned: false,
-      gate: null,
+      assigned:false,
+      gate:null,
       text:
-        "TBD — Gate assignment pending"
+        "TBD — Gate assignment pending",
+      occupancyStatus:null
     };
 
   }
 
 
   return {
-    assigned: true,
+    assigned:true,
+
     gate:
       assignment.gate,
+
     text:
       `Gate ${assignment.gate}`,
+
+    occupancyStatus:
+      assignment.occupancy_status,
+
     assignment
   };
+}
+
+
+/* ============================================================
+   LIVE GATE STATUS
+   ============================================================ */
+
+async function getViaviaLiveGateStatus(
+  airport
+) {
+
+  const airportCode =
+    normalizeViaviaAirport(
+      airport
+    );
+
+
+  const { data, error } =
+    await viaviaSupabase
+      .from(
+        "viavia_live_gate_status"
+      )
+      .select("*")
+      .eq(
+        "airport",
+        airportCode
+      );
+
+
+  if (error) {
+    throw error;
+  }
+
+  return data || [];
+}
+
+
+/* ============================================================
+   IS GATE PHYSICALLY OCCUPIED
+   ============================================================ */
+
+async function isViaviaGateOccupied(
+  airport,
+  gate
+) {
+
+  const airportCode =
+    normalizeViaviaAirport(
+      airport
+    );
+
+
+  if (
+    gate === null ||
+    gate === undefined ||
+    !String(gate).trim()
+  ) {
+
+    throw new Error(
+      "A gate is required."
+    );
+
+  }
+
+
+  const { data, error } =
+    await viaviaSupabase.rpc(
+      "viavia_gate_is_occupied",
+      {
+        p_airport:
+          airportCode,
+
+        p_gate:
+          String(gate)
+            .trim()
+            .toUpperCase()
+      }
+    );
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  return data === true;
+}
+
+
+/* ============================================================
+   ACARS GATE IN
+
+   Eventually this should be called by the ACARS system rather
+   than directly by normal pilot-facing pages.
+
+   When ACARS reports gate-in:
+       PLANNED -> OCCUPIED
+   ============================================================ */
+
+async function reportViaviaAcarsGateIn(
+  flightNumber,
+  operatingDate,
+  airport,
+  gate
+) {
+
+  const flight =
+    normalizeViaviaFlightNumber(
+      flightNumber
+    );
+
+  const date =
+    normalizeViaviaOperatingDate(
+      operatingDate
+    );
+
+  const airportCode =
+    normalizeViaviaAirport(
+      airport
+    );
+
+
+  if (
+    gate === null ||
+    gate === undefined ||
+    !String(gate).trim()
+  ) {
+
+    throw new Error(
+      "A gate is required for ACARS gate-in."
+    );
+
+  }
+
+
+  const { error } =
+    await viaviaSupabase.rpc(
+      "viavia_acars_gate_in",
+      {
+        p_flight_number:
+          flight,
+
+        p_operating_date:
+          date,
+
+        p_airport:
+          airportCode,
+
+        p_gate:
+          String(gate)
+            .trim()
+            .toUpperCase()
+      }
+    );
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  return await getViaviaGateAssignment(
+    flight,
+    date,
+    airportCode
+  );
+}
+
+
+/* ============================================================
+   ACARS GATE OUT
+
+   This is the important release event.
+
+   The moment ACARS reports gate-out:
+       OCCUPIED -> RELEASED
+
+   The gate can then be selected for another aircraft.
+   ============================================================ */
+
+async function reportViaviaAcarsGateOut(
+  flightNumber,
+  operatingDate,
+  airport
+) {
+
+  const flight =
+    normalizeViaviaFlightNumber(
+      flightNumber
+    );
+
+  const date =
+    normalizeViaviaOperatingDate(
+      operatingDate
+    );
+
+  const airportCode =
+    normalizeViaviaAirport(
+      airport
+    );
+
+
+  const { error } =
+    await viaviaSupabase.rpc(
+      "viavia_acars_gate_out",
+      {
+        p_flight_number:
+          flight,
+
+        p_operating_date:
+          date,
+
+        p_airport:
+          airportCode
+      }
+    );
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  return await getViaviaGateAssignment(
+    flight,
+    date,
+    airportCode
+  );
 }
 
 
@@ -1608,7 +1815,10 @@ function onViaviaAuthStateChange(
 
   return viaviaSupabase.auth
     .onAuthStateChange(
-      (event, session) => {
+      (
+        event,
+        session
+      ) => {
 
         callback(
           event,
@@ -1697,7 +1907,7 @@ window.ViaviaTrips = {
 /* ============================================================
    GLOBAL GATE API
 
-   Usage examples:
+   Examples:
 
    ViaviaGates.getPool("DFW")
 
@@ -1708,6 +1918,21 @@ window.ViaviaTrips = {
    )
 
    ViaviaGates.getOrAssign(
+     "VIA1757",
+     "2026-09-27",
+     "RSW",
+     scheduledArrival,
+     scheduledDeparture
+   )
+
+   ViaviaGates.acarsGateIn(
+     "VIA1757",
+     "2026-09-27",
+     "RSW",
+     "D4"
+   )
+
+   ViaviaGates.acarsGateOut(
      "VIA1757",
      "2026-09-27",
      "RSW"
@@ -1721,6 +1946,9 @@ window.ViaviaGates = {
 
   normalizeFlightNumber:
     normalizeViaviaFlightNumber,
+
+  normalizeTimestamp:
+    normalizeViaviaTimestamp,
 
   getPool:
     getViaviaGatePool,
@@ -1744,7 +1972,19 @@ window.ViaviaGates = {
     getOrAssignViaviaGate,
 
   getDisplay:
-    getViaviaGateDisplay
+    getViaviaGateDisplay,
+
+  getLiveStatus:
+    getViaviaLiveGateStatus,
+
+  isOccupied:
+    isViaviaGateOccupied,
+
+  acarsGateIn:
+    reportViaviaAcarsGateIn,
+
+  acarsGateOut:
+    reportViaviaAcarsGateOut
 
 };
 
