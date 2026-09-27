@@ -1,508 +1,615 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Viavia Airlines — Crew Calendar</title>
-
-    <style>
-        :root {
-            --purple: #5b247a;
-            --purple-dark: #3d1557;
-            --purple-light: #eee4f5;
-            --lavender: #e6d6f5;
-            --background: #f7f4fa;
-            --white: #ffffff;
-            --text: #24142f;
-            --muted: #6f6475;
-            --border: #e2dce7;
-            --green: #2e7d52;
-            --green-light: #e7f5ec;
-            --orange: #b66a16;
-            --orange-light: #fff1df;
-            --shadow: 0 4px 14px rgba(60, 30, 80, 0.08);
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-            background: var(--background);
-            color: var(--text);
-        }
-
-        header {
-            background: var(--purple);
-            color: white;
-            padding: 16px 28px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-        }
-
-        .header-inner {
-            max-width: 1250px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 700;
-            font-size: 21px;
-        }
-
-        .brand img {
-            height: 42px;
-            width: auto;
-            display: block;
-        }
-
-        nav {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-            gap: 8px;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-            padding: 9px 12px;
-            border-radius: 7px;
-            font-size: 14px;
-        }
-
-        nav a:hover,
-        nav a.active {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        main {
-            max-width: 1250px;
-            margin: 0 auto;
-            padding: 30px 20px 60px;
-        }
-
-        .page-heading {
-            margin-bottom: 22px;
-        }
-
-        .page-heading h1 {
-            margin: 0 0 6px;
-            font-size: 32px;
-            color: var(--purple-dark);
-        }
-
-        .page-heading p {
-            margin: 0;
-            color: var(--muted);
-        }
-
-        .status-grid {
-            display: grid;
-            grid-template-columns:
-                repeat(3, minmax(0, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .status-card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 18px;
-            box-shadow: var(--shadow);
-        }
-
-        .status-card span {
-            display: block;
-            color: var(--muted);
-            font-size: 13px;
-            margin-bottom: 7px;
-        }
-
-        .status-card strong {
-            display: block;
-            color: var(--purple-dark);
-            font-size: 22px;
-        }
-
-        .calendar-toolbar {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-            margin-bottom: 18px;
-            box-shadow: var(--shadow);
-        }
-
-        .calendar-toolbar button {
-            border: 1px solid var(--border);
-            background: white;
-            color: var(--purple-dark);
-            padding: 9px 14px;
-            border-radius: 7px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .calendar-toolbar button:hover {
-            background: var(--purple-light);
-        }
-
-        .week-title {
-            text-align: center;
-            font-weight: 700;
-            color: var(--purple-dark);
-            font-size: 18px;
-        }
-
-        .calendar {
-            display: grid;
-            grid-template-columns:
-                repeat(7, minmax(0, 1fr));
-            gap: 10px;
-            margin-bottom: 28px;
-        }
-
-        .day-column {
-            min-height: 205px;
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: var(--shadow);
-        }
-
-        .day-header {
-            background: var(--purple-light);
-            padding: 11px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .day-header .day-name {
-            font-size: 12px;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
-
-        .day-header .day-date {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--purple-dark);
-            margin-top: 3px;
-        }
-
-        .day-content {
-            padding: 9px;
-        }
-
-        .calendar-trip {
-            display: block;
-            width: 100%;
-            text-align: left;
-            border: 1px solid #d9cce2;
-            background: #faf7fc;
-            border-radius: 8px;
-            padding: 9px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            color: var(--text);
-        }
-
-        .calendar-trip:hover {
-            border-color: var(--purple);
-            background: var(--purple-light);
-        }
-
-        .calendar-trip .trip-id {
-            font-weight: 700;
-            color: var(--purple);
-            font-size: 13px;
-        }
-
-        .calendar-trip .trip-route {
-            font-weight: 700;
-            margin-top: 3px;
-            font-size: 13px;
-        }
-
-        .calendar-trip .trip-time {
-            color: var(--muted);
-            font-size: 12px;
-            margin-top: 3px;
-        }
-
-        .empty-day {
-            color: #a198a9;
-            font-size: 12px;
-            padding: 8px 2px;
-        }
-
-        .trip-section {
-            margin-top: 25px;
-        }
-
-        .section-heading {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-            margin-bottom: 12px;
-        }
-
-        .section-heading h2 {
-            margin: 0;
-            color: var(--purple-dark);
-            font-size: 22px;
-        }
-
-        .section-heading span {
-            color: var(--muted);
-            font-size: 13px;
-        }
-
-        .trip-list {
-            display: grid;
-            gap: 14px;
-        }
-
-        .trip-card {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .trip-card-header {
-            padding: 17px 18px;
-            background: #fbf9fc;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-        }
-
-        .trip-card-header h3 {
-            margin: 0 0 4px;
-            color: var(--purple-dark);
-            font-size: 19px;
-        }
-
-        .trip-card-header p {
-            margin: 0;
-            color: var(--muted);
-            font-size: 13px;
-        }
-
-        .trip-status {
-            padding: 6px 10px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 700;
-            background: var(--green-light);
-            color: var(--green);
-            white-space: nowrap;
-        }
-
-        .trip-status.pending {
-            background: var(--orange-light);
-            color: var(--orange);
-        }
-
-        .trip-card-body {
-            padding: 17px 18px;
-        }
-
-        .trip-meta {
-            display: grid;
-            grid-template-columns:
-                repeat(4, minmax(0, 1fr));
-            gap: 12px;
-            margin-bottom: 17px;
-        }
-
-        .meta-item {
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 10px;
-        }
-
-        .meta-item span {
-            display: block;
-            color: var(--muted);
-            font-size: 11px;
-            margin-bottom: 4px;
-        }
-
-        .meta-item strong {
-            color: var(--purple-dark);
-            font-size: 14px;
-        }
-
-        .flight-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .flight-table th {
-            text-align: left;
-            color: var(--muted);
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            padding: 9px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .flight-table td {
-            padding: 10px 9px;
-            border-bottom: 1px solid #eee9f0;
-            font-size: 13px;
-        }
-
-        .flight-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .flight-number {
-            font-weight: 700;
-            color: var(--purple);
-        }
-
-        .gate-pending {
-            display: inline-block;
-            margin-top: 14px;
-            padding: 9px 11px;
-            border-radius: 7px;
-            background: var(--orange-light);
-            color: var(--orange);
-            font-size: 12px;
-        }
-
-        .no-trips {
-            background: var(--white);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 45px 20px;
-            text-align: center;
-            box-shadow: var(--shadow);
-        }
-
-        .no-trips .icon {
-            font-size: 35px;
-            margin-bottom: 10px;
-        }
-
-        .no-trips h3 {
-            margin: 0 0 7px;
-            color: var(--purple-dark);
-        }
-
-        .no-trips p {
-            margin: 0;
-            color: var(--muted);
-        }
-
-        .notice {
-            background: var(--purple-light);
-            border: 1px solid #dac9e5;
-            border-radius: 10px;
-            padding: 13px 15px;
-            margin-bottom: 20px;
-            color: var(--purple-dark);
-            font-size: 13px;
-        }
-
-        .error-box {
-            background: #fff0f0;
-            border: 1px solid #e3bcbc;
-            color: #8a2424;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        @media (max-width: 950px) {
-            .calendar {
-                grid-template-columns:
-                    repeat(2, minmax(0, 1fr));
-            }
-
-            .status-grid {
-                grid-template-columns:
-                    repeat(2, minmax(0, 1fr));
-            }
-
-            .trip-meta {
-                grid-template-columns:
-                    repeat(2, minmax(0, 1fr));
-            }
-
-            .header-inner {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-
-            nav {
-                justify-content: flex-start;
-            }
-        }
-
-        @media (max-width: 600px) {
-            main {
-                padding: 22px 12px 45px;
-            }
-
-            .calendar {
-                grid-template-columns: 1fr;
-            }
-
-            .status-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .trip-meta {
-                grid-template-columns: 1fr;
-            }
-
-            .calendar-toolbar {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .trip-card-header {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-
-            .flight-table {
-                display: block;
-                overflow-x: auto;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Viavia Airlines — Crew Calendar</title>
+
+<style>
+:root {
+    --purple: #5b247a;
+    --purple-dark: #3d1557;
+    --purple-light: #eee4f5;
+    --background: #f7f4fa;
+    --white: #ffffff;
+    --text: #24142f;
+    --muted: #6f6475;
+    --border: #e2dce7;
+    --green: #2e7d52;
+    --green-light: #e7f5ec;
+    --orange: #b66a16;
+    --orange-light: #fff1df;
+    --shadow: 0 4px 14px rgba(60,30,80,.08);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--background);
+    color: var(--text);
+}
+
+header {
+    background: var(--purple);
+    color: white;
+    padding: 16px 28px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.12);
+}
+
+.header-inner {
+    max-width: 1250px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 21px;
+    color: white;
+    text-decoration: none;
+}
+
+.brand img {
+    height: 42px;
+    width: auto;
+    display: block;
+}
+
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+    align-items: center;
+}
+
+nav a,
+nav button {
+    color: white;
+    text-decoration: none;
+    padding: 9px 12px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-family: inherit;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+nav a:hover,
+nav a.active,
+nav button:hover {
+    background: rgba(255,255,255,.15);
+}
+
+main {
+    max-width: 1250px;
+    margin: 0 auto;
+    padding: 30px 20px 60px;
+}
+
+.page-heading {
+    margin-bottom: 22px;
+}
+
+.page-heading h1 {
+    margin: 0 0 6px;
+    font-size: 32px;
+    color: var(--purple-dark);
+}
+
+.page-heading p {
+    margin: 0;
+    color: var(--muted);
+}
+
+.connection-status {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    flex-wrap: wrap;
+    box-shadow: var(--shadow);
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.connection-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.connection-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #aaa;
+}
+
+.connection-dot.connected {
+    background: #36a765;
+    box-shadow: 0 0 0 4px rgba(54,167,101,.12);
+}
+
+.connection-status strong {
+    color: var(--purple);
+}
+
+.notice {
+    background: var(--purple-light);
+    border: 1px solid #dac9e5;
+    border-radius: 10px;
+    padding: 13px 15px;
+    margin-bottom: 20px;
+    color: var(--purple-dark);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.error-box {
+    display: none;
+    background: #fff0f0;
+    border: 1px solid #e3bcbc;
+    color: #8a2424;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.status-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: var(--shadow);
+}
+
+.status-card span {
+    display: block;
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 7px;
+}
+
+.status-card strong {
+    display: block;
+    color: var(--purple-dark);
+    font-size: 22px;
+}
+
+.calendar-toolbar {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+}
+
+.calendar-toolbar button {
+    border: 1px solid var(--border);
+    background: white;
+    color: var(--purple-dark);
+    padding: 9px 14px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.calendar-toolbar button:hover {
+    background: var(--purple-light);
+}
+
+.toolbar-left,
+.toolbar-right {
+    display: flex;
+    gap: 8px;
+}
+
+.week-title {
+    text-align: center;
+    font-weight: 700;
+    color: var(--purple-dark);
+    font-size: 18px;
+}
+
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7,minmax(0,1fr));
+    gap: 10px;
+    margin-bottom: 28px;
+}
+
+.day-column {
+    min-height: 205px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.day-column.today {
+    border: 2px solid var(--purple);
+}
+
+.day-header {
+    background: var(--purple-light);
+    padding: 11px;
+    border-bottom: 1px solid var(--border);
+}
+
+.day-column.today .day-header {
+    background: #dfcbed;
+}
+
+.day-header .day-name {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.day-header .day-date {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--purple-dark);
+    margin-top: 3px;
+}
+
+.today-label {
+    margin-top: 4px;
+    font-size: 10px;
+    color: var(--purple);
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.day-content {
+    padding: 9px;
+}
+
+.calendar-trip {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: 1px solid #d9cce2;
+    background: #faf7fc;
+    border-radius: 8px;
+    padding: 9px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    color: var(--text);
+}
+
+.calendar-trip:hover {
+    border-color: var(--purple);
+    background: var(--purple-light);
+}
+
+.calendar-trip .trip-id {
+    font-weight: 700;
+    color: var(--purple);
+    font-size: 13px;
+}
+
+.calendar-trip .trip-route {
+    font-weight: 700;
+    margin-top: 3px;
+    font-size: 13px;
+}
+
+.calendar-trip .trip-time {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 3px;
+}
+
+.empty-day {
+    color: #a198a9;
+    font-size: 12px;
+    padding: 8px 2px;
+}
+
+.trip-section {
+    margin-top: 25px;
+}
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 12px;
+}
+
+.section-heading h2 {
+    margin: 0;
+    color: var(--purple-dark);
+    font-size: 22px;
+}
+
+.section-heading span {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.trip-list {
+    display: grid;
+    gap: 14px;
+}
+
+.trip-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.trip-card.highlight {
+    outline: 2px solid var(--purple);
+}
+
+.trip-card-header {
+    padding: 17px 18px;
+    background: #fbf9fc;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.trip-card-header h3 {
+    margin: 0 0 4px;
+    color: var(--purple-dark);
+    font-size: 19px;
+}
+
+.trip-card-header p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.trip-status {
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    background: var(--green-light);
+    color: var(--green);
+    white-space: nowrap;
+}
+
+.trip-status.completed {
+    background: var(--purple-light);
+    color: var(--purple);
+}
+
+.trip-card-body {
+    padding: 17px 18px;
+}
+
+.trip-meta {
+    display: grid;
+    grid-template-columns: repeat(5,minmax(0,1fr));
+    gap: 12px;
+    margin-bottom: 17px;
+}
+
+.meta-item {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.meta-item span {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    margin-bottom: 4px;
+}
+
+.meta-item strong {
+    color: var(--purple-dark);
+    font-size: 14px;
+}
+
+.flight-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.flight-table th {
+    text-align: left;
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    padding: 9px;
+    border-bottom: 1px solid var(--border);
+}
+
+.flight-table td {
+    padding: 10px 9px;
+    border-bottom: 1px solid #eee9f0;
+    font-size: 13px;
+}
+
+.flight-table tr:last-child td {
+    border-bottom: none;
+}
+
+.flight-number {
+    font-weight: 700;
+    color: var(--purple);
+}
+
+.gate-pending {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 9px 11px;
+    border-radius: 7px;
+    background: var(--orange-light);
+    color: var(--orange);
+    font-size: 12px;
+}
+
+.gate-assigned {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 9px 11px;
+    border-radius: 7px;
+    background: var(--green-light);
+    color: var(--green);
+    font-size: 12px;
+}
+
+.trip-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.action-button {
+    display: inline-block;
+    background: var(--purple);
+    color: white;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.action-button.secondary {
+    background: var(--purple-light);
+    color: var(--purple);
+}
+
+.no-trips {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 45px 20px;
+    text-align: center;
+    box-shadow: var(--shadow);
+}
+
+.no-trips .icon {
+    font-size: 35px;
+    margin-bottom: 10px;
+}
+
+.no-trips h3 {
+    margin: 0 0 7px;
+    color: var(--purple-dark);
+}
+
+.no-trips p {
+    margin: 0 0 18px;
+    color: var(--muted);
+}
+
+.no-trips a {
+    display: inline-block;
+    background: var(--purple);
+    color: white;
+    text-decoration: none;
+    padding: 9px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+footer {
+    text-align: center;
+    color: #776d7e;
+    font-size: 13px;
+    padding: 0 20px 40px;
+}
+
+@media (max-width: 950px) {
+    .calendar {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+    }
+
+    .status-grid {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+    }
+
+    .trip-meta {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+    }
+
+    .header-inner {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    nav {
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 600px) {
+    main {
+        padding: 22px 12px 45px;
+    }
+
+    .calendar,
+    .status-grid,
+    .trip-meta {
+        grid-template-columns: 1fr;
+    }
+
+    .calendar-toolbar {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .trip-card-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .flight-table {
+        display: block;
+        overflow-x: auto;
+    }
+}
+</style>
 </head>
 
 <body>
@@ -510,18 +617,13 @@
 <header>
     <div class="header-inner">
 
-        <div class="brand">
-
+        <a class="brand" href="pilot-center.html">
             <img
                 src="viavia-logo.png"
                 alt="Viavia Airlines"
             >
-
-            <span>
-                Crew Calendar
-            </span>
-
-        </div>
+            <span>Crew Calendar</span>
+        </a>
 
         <nav>
 
@@ -530,7 +632,11 @@
             </a>
 
             <a href="available-bids.html">
-                Available Bids
+                Available Trips
+            </a>
+
+            <a href="my-trips.html">
+                My Trips
             </a>
 
             <a
@@ -545,8 +651,15 @@
             </a>
 
             <a href="index.html">
-                Home
+                Main Site
             </a>
+
+            <button
+                type="button"
+                id="signOutButton"
+            >
+                Sign Out
+            </button>
 
         </nav>
 
@@ -563,11 +676,41 @@
         </h1>
 
         <p>
-            View your submitted bids and awarded trips
-            using the Viavia master schedule.
+            View your awarded Viavia trips by operating date.
         </p>
 
     </div>
+
+
+    <div class="connection-status">
+
+        <div class="connection-left">
+
+            <span
+                id="connectionDot"
+                class="connection-dot"
+            ></span>
+
+            <span>
+                <strong>Viavia Operations:</strong>
+                <span id="connectionText">
+                    Connecting...
+                </span>
+            </span>
+
+        </div>
+
+        <span id="pilotDisplay">
+            Checking pilot account...
+        </span>
+
+    </div>
+
+
+    <div
+        id="errorBox"
+        class="error-box"
+    ></div>
 
 
     <div class="notice">
@@ -593,10 +736,10 @@
         <div class="status-card">
 
             <span>
-                Submitted Bids
+                Awarded Trips
             </span>
 
-            <strong id="bidCount">
+            <strong id="tripCount">
                 0
             </strong>
 
@@ -606,10 +749,10 @@
         <div class="status-card">
 
             <span>
-                Trips Displayed
+                Upcoming Trips
             </span>
 
-            <strong id="tripCount">
+            <strong id="upcomingCount">
                 0
             </strong>
 
@@ -633,12 +776,16 @@
 
     <div class="calendar-toolbar">
 
-        <button
-            type="button"
-            id="previousWeek"
-        >
-            ← Previous Week
-        </button>
+        <div class="toolbar-left">
+
+            <button
+                type="button"
+                id="previousWeek"
+            >
+                ← Previous Week
+            </button>
+
+        </div>
 
 
         <div
@@ -649,12 +796,23 @@
         </div>
 
 
-        <button
-            type="button"
-            id="nextWeek"
-        >
-            Next Week →
-        </button>
+        <div class="toolbar-right">
+
+            <button
+                type="button"
+                id="todayButton"
+            >
+                Today
+            </button>
+
+            <button
+                type="button"
+                id="nextWeek"
+            >
+                Next Week →
+            </button>
+
+        </div>
 
     </div>
 
@@ -690,33 +848,38 @@
 </main>
 
 
-<!-- ============================================================
-     VIAVIA MASTER SCHEDULE
-============================================================ -->
+<footer>
+    Viavia Airlines · Crew Calendar · Your destination, via us!
+</footer>
 
-<script src="viavia-schedule.js"></script>
+
+<script src="viavia-schedule.js?v=20260926"></script>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="viavia-supabase.js?v=20260926"></script>
 
 
 <script>
+"use strict";
+
+
 /* ============================================================
    VIAVIA AIRLINES — CREW CALENDAR
-   Uses the shared pairing engine from viavia-schedule.js
+   Supabase Assignment System
+   Version: 2026-09-26
+   ============================================================ */
 
-   IMPORTANT:
-   - No local pairing generation.
-   - No Math.random().
-   - No invented flight numbers.
-   - No KFTW pilot base.
-   - All pairings come from the master schedule.
-   - Submitted bids are read from localStorage.
-============================================================ */
+const GATE_PENDING_TEXT =
+    "TBD — Gate assignment pending";
 
-
-const STORAGE_KEY = "viaviaBids";
+let currentUser = null;
+let currentPilot = null;
 
 let allPairings = [];
-
-let submittedTrips = [];
+let myAssignments = [];
 
 let currentWeekStart =
     getMonday(
@@ -725,331 +888,452 @@ let currentWeekStart =
 
 
 /* ============================================================
-   INITIALIZATION
-============================================================ */
+   HTML
+   ============================================================ */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
-
-        initializeCrewCalendar();
-
-    }
-);
-
-
-function initializeCrewCalendar() {
+function escapeHtml(value) {
 
     if (
-        typeof VIAVIA_SCHEDULE ===
-        "undefined"
+        value === null ||
+        value === undefined
     ) {
-
-        showError(
-            "The Viavia master schedule could not be loaded."
-        );
-
-        return;
-
+        return "";
     }
 
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+/* ============================================================
+   DATE HELPERS
+   ============================================================ */
+
+function getMonday(date) {
+
+    const result =
+        new Date(date);
+
+    result.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+    const day =
+        result.getDay();
+
+    const difference =
+        day === 0
+            ? -6
+            : 1 - day;
+
+    result.setDate(
+        result.getDate() +
+        difference
+    );
+
+    return result;
+
+}
+
+
+function addDays(
+    date,
+    days
+) {
+
+    const result =
+        new Date(date);
+
+    result.setDate(
+        result.getDate() +
+        days
+    );
+
+    return result;
+
+}
+
+
+function getDateKey(date) {
+
+    const year =
+        date.getFullYear();
+
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+    const day =
+        String(
+            date.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+    return `${year}-${month}-${day}`;
+
+}
+
+
+function getTodayKey() {
+
+    return getDateKey(
+        new Date()
+    );
+
+}
+
+
+function formatMonthDay(date) {
+
+    return date.toLocaleDateString(
+        "en-US",
+        {
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+        }
+    );
+
+}
+
+
+function formatOperatingDate(value) {
+
+    if (!value) {
+        return "—";
+    }
+
+    const parts =
+        String(value).split("-");
+
+    if (
+        parts.length !== 3
+    ) {
+        return value;
+    }
+
+    const date =
+        new Date(
+            Number(parts[0]),
+            Number(parts[1]) - 1,
+            Number(parts[2])
+        );
+
+    return date.toLocaleDateString(
+        "en-US",
+        {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+        }
+    );
+
+}
+
+
+/* ============================================================
+   MASTER PAIRINGS
+   ============================================================ */
+
+function loadMasterPairings() {
 
     if (
         typeof generateViaviaPairings !==
         "function"
     ) {
 
-        showError(
+        throw new Error(
             "The Viavia pairing engine could not be loaded."
         );
 
-        return;
-
     }
 
+    return generateViaviaPairings({
+        maxLegs: 3
+    }) || [];
 
-    /*
-     * Load the exact same pairing set
-     * used by Available Bids.
-     */
-
-    allPairings =
-        generateViaviaPairings({
-            maxLegs: 3
-        });
+}
 
 
-    loadSubmittedTrips();
+function findPairing(tripId) {
 
-    setupWeekControls();
-
-    renderEverything();
+    return allPairings.find(
+        pairing =>
+            String(
+                pairing?.pairingId || ""
+            ) ===
+            String(
+                tripId || ""
+            )
+    ) || null;
 
 }
 
 
 /* ============================================================
-   LOAD SUBMITTED BIDS
-============================================================ */
+   ASSIGNMENT → TRIP
+   ============================================================ */
 
-function loadSubmittedTrips() {
+function buildTrip(assignment) {
 
-    let savedBids = [];
-
-
-    try {
-
-        const stored =
-            localStorage.getItem(
-                STORAGE_KEY
-            );
+    const pairing =
+        findPairing(
+            assignment.trip_id
+        );
 
 
-        if (stored) {
+    if (pairing) {
 
-            const parsed =
-                JSON.parse(
-                    stored
+        return {
+            assignment,
+            pairing,
+            tripId:
+                assignment.trip_id,
+            operatingDate:
+                assignment.operating_date,
+            base:
+                pairing.base ||
+                assignment.base ||
+                "—",
+            route:
+                pairing.route ||
+                assignment.route ||
+                "—",
+            flights:
+                Array.isArray(
+                    pairing.flights
+                )
+                    ? pairing.flights
+                    : [],
+            aircraft:
+                Array.isArray(
+                    pairing.aircraft
+                )
+                    ? pairing.aircraft
+                    : (
+                        Array.isArray(
+                            assignment.aircraft
+                        )
+                            ? assignment.aircraft
+                            : []
+                    ),
+            status:
+                assignment.status ||
+                "awarded",
+            gateStatus:
+                assignment.gate_status ||
+                GATE_PENDING_TEXT
+        };
+
+    }
+
+
+    /*
+     * Fallback if a pairing is ever changed or removed
+     * from the master schedule after being awarded.
+     */
+
+    const flightNumbers =
+        Array.isArray(
+            assignment.flight_numbers
+        )
+            ? assignment.flight_numbers
+            : [];
+
+
+    const flights =
+        flightNumbers
+            .map(number => {
+
+                if (
+                    typeof getViaviaFlight !==
+                    "function"
+                ) {
+                    return null;
+                }
+
+                return getViaviaFlight(
+                    number
                 );
 
-
-            if (
-                Array.isArray(
-                    parsed
-                )
-            ) {
-
-                savedBids =
-                    parsed;
-
-            }
-
-        }
-
-    } catch (error) {
-
-        console.error(
-            "Unable to read Viavia bids:",
-            error
-        );
-
-    }
+            })
+            .filter(Boolean);
 
 
-    /*
-     * Reconnect every stored bid to
-     * the authoritative pairing object.
-     *
-     * This prevents stale route,
-     * aircraft, or flight information
-     * from becoming the source of truth.
-     */
-
-    submittedTrips =
-        savedBids
-            .map(
-                bid => {
-
-                    const pairing =
-                        allPairings.find(
-                            item =>
-                                item.pairingId ===
-                                bid.pairingId
-                        );
-
-
-                    if (!pairing) {
-
-                        return null;
-
-                    }
-
-
-                    return {
-
-                        ...pairing,
-
-                        bidStatus:
-                            bid.status ||
-                            "SUBMITTED",
-
-                        submittedAt:
-                            bid.submittedAt ||
-                            null
-
-                    };
-
-                }
+    return {
+        assignment,
+        pairing: null,
+        tripId:
+            assignment.trip_id,
+        operatingDate:
+            assignment.operating_date,
+        base:
+            assignment.base ||
+            "—",
+        route:
+            assignment.route ||
+            "—",
+        flights,
+        aircraft:
+            Array.isArray(
+                assignment.aircraft
             )
-            .filter(
-                Boolean
-            );
+                ? assignment.aircraft
+                : [],
+        status:
+            assignment.status ||
+            "awarded",
+        gateStatus:
+            assignment.gate_status ||
+            GATE_PENDING_TEXT
+    };
 
 }
 
 
 /* ============================================================
-   WEEK CONTROLS
-============================================================ */
+   ACTIVE ASSIGNMENTS
+   ============================================================ */
 
-function setupWeekControls() {
+function getActiveAssignments() {
 
-    const previousButton =
-        document.getElementById(
-            "previousWeek"
-        );
-
-
-    const nextButton =
-        document.getElementById(
-            "nextWeek"
-        );
-
-
-    if (previousButton) {
-
-        previousButton.addEventListener(
-            "click",
-            () => {
-
-                currentWeekStart =
-                    addDays(
-                        currentWeekStart,
-                        -7
-                    );
-
-                renderEverything();
-
-            }
-        );
-
-    }
-
-
-    if (nextButton) {
-
-        nextButton.addEventListener(
-            "click",
-            () => {
-
-                currentWeekStart =
-                    addDays(
-                        currentWeekStart,
-                        7
-                    );
-
-                renderEverything();
-
-            }
-        );
-
-    }
+    return myAssignments.filter(
+        assignment =>
+            String(
+                assignment.status ||
+                ""
+            ).toLowerCase() !==
+            "cancelled"
+    );
 
 }
 
 
-/* ============================================================
-   RENDER EVERYTHING
-============================================================ */
+function getTrips() {
 
-function renderEverything() {
+    return getActiveAssignments()
+        .map(buildTrip)
+        .sort(
+            (a, b) => {
 
-    loadSubmittedTrips();
+                const dateCompare =
+                    String(
+                        a.operatingDate
+                    ).localeCompare(
+                        String(
+                            b.operatingDate
+                        )
+                    );
 
-    renderStats();
+                if (
+                    dateCompare !== 0
+                ) {
+                    return dateCompare;
+                }
 
-    renderWeekTitle();
+                return String(
+                    a.tripId
+                ).localeCompare(
+                    String(
+                        b.tripId
+                    )
+                );
 
-    renderCalendar();
-
-    renderTripList();
+            }
+        );
 
 }
 
 
 /* ============================================================
    STATISTICS
-============================================================ */
+   ============================================================ */
 
 function renderStats() {
 
-    const bidCount =
-        document.getElementById(
-            "bidCount"
-        );
+    const assignments =
+        getActiveAssignments();
 
 
-    const tripCount =
-        document.getElementById(
+    document
+        .getElementById(
             "tripCount"
+        )
+        .textContent =
+        assignments.length;
+
+
+    const today =
+        getTodayKey();
+
+
+    const upcoming =
+        assignments.filter(
+            assignment =>
+                String(
+                    assignment.operating_date
+                ) >= today
         );
 
 
-    const legCount =
-        document.getElementById(
+    document
+        .getElementById(
+            "upcomingCount"
+        )
+        .textContent =
+        upcoming.length;
+
+
+    const totalLegs =
+        assignments.reduce(
+            (
+                total,
+                assignment
+            ) => {
+
+                return (
+                    total +
+                    Number(
+                        assignment.leg_count ||
+                        0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    document
+        .getElementById(
             "legCount"
-        );
-
-
-    if (bidCount) {
-
-        bidCount.textContent =
-            submittedTrips.length;
-
-    }
-
-
-    if (tripCount) {
-
-        tripCount.textContent =
-            submittedTrips.length;
-
-    }
-
-
-    if (legCount) {
-
-        const totalLegs =
-            submittedTrips.reduce(
-                (
-                    total,
-                    trip
-                ) => {
-
-                    return total +
-                        trip.flights.length;
-
-                },
-                0
-            );
-
-
-        legCount.textContent =
-            totalLegs;
-
-    }
+        )
+        .textContent =
+        totalLegs;
 
 }
 
 
 /* ============================================================
    WEEK TITLE
-============================================================ */
+   ============================================================ */
 
 function renderWeekTitle() {
-
-    const element =
-        document.getElementById(
-            "weekTitle"
-        );
-
-
-    if (!element) {
-
-        return;
-
-    }
-
 
     const weekEnd =
         addDays(
@@ -1058,7 +1342,11 @@ function renderWeekTitle() {
         );
 
 
-    element.textContent =
+    document
+        .getElementById(
+            "weekTitle"
+        )
+        .textContent =
         `${formatMonthDay(
             currentWeekStart
         )} – ${formatMonthDay(
@@ -1070,7 +1358,23 @@ function renderWeekTitle() {
 
 /* ============================================================
    CALENDAR
-============================================================ */
+   ============================================================ */
+
+function getTripsForDate(date) {
+
+    const key =
+        getDateKey(date);
+
+
+    return getTrips().filter(
+        trip =>
+            String(
+                trip.operatingDate
+            ) === key
+    );
+
+}
+
 
 function renderCalendar() {
 
@@ -1080,26 +1384,19 @@ function renderCalendar() {
         );
 
 
-    if (!calendar) {
-
-        return;
-
-    }
-
-
     let html = "";
 
 
     for (
-        let dayIndex = 0;
-        dayIndex < 7;
-        dayIndex++
+        let index = 0;
+        index < 7;
+        index++
     ) {
 
         const date =
             addDays(
                 currentWeekStart,
-                dayIndex
+                index
             );
 
 
@@ -1124,14 +1421,19 @@ function renderCalendar() {
 }
 
 
-/* ============================================================
-   CREATE DAY COLUMN
-============================================================ */
-
 function createDayColumn(
     date,
     trips
 ) {
+
+    const dateKey =
+        getDateKey(date);
+
+
+    const isToday =
+        dateKey ===
+        getTodayKey();
+
 
     const dayName =
         date.toLocaleDateString(
@@ -1160,11 +1462,9 @@ function createDayColumn(
     ) {
 
         tripHtml = `
-
             <div class="empty-day">
                 No trips scheduled
             </div>
-
         `;
 
     } else {
@@ -1184,7 +1484,11 @@ function createDayColumn(
 
     return `
 
-        <div class="day-column">
+        <div class="day-column ${
+            isToday
+                ? "today"
+                : ""
+        }">
 
             <div class="day-header">
 
@@ -1200,13 +1504,21 @@ function createDayColumn(
                     )}
                 </div>
 
+                ${
+                    isToday
+                        ? `
+                            <div class="today-label">
+                                Today
+                            </div>
+                        `
+                        : ""
+                }
+
             </div>
 
 
             <div class="day-content">
-
                 ${tripHtml}
-
             </div>
 
         </div>
@@ -1218,14 +1530,33 @@ function createDayColumn(
 
 /* ============================================================
    CALENDAR TRIP
-============================================================ */
+   ============================================================ */
 
-function createCalendarTrip(
-    trip
-) {
+function createCalendarTrip(trip) {
 
     const firstFlight =
-        trip.flights[0];
+        trip.flights.length
+            ? trip.flights[0]
+            : null;
+
+
+    const departure =
+        firstFlight?.departure ||
+        "—";
+
+
+    const legs =
+        trip.flights.length ||
+        Number(
+            trip.assignment.leg_count ||
+            0
+        );
+
+
+    const targetId =
+        getTripElementId(
+            trip
+        );
 
 
     return `
@@ -1234,14 +1565,14 @@ function createCalendarTrip(
             type="button"
             class="calendar-trip"
             onclick="scrollToTrip('${escapeHtml(
-                trip.pairingId
+                targetId
             )}')"
         >
 
             <div class="trip-id">
 
                 ${escapeHtml(
-                    trip.pairingId
+                    trip.tripId
                 )}
 
             </div>
@@ -1259,13 +1590,18 @@ function createCalendarTrip(
             <div class="trip-time">
 
                 ${escapeHtml(
-                    firstFlight.departure
+                    departure
                 )}
+
                 ·
-                ${trip.flights.length}
-                ${trip.flights.length === 1
-                    ? "leg"
-                    : "legs"}
+
+                ${legs}
+
+                ${
+                    legs === 1
+                        ? "leg"
+                        : "legs"
+                }
 
             </div>
 
@@ -1277,62 +1613,8 @@ function createCalendarTrip(
 
 
 /* ============================================================
-   GET TRIPS FOR DATE
-============================================================ */
-
-function getTripsForDate(
-    date
-) {
-
-    const targetKey =
-        getDateKey(
-            date
-        );
-
-
-    return submittedTrips.filter(
-        trip => {
-
-            if (
-                !trip.flights ||
-                trip.flights.length === 0
-            ) {
-
-                return false;
-
-            }
-
-
-            /*
-             * A trip belongs on the calendar
-             * based on the departure date of
-             * its first flight.
-             */
-
-            const firstFlight =
-                trip.flights[0];
-
-
-            const departureDate =
-                getFlightDate(
-                    firstFlight
-                );
-
-
-            return (
-                departureDate ===
-                targetKey
-            );
-
-        }
-    );
-
-}
-
-
-/* ============================================================
    TRIP LIST
-============================================================ */
+   ============================================================ */
 
 function renderTripList() {
 
@@ -1348,27 +1630,20 @@ function renderTripList() {
         );
 
 
-    if (!container) {
-
-        return;
-
-    }
+    const trips =
+        getTrips();
 
 
-    if (summary) {
-
-        summary.textContent =
-            `${submittedTrips.length} ${
-                submittedTrips.length === 1
-                    ? "trip"
-                    : "trips"
-            }`;
-
-    }
+    summary.textContent =
+        `${trips.length} ${
+            trips.length === 1
+                ? "trip"
+                : "trips"
+        }`;
 
 
     if (
-        submittedTrips.length === 0
+        trips.length === 0
     ) {
 
         container.innerHTML = `
@@ -1380,18 +1655,22 @@ function renderTripList() {
                 </div>
 
                 <h3>
-                    No Trips Yet
+                    No Awarded Trips
                 </h3>
 
                 <p>
-                    Submit a bid from Available Bids
-                    to see your trips here.
+                    Claim a trip from Available Trips
+                    and it will appear on your calendar
+                    automatically.
                 </p>
+
+                <a href="available-bids.html">
+                    View Available Trips
+                </a>
 
             </div>
 
         `;
-
 
         return;
 
@@ -1399,7 +1678,7 @@ function renderTripList() {
 
 
     container.innerHTML =
-        submittedTrips
+        trips
             .map(
                 trip =>
                     createTripCard(
@@ -1412,42 +1691,98 @@ function renderTripList() {
 
 
 /* ============================================================
-   CREATE TRIP CARD
-============================================================ */
+   TRIP CARD
+   ============================================================ */
 
-function createTripCard(
-    trip
-) {
+function getTripElementId(trip) {
+
+    return (
+        String(
+            trip.tripId
+        )
+        .replace(
+            /[^a-zA-Z0-9_-]/g,
+            "-"
+        ) +
+        "-" +
+        String(
+            trip.operatingDate
+        )
+        .replace(
+            /[^0-9]/g,
+            ""
+        )
+    );
+
+}
+
+
+function createTripCard(trip) {
 
     const flightRows =
-        trip.flights
-            .map(
-                flight =>
-                    createFlightTableRow(
-                        flight
-                    )
-            )
-            .join("");
+        trip.flights.length
+            ? trip.flights
+                .map(
+                    flight =>
+                        createFlightTableRow(
+                            flight
+                        )
+                )
+                .join("")
+            : `
+
+                <tr>
+
+                    <td colspan="5">
+                        Flight details are unavailable
+                        in the current master schedule.
+                    </td>
+
+                </tr>
+
+            `;
 
 
     const aircraft =
-        trip.aircraft.join(
-            " / "
-        );
+        trip.aircraft.length
+            ? [
+                ...new Set(
+                    trip.aircraft
+                )
+            ].join(" / ")
+            : "—";
 
 
-    const statusClass =
-        trip.bidStatus ===
-        "AWARDED"
-            ? ""
-            : "pending";
+    const status =
+        String(
+            trip.status ||
+            "awarded"
+        ).toLowerCase();
 
 
     const statusText =
-        trip.bidStatus ===
-        "AWARDED"
-            ? "Awarded"
-            : "Bid Submitted";
+        status === "completed"
+            ? "Completed"
+            : "Awarded";
+
+
+    const statusClass =
+        status === "completed"
+            ? "trip-status completed"
+            : "trip-status";
+
+
+    const legs =
+        trip.flights.length ||
+        Number(
+            trip.assignment.leg_count ||
+            0
+        );
+
+
+    const gateAssigned =
+        trip.gateStatus !==
+        GATE_PENDING_TEXT;
 
 
     return `
@@ -1455,7 +1790,9 @@ function createTripCard(
         <article
             class="trip-card"
             id="trip-${escapeHtml(
-                trip.pairingId
+                getTripElementId(
+                    trip
+                )
             )}"
         >
 
@@ -1466,7 +1803,7 @@ function createTripCard(
                     <h3>
 
                         ${escapeHtml(
-                            trip.pairingId
+                            trip.tripId
                         )}
 
                         ·
@@ -1480,34 +1817,25 @@ function createTripCard(
 
                     <p>
 
-                        Base:
+                        ${escapeHtml(
+                            formatOperatingDate(
+                                trip.operatingDate
+                            )
+                        )}
+
+                        · Base:
+
                         ${escapeHtml(
                             trip.base
                         )}
-
-                        ·
-
-                        ${
-                            trip.flights.length
-                        }
-
-                        ${
-                            trip.flights.length === 1
-                                ? "leg"
-                                : "legs"
-                        }
 
                     </p>
 
                 </div>
 
 
-                <span
-                    class="trip-status ${statusClass}"
-                >
-
+                <span class="${statusClass}">
                     ${statusText}
-
                 </span>
 
             </div>
@@ -1516,6 +1844,25 @@ function createTripCard(
             <div class="trip-card-body">
 
                 <div class="trip-meta">
+
+                    <div class="meta-item">
+
+                        <span>
+                            Operating Date
+                        </span>
+
+                        <strong>
+
+                            ${escapeHtml(
+                                formatOperatingDate(
+                                    trip.operatingDate
+                                )
+                            )}
+
+                        </strong>
+
+                    </div>
+
 
                     <div class="meta-item">
 
@@ -1554,7 +1901,7 @@ function createTripCard(
                         </span>
 
                         <strong>
-                            ${trip.flights.length}
+                            ${legs}
                         </strong>
 
                     </div>
@@ -1607,25 +1954,51 @@ function createTripCard(
 
 
                     <tbody>
-
                         ${flightRows}
-
                     </tbody>
 
                 </table>
 
 
-                <div class="gate-pending">
+                <div
+                    class="${
+                        gateAssigned
+                            ? "gate-assigned"
+                            : "gate-pending"
+                    }"
+                >
 
                     <strong>
                         Gate:
                     </strong>
 
                     ${escapeHtml(
-                        VIAVIA_SCHEDULE
-                            .operations
-                            .gatePendingText
+                        trip.gateStatus
                     )}
+
+                </div>
+
+
+                <div class="trip-actions">
+
+                    <a
+                        class="action-button"
+                        href="my-trips.html"
+                    >
+                        My Trips
+                    </a>
+
+
+                    <a
+                        class="action-button secondary"
+                        href="flight-planning.html?trip=${encodeURIComponent(
+                            trip.tripId
+                        )}&date=${encodeURIComponent(
+                            trip.operatingDate
+                        )}"
+                    >
+                        Flight Planning
+                    </a>
 
                 </div>
 
@@ -1640,7 +2013,7 @@ function createTripCard(
 
 /* ============================================================
    FLIGHT TABLE ROW
-============================================================ */
+   ============================================================ */
 
 function createFlightTableRow(
     flight
@@ -1719,22 +2092,18 @@ function createFlightTableRow(
 
 /* ============================================================
    SCROLL TO TRIP
-============================================================ */
+   ============================================================ */
 
-function scrollToTrip(
-    pairingId
-) {
+function scrollToTrip(targetId) {
 
     const element =
         document.getElementById(
-            `trip-${pairingId}`
+            `trip-${targetId}`
         );
 
 
     if (!element) {
-
         return;
-
     }
 
 
@@ -1744,15 +2113,17 @@ function scrollToTrip(
     });
 
 
-    element.style.outline =
-        "2px solid #5b247a";
+    element.classList.add(
+        "highlight"
+    );
 
 
     setTimeout(
         () => {
 
-            element.style.outline =
-                "";
+            element.classList.remove(
+                "highlight"
+            );
 
         },
         1500
@@ -1762,294 +2133,338 @@ function scrollToTrip(
 
 
 /* ============================================================
-   DATE HELPERS
-============================================================ */
+   WEEK CONTROLS
+   ============================================================ */
 
-function getMonday(
-    date
-) {
+document
+    .getElementById(
+        "previousWeek"
+    )
+    .addEventListener(
+        "click",
+        () => {
 
-    const result =
-        new Date(
-            date
-        );
+            currentWeekStart =
+                addDays(
+                    currentWeekStart,
+                    -7
+                );
 
+            renderCalendar();
 
-    result.setHours(
-        0,
-        0,
-        0,
-        0
-    );
+            renderWeekTitle();
 
-
-    const day =
-        result.getDay();
-
-
-    const difference =
-        day === 0
-            ? -6
-            : 1 - day;
-
-
-    result.setDate(
-        result.getDate() +
-        difference
-    );
-
-
-    return result;
-
-}
-
-
-function addDays(
-    date,
-    days
-) {
-
-    const result =
-        new Date(
-            date
-        );
-
-
-    result.setDate(
-        result.getDate() +
-        days
-    );
-
-
-    return result;
-
-}
-
-
-function getDateKey(
-    date
-) {
-
-    const year =
-        date.getFullYear();
-
-
-    const month =
-        String(
-            date.getMonth() + 1
-        ).padStart(
-            2,
-            "0"
-        );
-
-
-    const day =
-        String(
-            date.getDate()
-        ).padStart(
-            2,
-            "0"
-        );
-
-
-    return `${year}-${month}-${day}`;
-
-}
-
-
-/* ============================================================
-   FLIGHT DATE
-============================================================ */
-
-function getFlightDate(
-    flight
-) {
-
-    /*
-     * The master schedule stores local
-     * departure times but does not assign
-     * a date to individual schedule entries.
-     *
-     * Calendar display therefore uses the
-     * current calendar week as the date
-     * context for submitted pairings.
-     *
-     * This function is intentionally kept
-     * separate so date handling can later
-     * be connected to an actual operating date.
-     */
-
-    if (
-        flight.calendarDate
-    ) {
-
-        return flight.calendarDate;
-
-    }
-
-
-    return getDateKey(
-        currentWeekStart
-    );
-
-}
-
-
-/* ============================================================
-   FORMAT DATE
-============================================================ */
-
-function formatMonthDay(
-    date
-) {
-
-    return date.toLocaleDateString(
-        "en-US",
-        {
-            month: "short",
-            day: "numeric",
-            year: "numeric"
         }
     );
 
+
+document
+    .getElementById(
+        "nextWeek"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            currentWeekStart =
+                addDays(
+                    currentWeekStart,
+                    7
+                );
+
+            renderCalendar();
+
+            renderWeekTitle();
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "todayButton"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            currentWeekStart =
+                getMonday(
+                    new Date()
+                );
+
+            renderCalendar();
+
+            renderWeekTitle();
+
+        }
+    );
+
+
+/* ============================================================
+   CONNECTION
+   ============================================================ */
+
+function showConnected() {
+
+    document
+        .getElementById(
+            "connectionDot"
+        )
+        .classList.add(
+            "connected"
+        );
+
+
+    document
+        .getElementById(
+            "connectionText"
+        )
+        .textContent =
+        "Connected";
+
+}
+
+
+function renderPilot() {
+
+    const displayName =
+        currentPilot?.display_name ||
+        currentUser?.user_metadata?.display_name ||
+        currentUser?.email ||
+        "Viavia Pilot";
+
+
+    document
+        .getElementById(
+            "pilotDisplay"
+        )
+        .textContent =
+        displayName;
+
 }
 
 
 /* ============================================================
-   ERROR DISPLAY
-============================================================ */
+   ERROR
+   ============================================================ */
 
-function showError(
-    message
-) {
+function showError(message) {
 
-    const calendar =
+    const box =
         document.getElementById(
-            "calendar"
+            "errorBox"
         );
 
 
-    const tripList =
-        document.getElementById(
-            "tripList"
-        );
+    box.style.display =
+        "block";
 
 
-    if (calendar) {
-
-        calendar.innerHTML = `
-
-            <div class="error-box">
-
-                ${escapeHtml(
-                    message
-                )}
-
-            </div>
-
-        `;
-
-    }
-
-
-    if (tripList) {
-
-        tripList.innerHTML = "";
-
-    }
+    box.textContent =
+        message;
 
 }
 
 
 /* ============================================================
-   HTML ESCAPING
-============================================================ */
+   LOAD ASSIGNMENTS
+   ============================================================ */
 
-function escapeHtml(
-    value
-) {
+async function loadAssignments() {
+
+    myAssignments =
+        await ViaviaTrips.getMyTrips();
+
 
     if (
-        value === null ||
-        value === undefined
+        !Array.isArray(
+            myAssignments
+        )
     ) {
 
-        return "";
+        myAssignments = [];
 
     }
-
-
-    return String(value)
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
 
 }
 
 
 /* ============================================================
-   DEBUG HELPERS
-============================================================ */
+   RENDER
+   ============================================================ */
 
-window.refreshCrewCalendar =
-    function () {
+function renderEverything() {
 
-        loadSubmittedTrips();
+    renderStats();
+
+    renderWeekTitle();
+
+    renderCalendar();
+
+    renderTripList();
+
+}
+
+
+/* ============================================================
+   SIGN OUT
+   ============================================================ */
+
+document
+    .getElementById(
+        "signOutButton"
+    )
+    .addEventListener(
+        "click",
+        async () => {
+
+            try {
+
+                await ViaviaAuth.signOut();
+
+            } catch (error) {
+
+                console.error(
+                    "Viavia sign out error:",
+                    error
+                );
+
+            }
+
+
+            window.location.replace(
+                "login.html"
+            );
+
+        }
+    );
+
+
+/* ============================================================
+   INITIALIZATION
+   ============================================================ */
+
+async function initializeCrewCalendar() {
+
+    try {
+
+        currentUser =
+            await ViaviaAuth.requireAuth();
+
+
+        if (!currentUser) {
+            return;
+        }
+
+
+        currentPilot =
+            await ViaviaPilots.getProfile();
+
+
+        renderPilot();
+
+
+        allPairings =
+            loadMasterPairings();
+
+
+        await loadAssignments();
+
 
         renderEverything();
 
-    };
+
+        showConnected();
 
 
-window.getCrewCalendarTrips =
-    function () {
+    } catch (error) {
 
-        return submittedTrips;
+        console.error(
+            "Viavia Crew Calendar initialization failed:",
+            error
+        );
 
-    };
+
+        showError(
+            error?.message ||
+            "Unable to load your crew calendar."
+        );
 
 
-window.getCrewCalendarPairings =
-    function () {
+        document
+            .getElementById(
+                "calendar"
+            )
+            .innerHTML = "";
 
-        return allPairings;
 
-    };
+        document
+            .getElementById(
+                "tripList"
+            )
+            .innerHTML = `
+
+                <div class="no-trips">
+
+                    <h3>
+                        Unable to Load Calendar
+                    </h3>
+
+                    <p>
+                        Viavia Operations could not
+                        retrieve your assignments.
+                    </p>
+
+                </div>
+
+            `;
+
+    }
+
+}
 
 
 /* ============================================================
-   FINAL SAFETY CHECK
-============================================================ */
+   REFRESH WHEN RETURNING TO PAGE
+   ============================================================ */
 
-if (
-    typeof generateViaviaPairings !==
-    "function"
-) {
+window.addEventListener(
+    "pageshow",
+    async event => {
 
-    console.error(
-        "Viavia pairing engine is unavailable. " +
-        "Make sure viavia-schedule.js is loaded " +
-        "before the Crew Calendar code."
-    );
+        if (
+            event.persisted &&
+            currentUser
+        ) {
 
-}
+            try {
+
+                await loadAssignments();
+
+                renderEverything();
+
+            } catch (error) {
+
+                console.error(
+                    "Unable to refresh Crew Calendar:",
+                    error
+                );
+
+            }
+
+        }
+
+    }
+);
+
+
+/* ============================================================
+   START
+   ============================================================ */
+
+initializeCrewCalendar();
+
 </script>
 
 </body>
