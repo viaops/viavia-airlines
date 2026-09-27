@@ -26,7 +26,6 @@
         :root {
             --purple: #3d2d5a;
             --purple-dark: #32244a;
-            --purple-soft: #eee7f3;
             --text: #24142f;
             --muted: #75677e;
             --border: #e4dce9;
@@ -35,8 +34,11 @@
 
         body {
             min-height: 100vh;
+
             font-family: "Maven Pro", sans-serif;
+
             background: var(--background);
+
             color: var(--text);
         }
 
@@ -71,12 +73,15 @@
 
         .brand-panel {
             position: relative;
+
             overflow: hidden;
 
             padding: 52px;
 
             display: flex;
+
             flex-direction: column;
+
             justify-content: space-between;
 
             color: white;
@@ -89,7 +94,9 @@
                 url("./crew-portal-bg.png");
 
             background-size: cover;
+
             background-position: center;
+
             background-repeat: no-repeat;
         }
 
@@ -97,6 +104,7 @@
             content: "";
 
             position: absolute;
+
             inset: 0;
 
             background:
@@ -109,11 +117,11 @@
             pointer-events: none;
         }
 
-
         .brand-top,
         .brand-copy,
         .brand-footer {
             position: relative;
+
             z-index: 2;
         }
 
@@ -124,7 +132,9 @@
 
         .logo-wrap {
             display: flex;
+
             align-items: center;
+
             gap: 20px;
         }
 
@@ -269,6 +279,7 @@
 
         .login-container {
             width: 100%;
+
             max-width: 480px;
         }
 
@@ -278,13 +289,13 @@
            ===================================================== */
 
         .login-header {
-            margin-bottom: 32px;
+            margin-bottom: 35px;
         }
 
         .login-header h2 {
             margin-bottom: 10px;
 
-            font-size: 38px;
+            font-size: 42px;
 
             line-height: 1.1;
 
@@ -298,74 +309,16 @@
 
             line-height: 1.6;
 
-            font-size: 16px;
+            font-size: 17px;
         }
 
 
         /* =====================================================
-           TABS
+           FORM
            ===================================================== */
-
-        .tabs {
-            display: grid;
-
-            grid-template-columns: 1fr 1fr;
-
-            gap: 5px;
-
-            padding: 5px;
-
-            margin-bottom: 30px;
-
-            border-radius: 13px;
-
-            background: var(--purple-soft);
-        }
-
-        .tab {
-            border: 0;
-
-            border-radius: 9px;
-
-            padding: 12px 16px;
-
-            background: transparent;
-
-            color: var(--muted);
-
-            font-weight: 700;
-
-            transition:
-                background 0.2s ease,
-                color 0.2s ease,
-                box-shadow 0.2s ease;
-        }
-
-        .tab.active {
-            background: white;
-
-            color: var(--purple);
-
-            box-shadow:
-                0 2px 8px
-                rgba(36, 20, 47, 0.08);
-        }
-
-
-        /* =====================================================
-           FORMS
-           ===================================================== */
-
-        .auth-form {
-            display: none;
-        }
-
-        .auth-form.active {
-            display: block;
-        }
 
         .field {
-            margin-bottom: 19px;
+            margin-bottom: 21px;
         }
 
         .field label {
@@ -383,7 +336,7 @@
         .field input {
             width: 100%;
 
-            padding: 14px 15px;
+            padding: 15px;
 
             border:
                 1px solid
@@ -396,6 +349,8 @@
             color: var(--text);
 
             outline: none;
+
+            font-size: 16px;
 
             transition:
                 border-color 0.2s ease,
@@ -431,6 +386,7 @@
             position: absolute;
 
             right: 12px;
+
             top: 50%;
 
             transform: translateY(-50%);
@@ -448,15 +404,15 @@
 
 
         /* =====================================================
-           PRIMARY BUTTON
+           SIGN IN BUTTON
            ===================================================== */
 
         .primary-button {
             width: 100%;
 
-            margin-top: 5px;
+            margin-top: 8px;
 
-            padding: 15px 18px;
+            padding: 16px 18px;
 
             border: 0;
 
@@ -466,7 +422,7 @@
 
             color: white;
 
-            font-size: 16px;
+            font-size: 17px;
 
             font-weight: 800;
 
@@ -485,6 +441,7 @@
 
         .primary-button:disabled {
             cursor: wait;
+
             opacity: 0.65;
         }
 
@@ -513,32 +470,54 @@
 
         .message.error {
             background: #fff0f0;
+
             color: #a32d2d;
         }
 
         .message.success {
             background: #eaf8ef;
+
             color: #1e6c3d;
         }
 
 
         /* =====================================================
-           FORM NOTE
+           JOIN MESSAGE
            ===================================================== */
 
-        .form-note {
-            margin-top: 18px;
+        .join-note {
+            margin-top: 22px;
+
+            padding-top: 22px;
+
+            border-top:
+                1px solid
+                var(--border);
+
+            text-align: center;
 
             color: var(--muted);
 
-            font-size: 12px;
+            font-size: 13px;
 
-            line-height: 1.55;
+            line-height: 1.6;
+        }
+
+        .join-note a {
+            color: var(--purple);
+
+            font-weight: 800;
+
+            text-decoration: none;
+        }
+
+        .join-note a:hover {
+            text-decoration: underline;
         }
 
 
         /* =====================================================
-           STATUS
+           SYSTEM STATUS
            ===================================================== */
 
         .system-status {
@@ -573,6 +552,7 @@
 
         .status-dot {
             width: 8px;
+
             height: 8px;
 
             border-radius: 50%;
@@ -656,7 +636,7 @@
             }
 
             .login-header h2 {
-                font-size: 31px;
+                font-size: 34px;
             }
 
             .system-status {
@@ -685,8 +665,6 @@
             <div class="brand-top">
 
                 <div class="logo-wrap">
-
-                    <!-- TEXT ONLY — NO LOGO IMAGE -->
 
                     <div class="brand-wordmark">
                         viavia
@@ -749,11 +727,11 @@
 
                 <div class="login-header">
 
-                    <h2 id="pageTitle">
+                    <h2>
                         Welcome back
                     </h2>
 
-                    <p id="pageDescription">
+                    <p>
                         Sign in with your Viavia crew account.
                     </p>
 
@@ -768,35 +746,9 @@
                 ></div>
 
 
-                <!-- TABS -->
-
-                <div class="tabs">
-
-                    <button
-                        type="button"
-                        class="tab active"
-                        id="loginTab"
-                    >
-                        Sign In
-                    </button>
-
-                    <button
-                        type="button"
-                        class="tab"
-                        id="signupTab"
-                    >
-                        Create Account
-                    </button>
-
-                </div>
-
-
                 <!-- LOGIN FORM -->
 
-                <form
-                    id="loginForm"
-                    class="auth-form active"
-                >
+                <form id="loginForm">
 
                     <div class="field">
 
@@ -834,7 +786,7 @@
                             <button
                                 type="button"
                                 class="password-toggle"
-                                data-target="loginPassword"
+                                id="passwordToggle"
                             >
                                 Show
                             </button>
@@ -855,126 +807,20 @@
                 </form>
 
 
-                <!-- SIGNUP FORM -->
+                <!-- JOIN -->
 
-                <form
-                    id="signupForm"
-                    class="auth-form"
-                >
+                <div class="join-note">
 
-                    <div class="field">
+                    Not a Viavia crew member?
 
-                        <label for="signupName">
-                            Pilot name
-                        </label>
+                    <a href="join.html">
+                        Join Viavia
+                    </a>
 
-                        <input
-                            id="signupName"
-                            type="text"
-                            autocomplete="name"
-                            placeholder="Your name"
-                            maxlength="80"
-                            required
-                        >
-
-                    </div>
+                </div>
 
 
-                    <div class="field">
-
-                        <label for="signupEmail">
-                            Email address
-                        </label>
-
-                        <input
-                            id="signupEmail"
-                            type="email"
-                            autocomplete="email"
-                            placeholder="pilot@example.com"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="field">
-
-                        <label for="signupPassword">
-                            Password
-                        </label>
-
-                        <div class="password-wrap">
-
-                            <input
-                                id="signupPassword"
-                                type="password"
-                                autocomplete="new-password"
-                                placeholder="At least 8 characters"
-                                minlength="8"
-                                required
-                            >
-
-                            <button
-                                type="button"
-                                class="password-toggle"
-                                data-target="signupPassword"
-                            >
-                                Show
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="field">
-
-                        <label for="signupPasswordConfirm">
-                            Confirm password
-                        </label>
-
-                        <div class="password-wrap">
-
-                            <input
-                                id="signupPasswordConfirm"
-                                type="password"
-                                autocomplete="new-password"
-                                placeholder="Enter your password again"
-                                minlength="8"
-                                required
-                            >
-
-                            <button
-                                type="button"
-                                class="password-toggle"
-                                data-target="signupPasswordConfirm"
-                            >
-                                Show
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <button
-                        type="submit"
-                        class="primary-button"
-                        id="signupButton"
-                    >
-                        Create Crew Account
-                    </button>
-
-
-                    <p class="form-note">
-                        Your email address must be verified before
-                        you can access Viavia Operations.
-                    </p>
-
-                </form>
-
-
-                <!-- STATUS -->
+                <!-- SYSTEM STATUS -->
 
                 <div class="system-status">
 
@@ -1017,26 +863,20 @@
 
     <script>
 
-        const loginTab =
-            document.getElementById("loginTab");
-
-        const signupTab =
-            document.getElementById("signupTab");
-
         const loginForm =
             document.getElementById("loginForm");
 
-        const signupForm =
-            document.getElementById("signupForm");
+        const loginButton =
+            document.getElementById("loginButton");
+
+        const passwordToggle =
+            document.getElementById("passwordToggle");
+
+        const loginPassword =
+            document.getElementById("loginPassword");
 
         const message =
             document.getElementById("message");
-
-        const pageTitle =
-            document.getElementById("pageTitle");
-
-        const pageDescription =
-            document.getElementById("pageDescription");
 
 
         /* =================================================
@@ -1091,103 +931,33 @@
 
 
         /* =================================================
-           TABS
-           ================================================= */
-
-        function showLogin() {
-
-            clearMessage();
-
-            loginTab.classList.add("active");
-
-            signupTab.classList.remove("active");
-
-            loginForm.classList.add("active");
-
-            signupForm.classList.remove("active");
-
-            pageTitle.textContent =
-                "Welcome back";
-
-            pageDescription.textContent =
-                "Sign in with your Viavia crew account.";
-        }
-
-
-        function showSignup() {
-
-            clearMessage();
-
-            signupTab.classList.add("active");
-
-            loginTab.classList.remove("active");
-
-            signupForm.classList.add("active");
-
-            loginForm.classList.remove("active");
-
-            pageTitle.textContent =
-                "Join the flight deck";
-
-            pageDescription.textContent =
-                "Create your Viavia crew account.";
-        }
-
-
-        loginTab.addEventListener(
-            "click",
-            showLogin
-        );
-
-
-        signupTab.addEventListener(
-            "click",
-            showSignup
-        );
-
-
-        /* =================================================
            PASSWORD VISIBILITY
            ================================================= */
 
-        document
-            .querySelectorAll(".password-toggle")
-            .forEach(button => {
+        passwordToggle.addEventListener(
+            "click",
+            () => {
 
-                button.addEventListener(
-                    "click",
-                    () => {
+                if (
+                    loginPassword.type === "password"
+                ) {
 
-                        const targetId =
-                            button.dataset.target;
+                    loginPassword.type = "text";
 
-                        const input =
-                            document.getElementById(
-                                targetId
-                            );
+                    passwordToggle.textContent =
+                        "Hide";
 
-                        if (
-                            input.type === "password"
-                        ) {
+                } else {
 
-                            input.type = "text";
+                    loginPassword.type =
+                        "password";
 
-                            button.textContent =
-                                "Hide";
+                    passwordToggle.textContent =
+                        "Show";
+                }
 
-                        } else {
-
-                            input.type =
-                                "password";
-
-                            button.textContent =
-                                "Show";
-                        }
-
-                    }
-                );
-
-            });
+            }
+        );
 
 
         /* =================================================
@@ -1205,21 +975,16 @@
                 const email =
                     document
                         .getElementById("loginEmail")
-                        .value;
+                        .value
+                        .trim();
 
                 const password =
-                    document
-                        .getElementById("loginPassword")
-                        .value;
+                    loginPassword.value;
 
-                const button =
-                    document.getElementById(
-                        "loginButton"
-                    );
 
-                button.disabled = true;
+                loginButton.disabled = true;
 
-                button.textContent =
+                loginButton.textContent =
                     "Signing in...";
 
 
@@ -1230,14 +995,17 @@
                         password
                     );
 
+
                     showMessage(
                         "Sign in successful. Opening Viavia Operations...",
                         "success"
                     );
 
+
                     window.location.replace(
                         getRedirectDestination()
                     );
+
 
                 } catch (error) {
 
@@ -1246,15 +1014,17 @@
                         error
                     );
 
+
                     showMessage(
                         getFriendlyAuthError(error)
                     );
 
+
                 } finally {
 
-                    button.disabled = false;
+                    loginButton.disabled = false;
 
-                    button.textContent =
+                    loginButton.textContent =
                         "Sign In";
                 }
 
@@ -1263,138 +1033,7 @@
 
 
         /* =================================================
-           SIGN UP
-           ================================================= */
-
-        signupForm.addEventListener(
-            "submit",
-            async event => {
-
-                event.preventDefault();
-
-                clearMessage();
-
-                const displayName =
-                    document
-                        .getElementById("signupName")
-                        .value
-                        .trim();
-
-                const email =
-                    document
-                        .getElementById("signupEmail")
-                        .value
-                        .trim();
-
-                const password =
-                    document
-                        .getElementById("signupPassword")
-                        .value;
-
-                const confirmPassword =
-                    document
-                        .getElementById(
-                            "signupPasswordConfirm"
-                        )
-                        .value;
-
-                const button =
-                    document.getElementById(
-                        "signupButton"
-                    );
-
-
-                if (
-                    password !== confirmPassword
-                ) {
-
-                    showMessage(
-                        "The passwords do not match."
-                    );
-
-                    return;
-                }
-
-
-                if (
-                    password.length < 8
-                ) {
-
-                    showMessage(
-                        "Your password must be at least 8 characters."
-                    );
-
-                    return;
-                }
-
-
-                button.disabled = true;
-
-                button.textContent =
-                    "Creating account...";
-
-
-                try {
-
-                    const result =
-                        await ViaviaAuth.signUp(
-                            email,
-                            password,
-                            displayName
-                        );
-
-
-                    if (
-                        result &&
-                        result.session
-                    ) {
-
-                        showMessage(
-                            "Crew account created. Opening Viavia Operations...",
-                            "success"
-                        );
-
-                        window.location.replace(
-                            getRedirectDestination()
-                        );
-
-                        return;
-                    }
-
-
-                    showMessage(
-                        "Crew account created. Check your email and confirm your address, then return here to sign in.",
-                        "success"
-                    );
-
-
-                    signupForm.reset();
-
-                } catch (error) {
-
-                    console.error(
-                        "Viavia signup error:",
-                        error
-                    );
-
-                    showMessage(
-                        getFriendlyAuthError(error)
-                    );
-
-                } finally {
-
-                    button.disabled = false;
-
-                    button.textContent =
-                        "Create Crew Account";
-                }
-
-            }
-        );
-
-
-        /* =================================================
-           FRIENDLY ERRORS
+           FRIENDLY AUTH ERRORS
            ================================================= */
 
         function getFriendlyAuthError(error) {
@@ -1406,6 +1045,7 @@
                     "Please try again."
                 );
             }
+
 
             const raw =
                 String(
@@ -1441,31 +1081,6 @@
 
 
             if (
-                raw.includes(
-                    "user already registered"
-                )
-            ) {
-
-                return (
-                    "An account already exists " +
-                    "with that email address."
-                );
-            }
-
-
-            if (
-                raw.includes("password") &&
-                raw.includes("characters")
-            ) {
-
-                return (
-                    "That password does not meet " +
-                    "the account security requirements."
-                );
-            }
-
-
-            if (
                 raw.includes("rate limit")
             ) {
 
@@ -1494,6 +1109,7 @@
                 const session =
                     await ViaviaAuth.getSession();
 
+
                 if (
                     session &&
                     session.user
@@ -1503,6 +1119,7 @@
                         getRedirectDestination()
                     );
                 }
+
 
             } catch (error) {
 
