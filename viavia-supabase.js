@@ -1297,17 +1297,6 @@ async function getViaviaFlightGateAssignments(
 
 /* ============================================================
    ATOMIC GATE ASSIGNMENT
-
-   Gate selection now occurs INSIDE PostgreSQL.
-
-   This prevents two browsers/pilots from simultaneously
-   selecting the same available gate.
-
-   scheduledArrival and scheduledDeparture should be actual
-   timestamps/Date objects representing the expected gate
-   occupancy interval.
-
-   The database also checks live ACARS occupancy.
    ============================================================ */
 
 async function assignViaviaGate(
@@ -1358,10 +1347,6 @@ async function assignViaviaGate(
     );
 
 
-  /* ----------------------------------------------------------
-     EXISTING SHARED ASSIGNMENT
-     ---------------------------------------------------------- */
-
   const existing =
     await getViaviaGateAssignment(
       flight,
@@ -1374,10 +1359,6 @@ async function assignViaviaGate(
     return existing;
   }
 
-
-  /* ----------------------------------------------------------
-     DATABASE ATOMIC ALLOCATOR
-     ---------------------------------------------------------- */
 
   const { data, error } =
     await viaviaSupabase.rpc(
@@ -1452,11 +1433,6 @@ async function assignViaviaGate(
   }
 
 
-  /*
-     Depending on PostgREST serialization of a composite return
-     value, data may be an object or a one-row array.
-  */
-
   const assignment =
     Array.isArray(data)
       ? data[0]
@@ -1464,12 +1440,6 @@ async function assignViaviaGate(
 
 
   if (!assignment) {
-
-    /*
-       Defensive fallback:
-       if the RPC completed but no row was returned to the
-       browser, retrieve the persisted shared assignment.
-    */
 
     const persisted =
       await getViaviaGateAssignment(
@@ -1665,12 +1635,6 @@ async function isViaviaGateOccupied(
 
 /* ============================================================
    ACARS GATE IN
-
-   Eventually this should be called by the ACARS system rather
-   than directly by normal pilot-facing pages.
-
-   When ACARS reports gate-in:
-       PLANNED -> OCCUPIED
    ============================================================ */
 
 async function reportViaviaAcarsGateIn(
@@ -1745,13 +1709,6 @@ async function reportViaviaAcarsGateIn(
 
 /* ============================================================
    ACARS GATE OUT
-
-   This is the important release event.
-
-   The moment ACARS reports gate-out:
-       OCCUPIED -> RELEASED
-
-   The gate can then be selected for another aircraft.
    ============================================================ */
 
 async function reportViaviaAcarsGateOut(
@@ -1802,6 +1759,400 @@ async function reportViaviaAcarsGateOut(
     date,
     airportCode
   );
+}
+
+
+/* ============================================================
+   AIRCRAFT ASSIGNMENTS
+   ============================================================ */
+
+const VIAVIA_AIRCRAFT_FIELDS = `
+  id,
+  operating_date,
+  flight_number,
+  registration,
+  origin,
+  destination,
+  aircraft_family,
+  scheduled_departure,
+  scheduled_arrival,
+  actual_departure,
+  actual_arrival,
+  assignment_status,
+  assignment_source,
+  created_at,
+  updated_at
+`;
+
+
+/* ============================================================
+   GET ONE AIRCRAFT ASSIGNMENT
+   ============================================================ */
+
+async function getViaviaAircraftAssignment(
+  flightNumber,
+  operatingDate
+) {
+
+  const flight =
+    normalizeViaviaFlightNumber(
+      flightNumber
+    );
+
+  const date =
+    normalizeViaviaOperatingDate(
+      operatingDate
+    );
+
+
+  const { data, error } =
+    await viaviaSupabase
+      .from(
+        "aircraft_assignments"
+      )
+      .select(
+        VIAVIA_AIRCRAFT_FIELDS
+      )
+      .eq(
+        "flight_number",
+        flight
+      )
+      .eq(
+        "operating_date",
+        date
+      )
+      .neq(
+        "assignment_status",
+        "cancelled"
+      )
+      .maybeSingle();
+
+
+  if (error) {
+
+    console.error(
+      `Viavia Aircraft: Could not load ${flight} for ${date}.`,
+      error
+    );
+
+    throw error;
+  }
+
+
+  return data || null;
+}
+
+
+/* ============================================================
+   GET AIRCRAFT ASSIGNMENTS FOR DATE
+   ============================================================ */
+
+async function getViaviaAircraftAssignmentsForDate(
+  operatingDate
+) {
+
+  const date =
+    normalizeViaviaOperatingDate(
+      operatingDate
+    );
+
+
+  const { data, error } =
+    await viaviaSupabase
+      .from(
+        "aircraft_assignments"
+      )
+      .select(
+        VIAVIA_AIRCRAFT_FIELDS
+      )
+      .eq(
+        "operating_date",
+        date
+      )
+      .neq(
+        "assignment_status",
+        "cancelled"
+      )
+      .order(
+        "scheduled_departure",
+        {
+          ascending:true
+        }
+      );
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  return data || [];
+}
+
+
+/* ============================================================
+   GET MULTIPLE AIRCRAFT ASSIGNMENTS
+   ============================================================ */
+
+async function getViaviaAircraftAssignments(
+  flights
+) {
+
+  if (
+    !Array.isArray(flights) ||
+    flights.length === 0
+  ) {
+
+    return [];
+  }
+
+
+  const results =
+    await Promise.all(
+      flights.map(
+        async item => {
+
+          if (
+            !item ||
+            !item.flightNumber ||
+            !item.operatingDate
+          ) {
+
+            return null;
+          }
+
+
+          return await getViaviaAircraftAssignment(
+            item.flightNumber,
+            item.operatingDate
+          );
+
+        }
+      )
+    );
+
+
+  return results.filter(Boolean);
+}
+
+
+/* ============================================================
+   GET AIRCRAFT ROTATION
+   ============================================================ */
+
+async function getViaviaAircraftRotation(
+  registration,
+  startDate = null,
+  endDate = null
+) {
+
+  const tail =
+    String(
+      registration || ""
+    )
+      .trim()
+      .toUpperCase();
+
+
+  if (!tail) {
+
+    throw new Error(
+      "An aircraft registration is required."
+    );
+
+  }
+
+
+  let query =
+    viaviaSupabase
+      .from(
+        "aircraft_assignments"
+      )
+      .select(
+        VIAVIA_AIRCRAFT_FIELDS
+      )
+      .eq(
+        "registration",
+        tail
+      )
+      .neq(
+        "assignment_status",
+        "cancelled"
+      );
+
+
+  if (startDate) {
+
+    query =
+      query.gte(
+        "operating_date",
+        normalizeViaviaOperatingDate(
+          startDate
+        )
+      );
+
+  }
+
+
+  if (endDate) {
+
+    query =
+      query.lte(
+        "operating_date",
+        normalizeViaviaOperatingDate(
+          endDate
+        )
+      );
+
+  }
+
+
+  const { data, error } =
+    await query.order(
+      "scheduled_departure",
+      {
+        ascending:true
+      }
+    );
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  return data || [];
+}
+
+
+/* ============================================================
+   AIRCRAFT VARIANT
+   ============================================================ */
+
+function getViaviaAircraftVariant(
+  aircraftFamily
+) {
+
+  const family =
+    String(
+      aircraftFamily || ""
+    )
+      .trim()
+      .toUpperCase();
+
+
+  const variants = {
+    A319:"A319-132",
+    A320:"A320-232",
+    A321:"A321-232"
+  };
+
+
+  return (
+    variants[family] ||
+    family ||
+    null
+  );
+}
+
+
+/* ============================================================
+   AIRCRAFT DISPLAY
+   ============================================================ */
+
+function formatViaviaAircraftAssignment(
+  assignment
+) {
+
+  if (!assignment) {
+    return null;
+  }
+
+
+  const variant =
+    getViaviaAircraftVariant(
+      assignment.aircraft_family
+    );
+
+
+  const registration =
+    assignment.registration
+      ? String(
+          assignment.registration
+        )
+          .trim()
+          .toUpperCase()
+      : null;
+
+
+  if (
+    variant &&
+    registration
+  ) {
+
+    return (
+      `${variant} · ${registration}`
+    );
+
+  }
+
+
+  return (
+    registration ||
+    variant ||
+    null
+  );
+}
+
+
+async function getViaviaAircraftDisplay(
+  flightNumber,
+  operatingDate
+) {
+
+  const assignment =
+    await getViaviaAircraftAssignment(
+      flightNumber,
+      operatingDate
+    );
+
+
+  if (!assignment) {
+
+    return {
+      assigned:false,
+      assignment:null,
+      family:null,
+      variant:null,
+      registration:null,
+      text:
+        "Aircraft registration pending"
+    };
+
+  }
+
+
+  return {
+    assigned:true,
+
+    assignment,
+
+    family:
+      assignment.aircraft_family,
+
+    variant:
+      getViaviaAircraftVariant(
+        assignment.aircraft_family
+      ),
+
+    registration:
+      assignment.registration,
+
+    text:
+      formatViaviaAircraftAssignment(
+        assignment
+      )
+  };
 }
 
 
@@ -1906,37 +2257,6 @@ window.ViaviaTrips = {
 
 /* ============================================================
    GLOBAL GATE API
-
-   Examples:
-
-   ViaviaGates.getPool("DFW")
-
-   ViaviaGates.getAssignment(
-     "VIA1757",
-     "2026-09-27",
-     "RSW"
-   )
-
-   ViaviaGates.getOrAssign(
-     "VIA1757",
-     "2026-09-27",
-     "RSW",
-     scheduledArrival,
-     scheduledDeparture
-   )
-
-   ViaviaGates.acarsGateIn(
-     "VIA1757",
-     "2026-09-27",
-     "RSW",
-     "D4"
-   )
-
-   ViaviaGates.acarsGateOut(
-     "VIA1757",
-     "2026-09-27",
-     "RSW"
-   )
    ============================================================ */
 
 window.ViaviaGates = {
@@ -1985,6 +2305,36 @@ window.ViaviaGates = {
 
   acarsGateOut:
     reportViaviaAcarsGateOut
+
+};
+
+
+/* ============================================================
+   GLOBAL AIRCRAFT API
+   ============================================================ */
+
+window.ViaviaAircraft = {
+
+  getAssignment:
+    getViaviaAircraftAssignment,
+
+  getAssignments:
+    getViaviaAircraftAssignments,
+
+  getAssignmentsForDate:
+    getViaviaAircraftAssignmentsForDate,
+
+  getRotation:
+    getViaviaAircraftRotation,
+
+  getVariant:
+    getViaviaAircraftVariant,
+
+  format:
+    formatViaviaAircraftAssignment,
+
+  getDisplay:
+    getViaviaAircraftDisplay
 
 };
 
