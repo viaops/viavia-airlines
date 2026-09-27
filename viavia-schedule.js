@@ -1,13 +1,24 @@
-"use strict";
-
 /* ============================================================
-   VIAVIA AIRLINES — MASTER SCHEDULE
+   VIAVIA AIRLINES — MASTER FLIGHT SCHEDULE
    IATA: V1
    ICAO: VIA
-   Callsign: NEXUS
+   Callsign: VIABUS
 
-   Complete replacement viavia-schedule.js
-   ============================================================ */
+   This file is the single source of truth for Viavia's
+   scheduled flight legs AND crew pairing generation.
+
+   Current schedule:
+   - 131 total flight legs
+   - 131 unique flight numbers
+   - Pilot bases: DFW / RSW / SMF
+   - Gate assignment: assigned only inside 12 hours
+
+   Pairing engine:
+   - Deterministic
+   - Uses only actual scheduled flights
+   - No random pairing generation
+   - Shared by Available Trips / Crew Calendar / Crew Portal
+============================================================ */
 
 const VIAVIA_SCHEDULE = {
 
@@ -15,21 +26,49 @@ const VIAVIA_SCHEDULE = {
         name: "Viavia Airlines",
         iata: "V1",
         icao: "VIA",
-        callsign: "Nexus",
+        callsign: "VIABUS",
         slogan: "Your destination, via us!",
         pilotBases: ["DFW", "RSW", "SMF"]
     },
 
     operations: {
         gateAssignmentHours: 12,
-        gatePendingText: "TBD — Gate assignment pending"
+
+        gatePendingText: "TBD — Gate assignment pending",
+
+        gateRule:
+            "Gates are not assigned until at least 12 hours before the scheduled aircraft departure."
+    },
+
+    airports: {
+
+        DFW: {
+            name: "Dallas Fort Worth International Airport",
+            city: "Dallas–Fort Worth",
+            country: "United States",
+            pilotBase: true
+        },
+
+        RSW: {
+            name: "Southwest Florida International Airport",
+            city: "Fort Myers",
+            country: "United States",
+            pilotBase: true
+        },
+
+        SMF: {
+            name: "Sacramento International Airport",
+            city: "Sacramento",
+            country: "United States",
+            pilotBase: true
+        }
     },
 
     flights: [
 
-        /* =====================================================
+        /* ====================================================
            DFW OUTBOUND
-           ===================================================== */
+        ==================================================== */
 
         {
             flightNumber: "VIA1361",
@@ -334,9 +373,9 @@ const VIAVIA_SCHEDULE = {
         },
 
 
-        /* =====================================================
+        /* ====================================================
            DFW INBOUND
-           ===================================================== */
+        ==================================================== */
 
         {
             flightNumber: "VIA1362",
@@ -408,8 +447,7 @@ const VIAVIA_SCHEDULE = {
             aircraft: "A320",
             base: "DFW"
         },
-
-        {
+               {
             flightNumber: "VIA1540",
             origin: "JAX",
             destination: "DFW",
@@ -497,6 +535,16 @@ const VIAVIA_SCHEDULE = {
             departure: "11:55",
             arrival: "14:10",
             aircraft: "A321",
+            base: "DFW"
+        },
+
+        {
+            flightNumber: "VIA1336",
+            origin: "MIA",
+            destination: "DFW",
+            departure: "20:52",
+            arrival: "23:07",
+            aircraft: "A320",
             base: "DFW"
         },
 
@@ -621,20 +669,10 @@ const VIAVIA_SCHEDULE = {
             base: "DFW"
         },
 
-        {
-            flightNumber: "VIA1336",
-            origin: "MIA",
-            destination: "DFW",
-            departure: "20:52",
-            arrival: "23:07",
-            aircraft: "A320",
-            base: "DFW"
-        },
 
-
-        /* =====================================================
+        /* ====================================================
            RSW OUTBOUND
-           ===================================================== */
+        ==================================================== */
 
         {
             flightNumber: "VIA1670",
@@ -809,107 +847,105 @@ const VIAVIA_SCHEDULE = {
 
         {
             flightNumber: "VIA1392",
-            origin: "RSW",
-            destination: "MKE",
-            departure: "12:17",
-            arrival: "14:32",
+                       origin: "RSW",
+            destination: "MIA",
+            departure: "08:05",
+            arrival: "09:05",
             aircraft: "A320",
             base: "RSW"
         },
 
         {
-            flightNumber: "VIA2073",
+            flightNumber: "VIA1676",
             origin: "RSW",
-            destination: "PTY",
-            departure: "20:58",
-            arrival: "23:08",
-            aircraft: "A321",
+            destination: "MIA",
+            departure: "17:20",
+            arrival: "18:20",
+            aircraft: "A319",
             base: "RSW"
         },
 
         {
             flightNumber: "VIA2317",
             origin: "RSW",
-            destination: "PUJ",
-            departure: "15:52",
-            arrival: "18:32",
+            destination: "MKE",
+            departure: "08:50",
+            arrival: "11:45",
             aircraft: "A320",
             base: "RSW"
         },
 
         {
-            flightNumber: "VIA571",
+            flightNumber: "VIA2421",
             origin: "RSW",
-            destination: "SDQ",
-            departure: "22:00",
-            arrival: "00:30",
-            nextDay: true,
-            aircraft: "A320",
-            base: "RSW"
-        },
-
-        {
-            flightNumber: "VIA2203",
-            origin: "RSW",
-            destination: "SJU",
-            departure: "15:55",
-            arrival: "18:50",
+            destination: "PTY",
+            departure: "06:30",
+            arrival: "09:05",
             aircraft: "A321",
             base: "RSW"
         },
 
         {
-            flightNumber: "VIA1819",
+            flightNumber: "VIA461",
+            origin: "RSW",
+            destination: "PUJ",
+            departure: "11:40",
+            arrival: "14:15",
+            aircraft: "A320",
+            base: "RSW"
+        },
+
+        {
+            flightNumber: "VIA1851",
+            origin: "RSW",
+            destination: "SDQ",
+            departure: "07:35",
+            arrival: "10:10",
+            aircraft: "A321",
+            base: "RSW"
+        },
+
+        {
+            flightNumber: "VIA1907",
             origin: "RSW",
             destination: "SJU",
-            departure: "21:40",
-            arrival: "00:35",
-            nextDay: true,
+            departure: "12:05",
+            arrival: "14:40",
+            aircraft: "A320",
+            base: "RSW"
+        },
+
+        {
+            flightNumber: "VIA2031",
+            origin: "RSW",
+            destination: "SXM",
+            departure: "09:15",
+            arrival: "12:15",
+            aircraft: "A320",
+            base: "RSW"
+        },
+
+        {
+            flightNumber: "VIA111",
+            origin: "RSW",
+            destination: "VPS",
+            departure: "06:45",
+            arrival: "07:55",
             aircraft: "A319",
             base: "RSW"
         },
 
-        {
-            flightNumber: "VIA1621",
-            origin: "RSW",
-            destination: "SXM",
-            departure: "13:00",
-            arrival: "16:15",
-            aircraft: "A320",
-            base: "RSW"
-        },
 
-        {
-            flightNumber: "VIA360",
-            origin: "RSW",
-            destination: "VPS",
-            departure: "14:11",
-            arrival: "14:51",
-            aircraft: "A320",
-            base: "RSW"
-        },
-
-        {
-            flightNumber: "VIA1428",
-            origin: "RSW",
-            destination: "XPL",
-            departure: "16:27",
-            arrival: "18:07",
-            aircraft: "A320",
-            base: "RSW"
-        },
-
-
-        /* =====================================================
+        /* ====================================================
            RSW INBOUND
-           ===================================================== */
+        ==================================================== */
 
         {
             flightNumber: "VIA1671",
             origin: "ATL",
             destination: "RSW",
             departure: "08:50",
-            arrival: "10:40",
+            arrival: "10:35",
             aircraft: "A321",
             base: "RSW"
         },
@@ -919,7 +955,7 @@ const VIAVIA_SCHEDULE = {
             origin: "ATL",
             destination: "RSW",
             departure: "23:45",
-            arrival: "01:35",
+            arrival: "01:30",
             nextDay: true,
             aircraft: "A319",
             base: "RSW"
@@ -950,7 +986,7 @@ const VIAVIA_SCHEDULE = {
             origin: "CMH",
             destination: "RSW",
             departure: "11:07",
-            arrival: "13:42",
+            arrival: "13:47",
             aircraft: "A320",
             base: "RSW"
         },
@@ -959,20 +995,19 @@ const VIAVIA_SCHEDULE = {
             flightNumber: "VIA954",
             origin: "CTG",
             destination: "RSW",
-            departure: "20:00",
-            arrival: "00:10",
-            nextDay: true,
+            departure: "19:50",
+            arrival: "23:00",
             aircraft: "A321",
             base: "RSW"
         },
 
         {
-            flightNumber: "VIA461",
+            flightNumber: "VIA1679",
             origin: "DFW",
             destination: "RSW",
-            departure: "05:15",
-            arrival: "08:55",
-            aircraft: "A320",
+            departure: "09:13",
+            arrival: "12:53",
+            aircraft: "A319",
             base: "RSW"
         },
 
@@ -980,19 +1015,19 @@ const VIAVIA_SCHEDULE = {
             flightNumber: "VIA2325",
             origin: "DFW",
             destination: "RSW",
-            departure: "08:40",
-            arrival: "12:20",
-            aircraft: "A319",
+            departure: "13:05",
+            arrival: "16:45",
+            aircraft: "A320",
             base: "RSW"
         },
 
         {
-            flightNumber: "VIA1077",
+            flightNumber: "VIA2431",
             origin: "DFW",
             destination: "RSW",
-            departure: "12:30",
-            arrival: "16:10",
-            aircraft: "A321",
+            departure: "18:54",
+            arrival: "22:34",
+            aircraft: "A320",
             base: "RSW"
         },
 
@@ -1000,10 +1035,9 @@ const VIAVIA_SCHEDULE = {
             flightNumber: "VIA115",
             origin: "DFW",
             destination: "RSW",
-            departure: "21:00",
-            arrival: "00:40",
-            nextDay: true,
-            aircraft: "A320",
+            departure: "06:15",
+            arrival: "09:55",
+            aircraft: "A321",
             base: "RSW"
         },
 
@@ -1032,7 +1066,7 @@ const VIAVIA_SCHEDULE = {
             origin: "JFK",
             destination: "RSW",
             departure: "15:00",
-            arrival: "18:00",
+            arrival: "18:10",
             aircraft: "A320",
             base: "RSW"
         },
@@ -1042,7 +1076,7 @@ const VIAVIA_SCHEDULE = {
             origin: "LAS",
             destination: "RSW",
             departure: "11:50",
-            arrival: "17:15",
+            arrival: "19:05",
             aircraft: "A320",
             base: "RSW"
         },
@@ -1051,8 +1085,8 @@ const VIAVIA_SCHEDULE = {
             flightNumber: "VIA2120",
             origin: "LGA",
             destination: "RSW",
-            departure: "07:05",
-            arrival: "10:10",
+            departure: "06:00",
+            arrival: "09:10",
             aircraft: "A320",
             base: "RSW"
         },
@@ -1061,8 +1095,8 @@ const VIAVIA_SCHEDULE = {
             flightNumber: "VIA2383",
             origin: "LIT",
             destination: "RSW",
-            departure: "19:40",
-            arrival: "23:00",
+            departure: "09:35",
+            arrival: "12:55",
             aircraft: "A321",
             base: "RSW"
         },
@@ -1071,473 +1105,804 @@ const VIAVIA_SCHEDULE = {
             flightNumber: "VIA1758",
             origin: "MDE",
             destination: "RSW",
-            departure: "19:46",
-            arrival: "00:31",
-            nextDay: true,
+            departure: "19:36",
+            arrival: "23:16",
             aircraft: "A320",
             base: "RSW"
         },
 
         {
             flightNumber: "VIA1393",
-            origin: "MKE",
+            origin: "MIA",
             destination: "RSW",
-            departure: "15:32",
-            arrival: "19:37",
-            aircraft: "A320",
-            base: "RSW"
-        },
-
-        {
-            flightNumber: "VIA2074",
-            origin: "PTY",
-            destination: "RSW",
-            departure: "07:30",
-            arrival: "11:45",
-            aircraft: "A321",
-            base: "RSW"
-        },
-
-        {
-            flightNumber: "VIA2318",
-            origin: "PUJ",
-            destination: "RSW",
-            departure: "19:42",
-            arrival: "22:42",
-            aircraft: "A320",
-            base: "RSW"
-        },
-
-        {
-            flightNumber: "VIA572",
-            origin: "SDQ",
-            destination: "RSW",
-            departure: "08:20",
+            departure: "10:05",
             arrival: "11:05",
             aircraft: "A320",
             base: "RSW"
         },
 
         {
-            flightNumber: "VIA2204",
-            origin: "SJU",
+            flightNumber: "VIA1677",
+            origin: "MIA",
             destination: "RSW",
-            departure: "19:50",
-            arrival: "23:05",
-            aircraft: "A321",
-            base: "RSW"
-        },
-
-        {
-            flightNumber: "VIA1820",
-            origin: "SJU",
-            destination: "RSW",
-            departure: "07:43",
-            arrival: "10:58",
+            departure: "19:20",
+            arrival: "20:20",
             aircraft: "A319",
             base: "RSW"
         },
 
         {
-            flightNumber: "VIA1622",
+            flightNumber: "VIA2318",
+            origin: "MKE",
+            destination: "RSW",
+            departure: "12:45",
+            arrival: "16:00",
+            aircraft: "A320",
+            base: "RSW"
+        },
+
+        {
+            flightNumber: "VIA2422",
+            origin: "PTY",
+            destination: "RSW",
+            departure: "10:05",
+            arrival: "14:40",
+            aircraft: "A321",
+            base: "RSW"
+        },
+
+        {
+            flightNumber: "VIA462",
+            origin: "PUJ",
+            destination: "RSW",
+            departure: "15:15",
+            arrival: "18:05",
+            aircraft: "A320",
+            base: "RSW"
+        },
+
+        {
+            flightNumber: "VIA1852",
+            origin: "SDQ",
+            destination: "RSW",
+            departure: "11:10",
+            arrival: "13:55",
+            aircraft: "A321",
+            base: "RSW"
+        },
+
+        {
+            flightNumber: "VIA1908",
+            origin: "SJU",
+            destination: "RSW",
+            departure: "15:40",
+            arrival: "18:25",
+            aircraft: "A320",
+            base: "RSW"
+        },
+
+        {
+            flightNumber: "VIA2032",
             origin: "SXM",
             destination: "RSW",
-            departure: "17:25",
-            arrival: "21:00",
+            departure: "13:15",
+            arrival: "16:20",
             aircraft: "A320",
             base: "RSW"
         },
 
         {
-            flightNumber: "VIA361",
+            flightNumber: "VIA112",
             origin: "VPS",
             destination: "RSW",
-            departure: "15:51",
-            arrival: "18:26",
-            aircraft: "A320",
-            base: "RSW"
-        },
-
-        {
-            flightNumber: "VIA1429",
-            origin: "XPL",
-            destination: "RSW",
-            departure: "19:17",
-            arrival: "23:52",
-            aircraft: "A320",
+            departure: "08:55",
+            arrival: "10:05",
+            aircraft: "A319",
             base: "RSW"
         },
 
 
-        /* =====================================================
+        /* ====================================================
            SMF OUTBOUND
-           ===================================================== */
+        ==================================================== */
 
         {
-            flightNumber: "VIA743",
+            flightNumber: "VIA1301",
             origin: "SMF",
-            destination: "LAS",
-            departure: "06:59",
-            arrival: "08:29",
+            destination: "DFW",
+            departure: "06:00",
+            arrival: "11:20",
             aircraft: "A320",
             base: "SMF"
         },
 
         {
-            flightNumber: "VIA829",
+            flightNumber: "VIA1303",
             origin: "SMF",
-            destination: "LAS",
-            departure: "16:24",
-            arrival: "17:54",
-            aircraft: "A320",
-            base: "SMF"
-        },
-
-        {
-            flightNumber: "VIA1105",
-            origin: "SMF",
-            destination: "LAX",
-            departure: "07:37",
-            arrival: "09:07",
+            destination: "DFW",
+            departure: "14:25",
+            arrival: "19:45",
             aircraft: "A321",
             base: "SMF"
         },
 
         {
-            flightNumber: "VIA1993",
+            flightNumber: "VIA1415",
             origin: "SMF",
-            destination: "LAX",
-            departure: "18:18",
-            arrival: "19:48",
-            aircraft: "A320",
-            base: "SMF"
-        },
-
-        {
-            flightNumber: "VIA1114",
-            origin: "SMF",
-            destination: "MFR",
-            departure: "08:44",
-            arrival: "10:54",
-            aircraft: "A321",
-            base: "SMF"
-        },
-
-        {
-            flightNumber: "VIA1878",
-            origin: "SMF",
-            destination: "MFR",
-            departure: "15:40",
-            arrival: "17:00",
+            destination: "LAS",
+            departure: "08:55",
+            arrival: "10:20",
             aircraft: "A319",
             base: "SMF"
         },
 
         {
-            flightNumber: "VIA1584",
+            flightNumber: "VIA1417",
+            origin: "SMF",
+            destination: "LAS",
+            departure: "18:30",
+            arrival: "19:55",
+            aircraft: "A320",
+            base: "SMF"
+        },
+
+        {
+            flightNumber: "VIA1501",
+            origin: "SMF",
+            destination: "LAX",
+            departure: "07:10",
+            arrival: "08:35",
+            aircraft: "A320",
+            base: "SMF"
+        },
+
+        {
+            flightNumber: "VIA1503",
+            origin: "SMF",
+            destination: "LAX",
+            departure: "16:15",
+            arrival: "17:40",
+            aircraft: "A321",
+            base: "SMF"
+        },
+
+        {
+            flightNumber: "VIA1601",
             origin: "SMF",
             destination: "SEA",
-            departure: "09:27",
-            arrival: "11:27",
+            departure: "06:35",
+            arrival: "08:25",
             aircraft: "A320",
             base: "SMF"
         },
 
         {
-            flightNumber: "VIA269",
+            flightNumber: "VIA1603",
             origin: "SMF",
-            destination: "SBA",
-            departure: "07:12",
-            arrival: "08:37",
+            destination: "SEA",
+            departure: "17:10",
+            arrival: "19:00",
             aircraft: "A319",
             base: "SMF"
         },
 
         {
-            flightNumber: "VIA1334",
+            flightNumber: "VIA1701",
             origin: "SMF",
-            destination: "SBA",
-            departure: "19:05",
-            arrival: "20:30",
-            aircraft: "A319",
+            destination: "SNA",
+            departure: "09:35",
+            arrival: "11:05",
+            aircraft: "A320",
             base: "SMF"
         },
 
         {
-            flightNumber: "VIA1869",
+            flightNumber: "VIA1801",
             origin: "SMF",
-            destination: "LIT",
-            departure: "13:00",
-            arrival: "18:40",
+            destination: "TUS",
+            departure: "12:20",
+            arrival: "14:15",
+            aircraft: "A320",
+            base: "SMF"
+        },
+
+
+        /* ====================================================
+           SMF INBOUND
+        ==================================================== */
+
+        {
+            flightNumber: "VIA1302",
+            origin: "DFW",
+            destination: "SMF",
+            departure: "12:20",
+            arrival: "14:15",
+            aircraft: "A320",
+            base: "SMF"
+        },
+
+        {
+            flightNumber: "VIA1304",
+            origin: "DFW",
+            destination: "SMF",
+            departure: "20:45",
+            arrival: "22:40",
             aircraft: "A321",
             base: "SMF"
         },
 
-
-        /* =====================================================
-           SMF INBOUND
-           ===================================================== */
+        {
+            flightNumber: "VIA1416",
+            origin: "LAS",
+            destination: "SMF",
+            departure: "11:20",
+            arrival: "12:45",
+            aircraft: "A319",
+            base: "SMF"
+        },
 
         {
-            flightNumber: "VIA744",
+            flightNumber: "VIA1418",
+            origin: "LAS",
+            destination: "SMF",
+            departure: "20:55",
+            arrival: "22:20",
+            aircraft: "A320",
+            base: "SMF"
+        },
+
+        {
+            flightNumber: "VIA1502",
+            origin: "LAX",
+            destination: "SMF",
+            departure: "09:35",
+            arrival: "11:00",
+            aircraft: "A320",
+            base: "SMF"
+        },
+
+        {
+            flightNumber: "VIA1504",
+            origin: "LAX",
+            destination: "SMF",
+            departure: "18:40",
+            arrival: "20:05",
+            aircraft: "A321",
+            base: "SMF"
+        },
+
+        {
+            flightNumber: "VIA1602",
+            origin: "SEA",
+            destination: "SMF",
+            departure: "09:25",
+            arrival: "11:15",
+            aircraft: "A320",
+            base: "SMF"
+        },
+
+        {
+            flightNumber: "VIA1604",
+            origin: "SEA",
+            destination: "SMF",
+            departure: "20:00",
+            arrival: "21:50",
+            aircraft: "A319",
+            base: "SMF"
+        },
+
+        {
+            flightNumber: "VIA1702",
+            origin: "SNA",
+            destination: "SMF",
+            departure: "12:05",
+            arrival: "13:35",
+            aircraft: "A320",
+            base: "SMF"
+        },
+
+        {
+            flightNumber: "VIA1802",
+            origin: "TUS",
+            destination: "SMF",
+            departure: "15:15",
+            arrival: "17:10",
+            aircraft: "A320",
+            base: "SMF"
+        },
+
+
+        /* ====================================================
+           NETWORK / CROSS-BASE FLIGHTS
+        ==================================================== */
+
+        {
+            flightNumber: "VIA2201",
+            origin: "LAX",
+            destination: "SEA",
+            departure: "09:05",
+            arrival: "11:45",
+            aircraft: "A320",
+            base: "DFW"
+        },
+
+        {
+            flightNumber: "VIA2202",
+            origin: "SEA",
+            destination: "LAX",
+            departure: "12:45",
+            arrival: "15:25",
+            aircraft: "A320",
+            base: "DFW"
+        },
+
+        {
+            flightNumber: "VIA2203",
             origin: "LAS",
             destination: "SMF",
             departure: "08:55",
             arrival: "10:35",
             aircraft: "A320",
-            base: "SMF"
+            base: "DFW"
         },
 
         {
-            flightNumber: "VIA830",
-            origin: "LAS",
-            destination: "SMF",
-            departure: "18:54",
-            arrival: "20:34",
+            flightNumber: "VIA2204",
+            origin: "SMF",
+            destination: "LAS",
+            departure: "11:35",
+            arrival: "13:15",
             aircraft: "A320",
-            base: "SMF"
+            base: "DFW"
         },
 
         {
-            flightNumber: "VIA1106",
-            origin: "LAX",
-            destination: "SMF",
-            departure: "10:07",
-            arrival: "11:43",
-            aircraft: "A321",
-            base: "SMF"
-        },
-
-        {
-            flightNumber: "VIA1994",
-            origin: "LAX",
-            destination: "SMF",
-            departure: "20:48",
-            arrival: "22:23",
+            flightNumber: "VIA2205",
+            origin: "VPS",
+            destination: "RSW",
+            departure: "12:05",
+            arrival: "13:15",
             aircraft: "A320",
-            base: "SMF"
+            base: "DFW"
         },
 
         {
-            flightNumber: "VIA1115",
-            origin: "MFR",
-            destination: "SMF",
-            departure: "11:54",
-            arrival: "13:09",
-            aircraft: "A321",
-            base: "SMF"
-        },
-
-        {
-            flightNumber: "VIA1879",
-            origin: "MFR",
-            destination: "SMF",
-            departure: "18:00",
-            arrival: "19:15",
-            aircraft: "A319",
-            base: "SMF"
-        },
-
-        {
-            flightNumber: "VIA1585",
-            origin: "SEA",
-            destination: "SMF",
-            departure: "12:27",
-            arrival: "14:27",
+            flightNumber: "VIA2206",
+            origin: "RSW",
+            destination: "VPS",
+            departure: "14:15",
+            arrival: "15:25",
             aircraft: "A320",
-            base: "SMF"
+            base: "DFW"
         },
 
         {
-            flightNumber: "VIA270",
-            origin: "SBA",
-            destination: "SMF",
-            departure: "09:37",
-            arrival: "11:02",
-            aircraft: "A319",
-            base: "SMF"
+            flightNumber: "VIA2207",
+            origin: "RSW",
+            destination: "CTG",
+            departure: "16:25",
+            arrival: "18:30",
+            aircraft: "A320",
+            base: "DFW"
         },
 
         {
-            flightNumber: "VIA1335",
-            origin: "SBA",
-            destination: "SMF",
-            departure: "21:30",
-            arrival: "22:55",
-            aircraft: "A319",
-            base: "SMF"
-        },
-
-        {
-            flightNumber: "VIA1868",
-            origin: "LIT",
-            destination: "SMF",
-            departure: "09:35",
-            arrival: "12:00",
-            aircraft: "A321",
-            base: "SMF"
+            flightNumber: "VIA2208",
+            origin: "CTG",
+            destination: "RSW",
+            departure: "19:30",
+            arrival: "22:40",
+            aircraft: "A320",
+            base: "DFW"
         }
 
     ]
+
 };
 
 
 /* ============================================================
-   FLIGHT LOOKUPS
-   ============================================================ */
+   BASIC SCHEDULE HELPERS
+============================================================ */
 
+/**
+ * Return all scheduled flights.
+ */
+function getViaviaFlights() {
+
+    return VIAVIA_SCHEDULE.flights.slice();
+
+}
+
+
+/**
+ * Find one scheduled flight by flight number.
+ */
 function getViaviaFlight(flightNumber) {
 
-    const target =
-        String(flightNumber || "")
-            .trim()
-            .toUpperCase();
+    return (
+        VIAVIA_SCHEDULE.flights.find(
+            flight =>
+                flight.flightNumber === flightNumber
+        ) ||
+        null
+    );
 
-    return VIAVIA_SCHEDULE.flights.find(
-        flight =>
-            String(flight.flightNumber)
-                .toUpperCase() === target
-    ) || null;
 }
 
 
+/**
+ * Get all flights departing an airport.
+ */
 function getViaviaFlightsFrom(airport) {
 
-    const target =
-        String(airport || "")
-            .trim()
-            .toUpperCase();
-
     return VIAVIA_SCHEDULE.flights.filter(
         flight =>
-            flight.origin === target
+            flight.origin === airport
     );
+
 }
 
 
+/**
+ * Get all flights arriving at an airport.
+ */
 function getViaviaFlightsTo(airport) {
 
-    const target =
-        String(airport || "")
-            .trim()
-            .toUpperCase();
-
     return VIAVIA_SCHEDULE.flights.filter(
         flight =>
-            flight.destination === target
+            flight.destination === airport
     );
+
 }
 
 
+/**
+ * Get all flights associated with one
+ * Viavia pilot base.
+ */
 function getViaviaBaseFlights(base) {
 
-    const target =
-        String(base || "")
-            .trim()
-            .toUpperCase();
-
     return VIAVIA_SCHEDULE.flights.filter(
         flight =>
-            flight.base === target
+            flight.base === base
     );
+
 }
 
 
+/**
+ * Return a human-readable route.
+ */
 function getViaviaRoute(flight) {
 
-    if (!flight) {
-        return "—";
-    }
+    return (
+        `${flight.origin} → ${flight.destination}`
+    );
 
-    return `${flight.origin} → ${flight.destination}`;
 }
 
 
+/**
+ * Return a formatted flight display.
+ */
 function getViaviaFlightLabel(flight) {
-
-    if (!flight) {
-        return "Unknown Flight";
-    }
 
     return (
         `${flight.flightNumber} · ` +
-        `${flight.origin} → ${flight.destination} · ` +
-        `${flight.departure}–${flight.arrival}` +
-        `${flight.nextDay ? " +1" : ""}`
+        `${flight.origin} → ${flight.destination}`
     );
+
 }
 
 
 /* ============================================================
-   GATE STATUS
-   ============================================================ */
+   GATE ASSIGNMENT
+============================================================ */
 
-function getViaviaGateStatus() {
+/**
+ * Determine the current gate status.
+ *
+ * More than 12 hours before departure:
+ *
+ *     TBD — Gate assignment pending
+ *
+ * Within 12 hours:
+ *
+ *     assignedGate is displayed when supplied.
+ */
+function getViaviaGateStatus(
+    departureDateTime,
+    assignedGate = null
+) {
+
+    const now =
+        new Date();
+
+    const departure =
+        new Date(
+            departureDateTime
+        );
+
+    const hoursUntilDeparture =
+        (
+            departure.getTime() -
+            now.getTime()
+        ) /
+        (
+            1000 *
+            60 *
+            60
+        );
+
+
+    if (
+        hoursUntilDeparture >
+        VIAVIA_SCHEDULE
+            .operations
+            .gateAssignmentHours
+    ) {
+
+        return (
+            VIAVIA_SCHEDULE
+                .operations
+                .gatePendingText
+        );
+
+    }
+
 
     return (
-        VIAVIA_SCHEDULE.operations.gatePendingText ||
-        "TBD — Gate assignment pending"
+        assignedGate ||
+        VIAVIA_SCHEDULE
+            .operations
+            .gatePendingText
     );
+
 }
 
 
 /* ============================================================
-   TIME HELPERS
-   ============================================================ */
+   MULTI-DAY CREW PAIRING ENGINE
+============================================================ */
 
-function getViaviaTimeMinutes(value) {
+/*
+ * Viavia crew-pairing rules
+ *
+ * - Every pairing begins at DFW, RSW, or SMF.
+ * - Every pairing ultimately returns to its starting base.
+ * - 1-day turns are permitted.
+ * - 2-day and 3-day trips are the normal pairing structure.
+ * - 4-day trips are permitted but intentionally less common.
+ * - A duty may contain multiple flight legs.
+ * - A pairing may pass through its home base without ending.
+ * - Overnight stations are permitted.
+ * - Only actual flights from VIAVIA_SCHEDULE may be used.
+ * - Pairings are deterministic.
+ *
+ * SAME-DAY CONNECTION RULE
+ *
+ * A crew transferring from one scheduled flight to another
+ * must have at least 50 minutes between the first arrival
+ * and the second departure.
+ *
+ * Example:
+ *
+ * DFW → LAS
+ * arrives 07:55
+ *
+ * LAS → SMF
+ * departs 08:55
+ *
+ * Connection = 60 minutes
+ * VALID.
+ */
 
-    if (!value) {
+
+/**
+ * Minimum Viavia same-day connection.
+ */
+const VIAVIA_MIN_CONNECTION_MINUTES = 50;
+
+
+/**
+ * Maximum same-day sit we will normally consider part
+ * of the same duty period.
+ *
+ * Anything longer is better represented as an overnight
+ * / new duty day rather than an extremely long airport sit.
+ */
+const VIAVIA_MAX_SAME_DAY_CONNECTION_MINUTES =
+    6 * 60;
+
+
+/**
+ * Minimum overnight/rest interval used by the pairing
+ * builder between duty periods.
+ *
+ * This is a pairing-generation value for the virtual
+ * airline system. It is separate from the same-day
+ * 50-minute connection rule.
+ */
+const VIAVIA_MIN_OVERNIGHT_MINUTES =
+    9 * 60;
+
+
+/**
+ * Maximum number of pairing days.
+ */
+const VIAVIA_MAX_PAIRING_DAYS = 4;
+
+
+/**
+ * Normal maximum legs per duty day.
+ *
+ * The current schedule works best with 1–3 legs per
+ * duty period. This prevents the generator from creating
+ * unrealistic airport-hopping marathon days.
+ */
+const VIAVIA_MAX_LEGS_PER_DAY = 3;
+
+
+/**
+ * Convert HH:MM into minutes after midnight.
+ */
+function getViaviaTimeMinutes(time) {
+
+    if (
+        typeof time !== "string" ||
+        !time.includes(":")
+    ) {
+
         return null;
+
     }
+
 
     const parts =
-        String(value).split(":");
+        time.split(":");
 
-    if (parts.length !== 2) {
-        return null;
-    }
 
     const hours =
-        Number(parts[0]);
+        Number(
+            parts[0]
+        );
 
     const minutes =
-        Number(parts[1]);
+        Number(
+            parts[1]
+        );
+
 
     if (
         !Number.isFinite(hours) ||
         !Number.isFinite(minutes)
     ) {
+
         return null;
+
     }
 
-    return hours * 60 + minutes;
+
+    return (
+        (hours * 60) +
+        minutes
+    );
+
 }
 
 
-function getViaviaArrivalMinutes(flight) {
+/**
+ * Return the scheduled duration of one flight in minutes.
+ *
+ * This works with the schedule's local clock values.
+ * If arrival is earlier than departure, or nextDay is true,
+ * the arrival is moved into the following calendar day.
+ */
+function getViaviaFlightDurationMinutes(flight) {
 
     if (!flight) {
         return null;
     }
+
+
+    const departure =
+        getViaviaTimeMinutes(
+            flight.departure
+        );
 
     let arrival =
         getViaviaTimeMinutes(
             flight.arrival
         );
 
-    if (arrival === null) {
+
+    if (
+        departure === null ||
+        arrival === null
+    ) {
+
         return null;
+
     }
 
-    if (flight.nextDay) {
-        arrival += 1440;
+
+    if (
+        flight.nextDay ||
+        arrival < departure
+    ) {
+
+        arrival +=
+            24 * 60;
+
     }
 
-    return arrival;
+
+    return (
+        arrival -
+        departure
+    );
+
 }
 
 
+/**
+ * Get an arrival time expressed in minutes relative
+ * to the flight's departure calendar day.
+ */
+function getViaviaArrivalMinutes(flight) {
+
+    if (!flight) {
+        return null;
+    }
+
+
+    const departure =
+        getViaviaTimeMinutes(
+            flight.departure
+        );
+
+    let arrival =
+        getViaviaTimeMinutes(
+            flight.arrival
+        );
+
+
+    if (
+        departure === null ||
+        arrival === null
+    ) {
+
+        return null;
+
+    }
+
+
+    if (
+        flight.nextDay ||
+        arrival < departure
+    ) {
+
+        arrival +=
+            24 * 60;
+
+    }
+
+
+    return arrival;
+
+}
+
+
+/**
+ * Calculate the same-day connection between two flights.
+ *
+ * Returns null when the airports do not connect.
+ *
+ * This helper assumes both flight departures belong to the
+ * same pairing calendar day. Overnight movement is handled
+ * separately by the multi-day pairing builder.
+ */
 function getViaviaConnectionMinutes(
     firstFlight,
     secondFlight
@@ -1545,69 +1910,71 @@ function getViaviaConnectionMinutes(
 
     if (
         !firstFlight ||
-        !secondFlight
+        !secondFlight ||
+        firstFlight.destination !==
+            secondFlight.origin
     ) {
+
         return null;
+
     }
 
-    if (
-        firstFlight.destination !==
-        secondFlight.origin
-    ) {
-        return null;
-    }
 
     const arrival =
         getViaviaArrivalMinutes(
             firstFlight
         );
 
-    let departure =
+    let nextDeparture =
         getViaviaTimeMinutes(
             secondFlight.departure
         );
 
+
     if (
         arrival === null ||
-        departure === null
+        nextDeparture === null
     ) {
+
         return null;
+
     }
 
-    while (departure < arrival) {
-        departure += 1440;
+
+    /*
+     * If the first flight itself arrived after midnight,
+     * its arrival value is already above 1440.
+     *
+     * Move the second departure into that same relative
+     * calendar day before calculating the connection.
+     */
+
+    if (
+        arrival >= (24 * 60)
+    ) {
+
+        nextDeparture +=
+            24 * 60;
+
     }
 
-    return departure - arrival;
+
+    return (
+        nextDeparture -
+        arrival
+    );
+
 }
 
 
-/* ============================================================
-   CONNECTION VALIDATION
-
-   Pairings use practical same-day connections.
-   Minimum connection: 30 minutes
-   Maximum connection: 8 hours
-   ============================================================ */
-
+/**
+ * Test whether two flights form a valid SAME-DAY
+ * Viavia crew connection.
+ */
 function isViaviaValidConnection(
     firstFlight,
     secondFlight
 ) {
-
-    if (
-        !firstFlight ||
-        !secondFlight
-    ) {
-        return false;
-    }
-
-    if (
-        firstFlight.destination !==
-        secondFlight.origin
-    ) {
-        return false;
-    }
 
     const connection =
         getViaviaConnectionMinutes(
@@ -1615,901 +1982,752 @@ function isViaviaValidConnection(
             secondFlight
         );
 
-    if (connection === null) {
+
+    if (
+        connection === null
+    ) {
+
         return false;
+
     }
 
+
     return (
-        connection >= 30 &&
-        connection <= 480
+        connection >=
+            VIAVIA_MIN_CONNECTION_MINUTES &&
+        connection <=
+            VIAVIA_MAX_SAME_DAY_CONNECTION_MINUTES
     );
+
 }
 
 
-/* ============================================================
-   CREATE PAIRING
-   ============================================================ */
+/**
+ * Clone a schedule flight for use inside a pairing.
+ *
+ * Pairing-specific properties are added to the cloned
+ * object rather than modifying the master schedule.
+ */
+function cloneViaviaPairingFlight(
+    flight,
+    pairingDay
+) {
 
+    return {
+
+        ...flight,
+
+        pairingDay:
+            pairingDay,
+
+        day:
+            pairingDay
+
+    };
+
+}
+
+
+/**
+ * Build a route string from pairing flights.
+ */
+function buildViaviaPairingRoute(
+    flights
+) {
+
+    if (
+        !Array.isArray(flights) ||
+        flights.length === 0
+    ) {
+
+        return "";
+
+    }
+
+
+    const airports = [
+        flights[0].origin
+    ];
+
+
+    flights.forEach(
+        flight => {
+
+            airports.push(
+                flight.destination
+            );
+
+        }
+    );
+
+
+    return (
+        airports.join(
+            " → "
+        )
+    );
+
+}
+
+
+/**
+ * Group pairing flights by duty / pairing day.
+ */
+function buildViaviaPairingDays(
+    flights
+) {
+
+    const days = [];
+
+
+    flights.forEach(
+        flight => {
+
+            const dayNumber =
+                Number(
+                    flight.pairingDay ||
+                    flight.day ||
+                    1
+                );
+
+
+            let day =
+                days.find(
+                    item =>
+                        item.day ===
+                        dayNumber
+                );
+
+
+            if (!day) {
+
+                day = {
+
+                    day:
+                        dayNumber,
+
+                    flights:
+                        [],
+
+                    startAirport:
+                        flight.origin,
+
+                    endAirport:
+                        flight.destination
+
+                };
+
+
+                days.push(
+                    day
+                );
+
+            }
+
+
+            day.flights.push(
+                flight
+            );
+
+
+            day.endAirport =
+                flight.destination;
+
+        }
+    );
+
+
+    days.sort(
+        (a, b) =>
+            a.day - b.day
+    );
+
+
+    days.forEach(
+        day => {
+
+            day.flightNumbers =
+                day.flights.map(
+                    flight =>
+                        flight.flightNumber
+                );
+
+
+            day.route =
+                buildViaviaPairingRoute(
+                    day.flights
+                );
+
+        }
+    );
+
+
+    return days;
+
+}
+
+
+/**
+ * Return the overnight stations for a pairing.
+ *
+ * A 3-day trip has two overnight stations.
+ * A 4-day trip has three.
+ */
+function getViaviaPairingOvernights(
+    pairingDays
+) {
+
+    if (
+        !Array.isArray(pairingDays) ||
+        pairingDays.length <= 1
+    ) {
+
+        return [];
+
+    }
+
+
+    return pairingDays
+        .slice(
+            0,
+            -1
+        )
+        .map(
+            day =>
+                day.endAirport
+        );
+
+}
+
+
+/**
+ * Create the standardized pairing object consumed by
+ * Available Trips, My Trips, Crew Calendar, Flight Planning,
+ * and the rest of Viavia Operations.
+ */
 function createViaviaPairing(
     pairingId,
     base,
     flights
 ) {
 
-    const validFlights =
-        Array.isArray(flights)
-            ? flights.filter(Boolean)
-            : [];
-
-    const flightNumbers =
-        validFlights.map(
-            flight =>
-                flight.flightNumber
-        );
-
-    const routeAirports = [];
-
-    if (validFlights.length) {
-
-        routeAirports.push(
-            validFlights[0].origin
-        );
-
-        validFlights.forEach(
-            flight => {
-                routeAirports.push(
-                    flight.destination
-                );
-            }
-        );
-    }
-
-    const aircraft =
-        [
-            ...new Set(
-                validFlights
-                    .map(
-                        flight =>
-                            flight.aircraft
-                    )
-                    .filter(Boolean)
-            )
-        ];
-
-    const startAirport =
-        validFlights.length
-            ? validFlights[0].origin
-            : base;
-
-    const endAirport =
-        validFlights.length
-            ? validFlights[
-                validFlights.length - 1
-            ].destination
-            : base;
-
-    return {
-
-        pairingId,
-
-        base,
-
-        flights:
-            validFlights,
-
-        flightNumbers,
-
-        legs:
-            validFlights.length,
-
-        route:
-            routeAirports.join(" → "),
-
-        aircraft,
-
-        startAirport,
-
-        endAirport,
-
-        closed:
-            startAirport === base &&
-            endAirport === base,
-
-        gateStatus:
-            getViaviaGateStatus()
-
-    };
-}
-
-
-/* ============================================================
-   TWO-LEG BASE TURNS
-
-   Creates:
-   BASE → DESTINATION → BASE
-
-   The outbound and return flights must:
-   - belong to the same pilot base
-   - physically connect
-   - use the same aircraft family
-   - have a valid connection
-   ============================================================ */
-
-function generateViaviaTwoLegTurns(
-    base
-) {
-
-    const targetBase =
-        String(base || "")
-            .trim()
-            .toUpperCase();
-
-    const flights =
-        getViaviaBaseFlights(
-            targetBase
-        );
-
-    const outbound =
-        flights.filter(
-            flight =>
-                flight.origin === targetBase
-        );
-
-    const inbound =
-        flights.filter(
-            flight =>
-                flight.destination === targetBase
-        );
-
-    const turns = [];
-
-    outbound.forEach(
-        firstFlight => {
-
-            const possibleReturns =
-                inbound
-                    .filter(
-                        secondFlight =>
-
-                            secondFlight.origin ===
-                                firstFlight.destination &&
-
-                            secondFlight.aircraft ===
-                                firstFlight.aircraft &&
-
-                            isViaviaValidConnection(
-                                firstFlight,
-                                secondFlight
-                            )
-                    )
-                    .sort(
-                        (a, b) => {
-
-                            const connectionA =
-                                getViaviaConnectionMinutes(
-                                    firstFlight,
-                                    a
-                                );
-
-                            const connectionB =
-                                getViaviaConnectionMinutes(
-                                    firstFlight,
-                                    b
-                                );
-
-                            return (
-                                connectionA -
-                                connectionB
-                            );
-                        }
-                    );
-
-            if (
-                possibleReturns.length
-            ) {
-
-                turns.push(
-                    [
-                        firstFlight,
-                        possibleReturns[0]
-                    ]
-                );
-            }
-
-        }
-    );
-
-    return turns;
-}
-
-
-/* ============================================================
-   GENERATE PAIRINGS
-
-   TRIP-001 is permanently:
-   RSW → MDE → RSW
-   VIA1757 / VIA1758
-
-   All other pairings receive deterministic IDs beginning
-   with TRIP-002.
-   ============================================================ */
-
-function generateViaviaPairings(
-    options = {}
-) {
-
-    const maxLegs =
-        Number(
-            options.maxLegs || 3
-        );
-
-    const pairings = [];
-
-    const usedSignatures =
-        new Set();
-
-
-    /* --------------------------------------------------------
-       PERMANENT TRIP-001
-       -------------------------------------------------------- */
-
-    const trip001Flights =
-        [
-            getViaviaFlight("VIA1757"),
-            getViaviaFlight("VIA1758")
-        ]
-            .filter(Boolean);
-
     if (
-        trip001Flights.length === 2
+        !Array.isArray(flights) ||
+        flights.length === 0
     ) {
 
-        pairings.push(
-            createViaviaPairing(
-                "TRIP-001",
-                "RSW",
-                trip001Flights
-            )
-        );
+        return null;
 
-        usedSignatures.add(
-            trip001Flights
-                .map(
-                    flight =>
-                        flight.flightNumber
-                )
-                .join("|")
-        );
     }
 
 
-    /* --------------------------------------------------------
-       GENERATE BASE TURNS
-       -------------------------------------------------------- */
+    const normalizedFlights =
+        flights.map(
+            flight => {
 
-    const generatedTurns = [];
+                if (
+                    Number.isFinite(
+                        Number(
+                            flight.pairingDay
+                        )
+                    )
+                ) {
 
-    VIAVIA_SCHEDULE.airline
-        .pilotBases
-        .forEach(
-            base => {
+                    return {
+                        ...flight
+                    };
 
-                generateViaviaTwoLegTurns(
-                    base
-                )
-                    .forEach(
-                        flights => {
+                }
 
-                            if (
-                                flights.length >
-                                maxLegs
-                            ) {
-                                return;
-                            }
 
-                            const signature =
-                                flights
-                                    .map(
-                                        flight =>
-                                            flight.flightNumber
-                                    )
-                                    .join("|");
-
-                            if (
-                                usedSignatures.has(
-                                    signature
-                                )
-                            ) {
-                                return;
-                            }
-
-                            generatedTurns.push({
-                                base,
-                                flights,
-                                signature
-                            });
-
-                            usedSignatures.add(
-                                signature
-                            );
-
-                        }
-                    );
+                return (
+                    cloneViaviaPairingFlight(
+                        flight,
+                        1
+                    )
+                );
 
             }
         );
 
 
-    /* --------------------------------------------------------
-       DETERMINISTIC SORT
+    const firstFlight =
+        normalizedFlights[0];
 
-       This prevents trip IDs from changing merely because the
-       source array happens to be reordered.
-       -------------------------------------------------------- */
+    const lastFlight =
+        normalizedFlights[
+            normalizedFlights.length - 1
+        ];
 
-    generatedTurns.sort(
-        (a, b) => {
 
-            const baseCompare =
-                a.base.localeCompare(
-                    b.base
-                );
+    const pairingDays =
+        buildViaviaPairingDays(
+            normalizedFlights
+        );
 
-            if (baseCompare !== 0) {
-                return baseCompare;
-            }
 
-            const firstA =
-                a.flights[0]
-                    ?.departure || "";
+    const overnights =
+        getViaviaPairingOvernights(
+            pairingDays
+        );
 
-            const firstB =
-                b.flights[0]
-                    ?.departure || "";
 
-            const timeCompare =
-                firstA.localeCompare(
-                    firstB
-                );
+    return {
 
-            if (timeCompare !== 0) {
-                return timeCompare;
-            }
+        pairingId:
+            pairingId,
 
-            return (
-                a.signature.localeCompare(
-                    b.signature
+        base:
+            base,
+
+        flights:
+            normalizedFlights,
+
+        flightNumbers:
+            normalizedFlights.map(
+                flight =>
+                    flight.flightNumber
+            ),
+
+        legs:
+            normalizedFlights.length,
+
+        days:
+            pairingDays.length,
+
+        tripLength:
+            pairingDays.length,
+
+        dutyDays:
+            pairingDays,
+
+        overnights:
+            overnights,
+
+        route:
+            buildViaviaPairingRoute(
+                normalizedFlights
+            ),
+
+        aircraft:
+            [
+                ...new Set(
+                    normalizedFlights
+                        .map(
+                            flight =>
+                                flight.aircraft
+                        )
+                        .filter(
+                            Boolean
+                        )
                 )
-            );
-        }
-    );
+            ],
 
+        startAirport:
+            firstFlight.origin,
 
-    let tripNumber = 2;
+        endAirport:
+            lastFlight.destination,
 
-    generatedTurns.forEach(
-        item => {
+        closed:
+            (
+                firstFlight.origin ===
+                lastFlight.destination
+            ),
 
-            const pairingId =
-                `TRIP-${String(
-                    tripNumber
-                ).padStart(3, "0")}`;
+        gateStatus:
+            VIAVIA_SCHEDULE
+                .operations
+                .gatePendingText
 
-            pairings.push(
-                createViaviaPairing(
-                    pairingId,
-                    item.base,
-                    item.flights
-                )
-            );
+    };
 
-            tripNumber += 1;
-
-        }
-    );
-
-    return pairings;
 }
 
 
 /* ============================================================
-   PAIRING LOOKUPS
-   ============================================================ */
+   PAIRING GENERATOR INTERNAL HELPERS
+============================================================ */
 
-function getViaviaPairing(
-    pairingId
-) {
+/**
+ * Stable string hash.
+ *
+ * This gives us deterministic choices without Math.random().
+ * The same schedule produces the same pairing set every time.
+ */
+function getViaviaStableHash(value) {
 
-    const target =
-        String(pairingId || "")
-            .trim()
-            .toUpperCase();
+    const text =
+        String(
+            value || ""
+        );
+
+
+    let hash =
+        2166136261;
+
+
+    for (
+        let index = 0;
+        index < text.length;
+        index++
+    ) {
+
+        hash ^=
+            text.charCodeAt(
+                index
+            );
+
+
+        hash =
+            Math.imul(
+                hash,
+                16777619
+            );
+
+    }
+
 
     return (
-        generateViaviaPairings({
-            maxLegs: 3
-        })
-            .find(
-                pairing =>
+        hash >>> 0
+    );
+
+}
+
+
+/**
+ * Stable sort helper used throughout pairing generation.
+ */
+function sortViaviaFlightsStable(
+    flights
+) {
+
+    return flights
+        .slice()
+        .sort(
+            (a, b) => {
+
+                const aTime =
+                    getViaviaTimeMinutes(
+                        a.departure
+                    ) ?? 0;
+
+                const bTime =
+                    getViaviaTimeMinutes(
+                        b.departure
+                    ) ?? 0;
+
+
+                if (
+                    aTime !==
+                    bTime
+                ) {
+
+                    return (
+                        aTime -
+                        bTime
+                    );
+
+                }
+
+
+                return (
                     String(
-                        pairing.pairingId
-                    ).toUpperCase() ===
-                    target
-            ) ||
-        null
-    );
+                        a.flightNumber
+                    )
+                        .localeCompare(
+                            String(
+                                b.flightNumber
+                            ),
+                            undefined,
+                            {
+                                numeric: true
+                            }
+                        )
+                );
+
+            }
+        );
+
 }
 
 
-function getViaviaPairingForFlight(
-    flightNumber
+/**
+ * Return all scheduled departures from an airport.
+ */
+function getViaviaPairingDepartures(
+    airport
 ) {
 
-    const target =
-        String(flightNumber || "")
-            .trim()
-            .toUpperCase();
-
     return (
-        generateViaviaPairings({
-            maxLegs: 3
-        })
-            .find(
-                pairing =>
-                    pairing.flightNumbers
-                        .some(
-                            number =>
-                                String(number)
-                                    .toUpperCase() ===
-                                target
-                        )
-            ) ||
-        null
+        sortViaviaFlightsStable(
+            VIAVIA_SCHEDULE
+                .flights
+                .filter(
+                    flight =>
+                        flight.origin ===
+                        airport
+                )
+        )
     );
+
 }
 
 
-function getViaviaPairingsForBase(
+/**
+ * Return a stable candidate score.
+ *
+ * Lower values are preferred.
+ */
+function getViaviaCandidateScore(
+    flight,
+    seed
+) {
+
+    return (
+        getViaviaStableHash(
+            [
+                seed,
+                flight.flightNumber,
+                flight.origin,
+                flight.destination,
+                flight.departure
+            ].join("|")
+        )
+    );
+
+}
+
+
+/**
+ * Stable deterministic candidate ordering.
+ */
+function orderViaviaCandidates(
+    flights,
+    seed
+) {
+
+    return flights
+        .slice()
+        .sort(
+            (a, b) => {
+
+                const aScore =
+                    getViaviaCandidateScore(
+                        a,
+                        seed
+                    );
+
+                const bScore =
+                    getViaviaCandidateScore(
+                        b,
+                        seed
+                    );
+
+
+                if (
+                    aScore !==
+                    bScore
+                ) {
+
+                    return (
+                        aScore -
+                        bScore
+                    );
+
+                }
+
+
+                return (
+                    String(
+                        a.flightNumber
+                    )
+                        .localeCompare(
+                            String(
+                                b.flightNumber
+                            ),
+                            undefined,
+                            {
+                                numeric: true
+                            }
+                        )
+                );
+
+            }
+        );
+
+}
+
+
+/**
+ * Check whether a flight number already exists in a
+ * partially constructed pairing.
+ */
+function viaviaPairingContainsFlight(
+    flights,
+    candidate
+) {
+
+    return flights.some(
+        flight =>
+            flight.flightNumber ===
+            candidate.flightNumber
+    );
+
+}
+
+
+/**
+ * Return the final airport of a partial pairing.
+ */
+function getViaviaPartialEndAirport(
+    flights,
     base
 ) {
 
-    const target =
-        String(base || "")
-            .trim()
-            .toUpperCase();
+    if (
+        !Array.isArray(flights) ||
+        flights.length === 0
+    ) {
 
-    return (
-        generateViaviaPairings({
-            maxLegs: 3
-        })
-            .filter(
-                pairing =>
-                    pairing.base === target
-            )
-    );
-}
+        return base;
 
-
-function getViaviaPairingsForFlight(
-    flightNumber
-) {
-
-    const target =
-        String(flightNumber || "")
-            .trim()
-            .toUpperCase();
-
-    return (
-        generateViaviaPairings({
-            maxLegs: 3
-        })
-            .filter(
-                pairing =>
-                    pairing.flightNumbers
-                        .some(
-                            number =>
-                                String(number)
-                                    .toUpperCase() ===
-                                target
-                        )
-            )
-    );
-}
-
-
-/* ============================================================
-   SCHEDULE VALIDATION
-   ============================================================ */
-
-function validateViaviaSchedule() {
-
-    const errors = [];
-
-    const flights =
-        VIAVIA_SCHEDULE.flights;
-
-    if (!Array.isArray(flights)) {
-
-        errors.push(
-            "VIAVIA_SCHEDULE.flights is not an array."
-        );
-
-        return {
-            valid: false,
-            errors
-        };
     }
 
 
-    const seenNumbers =
-        new Set();
-
-
-    flights.forEach(
-        (flight, index) => {
-
-            if (!flight.flightNumber) {
-
-                errors.push(
-                    `Flight at index ${index} has no flight number.`
-                );
-
-                return;
-            }
-
-
-            if (
-                seenNumbers.has(
-                    flight.flightNumber
-                )
-            ) {
-
-                errors.push(
-                    `Duplicate flight number: ${flight.flightNumber}`
-                );
-
-            }
-
-
-            seenNumbers.add(
-                flight.flightNumber
-            );
-
-
-            if (
-                !flight.origin ||
-                !flight.destination
-            ) {
-
-                errors.push(
-                    `${flight.flightNumber} has an invalid route.`
-                );
-            }
-
-
-            if (
-                !flight.departure ||
-                !flight.arrival
-            ) {
-
-                errors.push(
-                    `${flight.flightNumber} is missing scheduled times.`
-                );
-            }
-
-
-            if (
-                ![
-                    "A319",
-                    "A320",
-                    "A321"
-                ].includes(
-                    flight.aircraft
-                )
-            ) {
-
-                errors.push(
-                    `${flight.flightNumber} has invalid aircraft ${flight.aircraft}.`
-                );
-            }
-
-
-            if (
-                ![
-                    "DFW",
-                    "RSW",
-                    "SMF"
-                ].includes(
-                    flight.base
-                )
-            ) {
-
-                errors.push(
-                    `${flight.flightNumber} has invalid base ${flight.base}.`
-                );
-            }
-
-        }
+    return (
+        flights[
+            flights.length - 1
+        ].destination
     );
 
-
-    return {
-
-        valid:
-            errors.length === 0,
-
-        flightCount:
-            flights.length,
-
-        uniqueFlightNumbers:
-            seenNumbers.size,
-
-        errors
-
-    };
 }
 
 
-/* ============================================================
-   PAIRING VALIDATION
-   ============================================================ */
+/**
+ * Count how many legs are assigned to a particular day.
+ */
+function countViaviaDayLegs(
+    flights,
+    day
+) {
 
-function validateViaviaPairings() {
+    return flights.filter(
+        flight =>
+            Number(
+                flight.pairingDay
+            ) ===
+            Number(
+                day
+            )
+    ).length;
 
-    const errors = [];
+}
 
-    let pairings = [];
 
-    try {
+/**
+ * Return the last flight flown on one pairing day.
+ */
+function getViaviaLastFlightForDay(
+    flights,
+    day
+) {
 
-        pairings =
-            generateViaviaPairings({
-                maxLegs: 3
-            });
-
-    } catch (error) {
-
-        errors.push(
-            error?.message ||
-            "Pairing generation failed."
+    const dayFlights =
+        flights.filter(
+            flight =>
+                Number(
+                    flight.pairingDay
+                ) ===
+                Number(
+                    day
+                )
         );
 
-        return {
-            valid: false,
-            pairingCount: 0,
-            errors
-        };
+
+    if (
+        dayFlights.length === 0
+    ) {
+
+        return null;
+
     }
 
 
-    const seenIds =
-        new Set();
-
-
-    pairings.forEach(
-        pairing => {
-
-            if (
-                !/^TRIP-\d{3}$/.test(
-                    pairing.pairingId
-                )
-            ) {
-
-                errors.push(
-                    `Invalid pairing ID: ${pairing.pairingId}`
-                );
-            }
-
-
-            if (
-                seenIds.has(
-                    pairing.pairingId
-                )
-            ) {
-
-                errors.push(
-                    `Duplicate pairing ID: ${pairing.pairingId}`
-                );
-            }
-
-
-            seenIds.add(
-                pairing.pairingId
-            );
-
-
-            if (
-                !Array.isArray(
-                    pairing.flights
-                ) ||
-                !pairing.flights.length
-            ) {
-
-                errors.push(
-                    `${pairing.pairingId} has no flights.`
-                );
-
-                return;
-            }
-
-
-            if (
-                pairing.startAirport !==
-                pairing.base
-            ) {
-
-                errors.push(
-                    `${pairing.pairingId} does not begin at ${pairing.base}.`
-                );
-            }
-
-
-            if (
-                pairing.endAirport !==
-                pairing.base
-            ) {
-
-                errors.push(
-                    `${pairing.pairingId} does not return to ${pairing.base}.`
-                );
-            }
-
-
-            for (
-                let i = 0;
-                i < pairing.flights.length - 1;
-                i++
-            ) {
-
-                const first =
-                    pairing.flights[i];
-
-                const second =
-                    pairing.flights[i + 1];
-
-                if (
-                    first.destination !==
-                    second.origin
-                ) {
-
-                    errors.push(
-                        `${pairing.pairingId} has a broken connection between ${first.flightNumber} and ${second.flightNumber}.`
-                    );
-                }
-
-            }
-
-        }
-    );
-
-
-    return {
-
-        valid:
-            errors.length === 0,
-
-        pairingCount:
-            pairings.length,
-
-        errors
-
-    };
-}
-
-
-/* ============================================================
-   GLOBAL EXPORTS
-
-   Explicitly expose everything because the website uses
-   ordinary browser script tags rather than ES modules.
-   ============================================================ */
-
-window.VIAVIA_SCHEDULE =
-    VIAVIA_SCHEDULE;
-
-window.getViaviaFlight =
-    getViaviaFlight;
-
-window.getViaviaFlightsFrom =
-    getViaviaFlightsFrom;
-
-window.getViaviaFlightsTo =
-    getViaviaFlightsTo;
-
-window.getViaviaBaseFlights =
-    getViaviaBaseFlights;
-
-window.getViaviaRoute =
-    getViaviaRoute;
-
-window.getViaviaFlightLabel =
-    getViaviaFlightLabel;
-
-window.getViaviaGateStatus =
-    getViaviaGateStatus;
-
-window.getViaviaTimeMinutes =
-    getViaviaTimeMinutes;
-
-window.getViaviaArrivalMinutes =
-    getViaviaArrivalMinutes;
-
-window.getViaviaConnectionMinutes =
-    getViaviaConnectionMinutes;
-
-window.isViaviaValidConnection =
-    isViaviaValidConnection;
-
-window.createViaviaPairing =
-    createViaviaPairing;
-
-window.generateViaviaTwoLegTurns =
-    generateViaviaTwoLegTurns;
-
-window.generateViaviaPairings =
-    generateViaviaPairings;
-
-window.getViaviaPairing =
-    getViaviaPairing;
-
-window.getViaviaPairingForFlight =
-    getViaviaPairingForFlight;
-
-window.getViaviaPairingsForBase =
-    getViaviaPairingsForBase;
-
-window.getViaviaPairingsForFlight =
-    getViaviaPairingsForFlight;
-
-window.validateViaviaSchedule =
-    validateViaviaSchedule;
-
-window.validateViaviaPairings =
-    validateViaviaPairings;
-
-
-/* ============================================================
-   STARTUP VALIDATION
-   ============================================================ */
-
-const VIAVIA_SCHEDULE_VALIDATION =
-    validateViaviaSchedule();
-
-const VIAVIA_PAIRING_VALIDATION =
-    validateViaviaPairings();
-
-
-if (
-    !VIAVIA_SCHEDULE_VALIDATION.valid
-) {
-
-    console.error(
-        "Viavia schedule validation failed:",
-        VIAVIA_SCHEDULE_VALIDATION.errors
-    );
-
-} else {
-
-    console.log(
-        `Viavia master schedule loaded: ${VIAVIA_SCHEDULE_VALIDATION.flightCount} flights.`
+    return (
+        dayFlights[
+            dayFlights.length - 1
+        ]
     );
 
 }
 
 
-if (
-    !VIAVIA_PAIRING_VALIDATION.valid
+/**
+ * Return true if a candidate may follow the previous flight
+ * during the SAME duty day.
+ */
+function canViaviaAddSameDayFlight(
+    currentFlights,
+    candidate,
+    day
 ) {
 
-    console.error(
-        "Viavia pairing validation failed:",
-        VIAVIA_PAIRING_VALIDATION.errors
-    );
+    if (
+        !candidate ||
+        viaviaPairingContainsFlight(
+            currentFlights,
+            candidate
+        )
+    ) {
 
-} else {
+        return false;
 
-    console.log(
-        `Viavia pairings loaded: ${VIAVIA_PAIRING_VALIDATION.pairingCount} pairings.`
+    }
+
+
+    if (
+        countViaviaDayLegs(
+            currentFlights,
+            day
+        ) >=
+        VIAVIA_MAX_LEGS_PER_DAY
+    ) {
+
+        return false;
+
+    }
+
+
+    const previous =
+        getViaviaLastFlightForDay(
+            currentFlights,
+            day
+        );
+
+
+    if (!previous) {
+
+        return true;
+
+    }
+
+
+    if (
+        previous.destination !==
+        candidate.origin
+    ) {
+
+        return false;
+
+    }
+
+
+    return (
+        isViaviaValidConnection(
+            previous,
+            candidate
+        )
     );
 
 }
