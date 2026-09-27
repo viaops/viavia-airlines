@@ -2731,3 +2731,2122 @@ function canViaviaAddSameDayFlight(
     );
 
 }
+/**
+ * Determine whether a candidate flight can begin a NEW
+ * pairing duty day from the airport where the previous
+ * duty ended.
+ *
+ * The schedule stores recurring local flight times rather
+ * than dated timestamps, so an overnight connection is
+ * represented by advancing the candidate departure to the
+ * following calendar day.
+ */
+function canViaviaBeginNextDutyDay(
+    currentFlights,
+    candidate,
+    currentDay
+) {
+
+    if (
+        !candidate ||
+        viaviaPairingContainsFlight(
+            currentFlights,
+            candidate
+        )
+    ) {
+
+        return false;
+
+    }
+
+
+    const previous =
+        getViaviaLastFlightForDay(
+            currentFlights,
+            currentDay
+        );
+
+
+    if (!previous) {
+
+        return false;
+
+    }
+
+
+    if (
+        previous.destination !==
+        candidate.origin
+    ) {
+
+        return false;
+
+    }
+
+
+    const previousArrival =
+        getViaviaArrivalMinutes(
+            previous
+        );
+
+    const candidateDeparture =
+        getViaviaTimeMinutes(
+            candidate.departure
+        );
+
+
+    if (
+        previousArrival === null ||
+        candidateDeparture === null
+    ) {
+
+        return false;
+
+    }
+
+
+    /*
+     * Candidate departure occurs on the following pairing
+     * calendar day.
+     */
+    let restMinutes =
+        (
+            (24 * 60) +
+            candidateDeparture
+        ) -
+        previousArrival;
+
+
+    /*
+     * A flight that arrived after midnight has an arrival
+     * value above 1440. In that case, advance the next
+     * departure by another day if necessary.
+     */
+    if (
+        restMinutes < 0
+    ) {
+
+        restMinutes +=
+            24 * 60;
+
+    }
+
+
+    return (
+        restMinutes >=
+        VIAVIA_MIN_OVERNIGHT_MINUTES
+    );
+
+}
+
+
+/**
+ * Find valid same-day continuation flights from the
+ * current airport.
+ */
+function getViaviaSameDayCandidates(
+    currentFlights,
+    day,
+    seed
+) {
+
+    const airport =
+        getViaviaPartialEndAirport(
+            currentFlights,
+            null
+        );
+
+
+    if (!airport) {
+
+        return [];
+
+    }
+
+
+    const departures =
+        getViaviaPairingDepartures(
+            airport
+        )
+        .filter(
+            candidate =>
+                canViaviaAddSameDayFlight(
+                    currentFlights,
+                    candidate,
+                    day
+                )
+        );
+
+
+    return (
+        orderViaviaCandidates(
+            departures,
+            seed
+        )
+    );
+
+}
+
+
+/**
+ * Find flights that can begin the next duty day from the
+ * current overnight station.
+ */
+function getViaviaNextDayCandidates(
+    currentFlights,
+    currentDay,
+    seed
+) {
+
+    const airport =
+        getViaviaPartialEndAirport(
+            currentFlights,
+            null
+        );
+
+
+    if (!airport) {
+
+        return [];
+
+    }
+
+
+    const departures =
+        getViaviaPairingDepartures(
+            airport
+        )
+        .filter(
+            candidate =>
+                canViaviaBeginNextDutyDay(
+                    currentFlights,
+                    candidate,
+                    currentDay
+                )
+        );
+
+
+    return (
+        orderViaviaCandidates(
+            departures,
+            seed
+        )
+    );
+
+}
+
+
+/**
+ * Return true when a partial pairing has returned to its
+ * starting pilot base.
+ */
+function isViaviaPairingBackAtBase(
+    flights,
+    base
+) {
+
+    if (
+        !Array.isArray(flights) ||
+        flights.length === 0
+    ) {
+
+        return false;
+
+    }
+
+
+    return (
+        flights[
+            flights.length - 1
+        ].destination ===
+        base
+    );
+
+}
+
+
+/**
+ * Count the number of distinct pairing days represented
+ * by a partial pairing.
+ */
+function getViaviaPartialDayCount(
+    flights
+) {
+
+    if (
+        !Array.isArray(flights) ||
+        flights.length === 0
+    ) {
+
+        return 0;
+
+    }
+
+
+    return (
+        Math.max(
+            ...flights.map(
+                flight =>
+                    Number(
+                        flight.pairingDay ||
+                        1
+                    )
+            )
+        )
+    );
+
+}
+
+
+/**
+ * Determine the minimum number of legs we expect for a
+ * pairing of a particular length.
+ *
+ * This keeps multi-day pairings from becoming little more
+ * than a single outbound flight, a long layover, and a
+ * return flight several days later.
+ */
+function getViaviaMinimumLegsForDays(
+    days
+) {
+
+    switch (
+        Number(
+            days
+        )
+    ) {
+
+        case 1:
+            return 2;
+
+        case 2:
+            return 3;
+
+        case 3:
+            return 5;
+
+        case 4:
+            return 6;
+
+        default:
+            return 2;
+
+    }
+
+}
+
+
+/**
+ * Check whether a completed partial pairing is suitable
+ * for inclusion in the final pairing catalog.
+ */
+function isViaviaCompletePairing(
+    flights,
+    base,
+    targetDays
+) {
+
+    if (
+        !Array.isArray(flights) ||
+        flights.length === 0
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        !isViaviaPairingBackAtBase(
+            flights,
+            base
+        )
+    ) {
+
+        return false;
+
+    }
+
+
+    const days =
+        getViaviaPartialDayCount(
+            flights
+        );
+
+
+    if (
+        days !==
+        targetDays
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        flights.length <
+        getViaviaMinimumLegsForDays(
+            targetDays
+        )
+    ) {
+
+        return false;
+
+    }
+
+
+    /*
+     * Every pairing must physically begin at its pilot base.
+     */
+    if (
+        flights[0].origin !==
+        base
+    ) {
+
+        return false;
+
+    }
+
+
+    /*
+     * And ultimately return to that same base.
+     */
+    if (
+        flights[
+            flights.length - 1
+        ].destination !==
+        base
+    ) {
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+/**
+ * Create a unique signature for a pairing's exact sequence.
+ */
+function getViaviaPairingSignature(
+    flights
+) {
+
+    return flights
+        .map(
+            flight =>
+                (
+                    `${flight.pairingDay}:` +
+                    `${flight.flightNumber}`
+                )
+        )
+        .join("|");
+
+}
+
+
+/**
+ * Search recursively for a valid pairing.
+ *
+ * The search is intentionally bounded:
+ *
+ * - maximum 4 duty days
+ * - maximum 3 legs per duty day
+ * - maximum 9 total legs
+ *
+ * Candidates are deterministically ordered, so the same
+ * schedule always produces the same pairings.
+ */
+function searchViaviaPairing(
+    state,
+    options
+) {
+
+    const {
+        base,
+        targetDays,
+        seed,
+        maximumTripLegs
+    } = options;
+
+
+    const flights =
+        state.flights;
+
+
+    const currentDay =
+        state.currentDay;
+
+
+    if (
+        flights.length >
+        maximumTripLegs
+    ) {
+
+        return null;
+
+    }
+
+
+    /*
+     * Do not accept an early return to base unless this is
+     * the target final day.
+     *
+     * Passing through base during a duty is still allowed
+     * because the search can continue with another valid
+     * same-day flight.
+     */
+    if (
+        isViaviaCompletePairing(
+            flights,
+            base,
+            targetDays
+        )
+    ) {
+
+        return flights;
+
+    }
+
+
+    /*
+     * If we are already on the target final day, only
+     * same-day continuation can finish the trip.
+     */
+    const sameDayCandidates =
+        getViaviaSameDayCandidates(
+            flights,
+            currentDay,
+            `${seed}|DAY${currentDay}|SAME`
+        );
+
+
+    for (
+        const candidate of
+        sameDayCandidates
+    ) {
+
+        const nextFlights = [
+            ...flights,
+            cloneViaviaPairingFlight(
+                candidate,
+                currentDay
+            )
+        ];
+
+
+        /*
+         * Returning to base before the target day does not
+         * automatically terminate the pairing. We permit
+         * another same-day departure from base, which allows
+         * realistic sequences such as:
+         *
+         * SEA → DFW → VPS
+         */
+        if (
+            currentDay <
+            targetDays &&
+            isViaviaPairingBackAtBase(
+                nextFlights,
+                base
+            )
+        ) {
+
+            const continuation =
+                getViaviaSameDayCandidates(
+                    nextFlights,
+                    currentDay,
+                    `${seed}|BASEPASS|${candidate.flightNumber}`
+                );
+
+
+            if (
+                continuation.length === 0
+            ) {
+
+                continue;
+
+            }
+
+        }
+
+
+        const result =
+            searchViaviaPairing(
+                {
+                    flights:
+                        nextFlights,
+
+                    currentDay:
+                        currentDay
+                },
+                options
+            );
+
+
+        if (result) {
+
+            return result;
+
+        }
+
+    }
+
+
+    /*
+     * No more same-day flying is required. If there are
+     * remaining pairing days, attempt an overnight and begin
+     * a new duty the following day.
+     */
+    if (
+        currentDay <
+        targetDays
+    ) {
+
+        /*
+         * We do not deliberately overnight at the home base.
+         * If a duty returns to base before the trip's final
+         * day, the pairing should continue from base during
+         * that same duty instead.
+         */
+        if (
+            isViaviaPairingBackAtBase(
+                flights,
+                base
+            )
+        ) {
+
+            return null;
+
+        }
+
+
+        const nextDayCandidates =
+            getViaviaNextDayCandidates(
+                flights,
+                currentDay,
+                `${seed}|DAY${currentDay + 1}|START`
+            );
+
+
+        for (
+            const candidate of
+            nextDayCandidates
+        ) {
+
+            const nextFlights = [
+                ...flights,
+                cloneViaviaPairingFlight(
+                    candidate,
+                    currentDay + 1
+                )
+            ];
+
+
+            const result =
+                searchViaviaPairing(
+                    {
+                        flights:
+                            nextFlights,
+
+                        currentDay:
+                            currentDay + 1
+                    },
+                    options
+                );
+
+
+            if (result) {
+
+                return result;
+
+            }
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+/**
+ * Build one deterministic multi-day pairing from a specific
+ * base departure.
+ */
+function buildViaviaMultiDayPairing(
+    firstFlight,
+    base,
+    targetDays,
+    seed
+) {
+
+    if (
+        !firstFlight ||
+        firstFlight.origin !==
+        base
+    ) {
+
+        return null;
+
+    }
+
+
+    if (
+        targetDays < 2 ||
+        targetDays >
+        VIAVIA_MAX_PAIRING_DAYS
+    ) {
+
+        return null;
+
+    }
+
+
+    const initialFlights = [
+        cloneViaviaPairingFlight(
+            firstFlight,
+            1
+        )
+    ];
+
+
+    return (
+        searchViaviaPairing(
+            {
+                flights:
+                    initialFlights,
+
+                currentDay:
+                    1
+            },
+            {
+                base:
+                    base,
+
+                targetDays:
+                    targetDays,
+
+                seed:
+                    seed,
+
+                maximumTripLegs:
+                    9
+            }
+        )
+    );
+
+}
+
+
+/**
+ * Build a traditional one-day closed turn.
+ *
+ * The outbound flight must leave the pilot base and the
+ * return flight must depart the destination at least
+ * 50 minutes after arrival.
+ */
+function buildViaviaOneDayTurn(
+    outbound,
+    base,
+    seed
+) {
+
+    if (
+        !outbound ||
+        outbound.origin !==
+        base
+    ) {
+
+        return null;
+
+    }
+
+
+    const returnCandidates =
+        orderViaviaCandidates(
+            getViaviaPairingDepartures(
+                outbound.destination
+            )
+            .filter(
+                candidate =>
+                    candidate.destination ===
+                        base &&
+                    candidate.flightNumber !==
+                        outbound.flightNumber &&
+                    isViaviaValidConnection(
+                        outbound,
+                        candidate
+                    )
+            ),
+            `${seed}|RETURN`
+        );
+
+
+    if (
+        returnCandidates.length === 0
+    ) {
+
+        return null;
+
+    }
+
+
+    return [
+        cloneViaviaPairingFlight(
+            outbound,
+            1
+        ),
+
+        cloneViaviaPairingFlight(
+            returnCandidates[0],
+            1
+        )
+    ];
+
+}
+
+
+/* ============================================================
+   PAIRING DISTRIBUTION
+============================================================ */
+
+/**
+ * Desired pairing-length mix.
+ *
+ * 2-day and 3-day trips are the normal Viavia pairing.
+ * 4-day trips exist but are deliberately less common.
+ * A smaller collection of one-day turns remains available.
+ */
+const VIAVIA_PAIRING_DISTRIBUTION = Object.freeze({
+
+    DFW: Object.freeze({
+        oneDay: 6,
+        twoDay: 8,
+        threeDay: 20,
+        fourDay: 5
+    }),
+
+    RSW: Object.freeze({
+        oneDay: 5,
+        twoDay: 6,
+        threeDay: 13,
+        fourDay: 3
+    }),
+
+    SMF: Object.freeze({
+        oneDay: 3,
+        twoDay: 4,
+        threeDay: 8,
+        fourDay: 1
+    })
+
+});
+
+
+/**
+ * Return the target count for a particular base and
+ * pairing length.
+ */
+function getViaviaPairingTargetCount(
+    base,
+    days
+) {
+
+    const distribution =
+        VIAVIA_PAIRING_DISTRIBUTION[
+            base
+        ];
+
+
+    if (!distribution) {
+
+        return 0;
+
+    }
+
+
+    switch (
+        Number(
+            days
+        )
+    ) {
+
+        case 1:
+            return distribution.oneDay;
+
+        case 2:
+            return distribution.twoDay;
+
+        case 3:
+            return distribution.threeDay;
+
+        case 4:
+            return distribution.fourDay;
+
+        default:
+            return 0;
+
+    }
+
+}
+
+
+/**
+ * Produce a deterministic list of outbound flights from
+ * a pilot base for pairing construction.
+ */
+function getViaviaBasePairingStarts(
+    base,
+    seed
+) {
+
+    const flights =
+        VIAVIA_SCHEDULE
+            .flights
+            .filter(
+                flight =>
+                    flight.origin ===
+                    base
+            );
+
+
+    return (
+        orderViaviaCandidates(
+            flights,
+            seed
+        )
+    );
+
+}
+
+
+/**
+ * Attempt to build the requested number of pairings for
+ * one base / trip-length combination.
+ */
+function generateViaviaPairingsForLength(
+    base,
+    targetDays,
+    targetCount,
+    existingSignatures
+) {
+
+    const results = [];
+
+
+    if (
+        targetCount <= 0
+    ) {
+
+        return results;
+
+    }
+
+
+    const starts =
+        getViaviaBasePairingStarts(
+            base,
+            `${base}|${targetDays}|STARTS`
+        );
+
+
+    /*
+     * We make several deterministic passes using different
+     * seeds. This allows multiple valid pairings to originate
+     * with the same flight while still producing different
+     * downstream sequences.
+     */
+    const maximumPasses =
+        18;
+
+
+    for (
+        let pass = 0;
+        pass < maximumPasses;
+        pass++
+    ) {
+
+        if (
+            results.length >=
+            targetCount
+        ) {
+
+            break;
+
+        }
+
+
+        const orderedStarts =
+            orderViaviaCandidates(
+                starts,
+                `${base}|${targetDays}|PASS${pass}`
+            );
+
+
+        for (
+            const firstFlight of
+            orderedStarts
+        ) {
+
+            if (
+                results.length >=
+                targetCount
+            ) {
+
+                break;
+
+            }
+
+
+            let flights = null;
+
+
+            if (
+                targetDays === 1
+            ) {
+
+                flights =
+                    buildViaviaOneDayTurn(
+                        firstFlight,
+                        base,
+                        `${base}|1|${pass}|${firstFlight.flightNumber}`
+                    );
+
+            } else {
+
+                flights =
+                    buildViaviaMultiDayPairing(
+                        firstFlight,
+                        base,
+                        targetDays,
+                        `${base}|${targetDays}|${pass}|${firstFlight.flightNumber}`
+                    );
+
+            }
+
+
+            if (
+                !flights ||
+                !isViaviaCompletePairing(
+                    flights,
+                    base,
+                    targetDays
+                )
+            ) {
+
+                continue;
+
+            }
+
+
+            const signature =
+                getViaviaPairingSignature(
+                    flights
+                );
+
+
+            if (
+                existingSignatures.has(
+                    signature
+                )
+            ) {
+
+                continue;
+
+            }
+
+
+            existingSignatures.add(
+                signature
+            );
+
+
+            results.push({
+                base:
+                    base,
+
+                days:
+                    targetDays,
+
+                flights:
+                    flights
+            });
+
+        }
+
+    }
+
+
+    return results;
+
+}
+/* ============================================================
+   MASTER PAIRING GENERATOR
+============================================================ */
+
+/**
+ * Generate the complete Viavia pairing catalog.
+ *
+ * Default:
+ * - DFW / RSW / SMF
+ * - up to 4 days
+ * - deterministic
+ *
+ * The legacy maxLegs option is intentionally ignored.
+ * Multi-day consumers should use maxDays.
+ */
+function generateViaviaPairings(options = {}) {
+
+    const requestedBases =
+        Array.isArray(
+            options.bases
+        ) &&
+        options.bases.length > 0
+            ? options.bases
+            : VIAVIA_SCHEDULE
+                .airline
+                .pilotBases;
+
+
+    const maximumDays =
+        Math.min(
+            Math.max(
+                Number(
+                    options.maxDays ||
+                    VIAVIA_MAX_PAIRING_DAYS
+                ),
+                1
+            ),
+            VIAVIA_MAX_PAIRING_DAYS
+        );
+
+
+    const generated = [];
+
+    const signatures =
+        new Set();
+
+
+    requestedBases.forEach(
+        base => {
+
+            for (
+                let days = 1;
+                days <= maximumDays;
+                days++
+            ) {
+
+                const targetCount =
+                    getViaviaPairingTargetCount(
+                        base,
+                        days
+                    );
+
+
+                const pairings =
+                    generateViaviaPairingsForLength(
+                        base,
+                        days,
+                        targetCount,
+                        signatures
+                    );
+
+
+                pairings.forEach(
+                    pairing => {
+
+                        generated.push(
+                            pairing
+                        );
+
+                    }
+                );
+
+            }
+
+        }
+    );
+
+
+    /*
+     * --------------------------------------------------------
+     * TRIP-001
+     * --------------------------------------------------------
+     *
+     * TRIP-001 is intentionally fixed as the original
+     * RSW → MDE → RSW turn.
+     *
+     * This preserves compatibility with existing Viavia
+     * trip assignments and previously tested backend data.
+     */
+    const via1757 =
+        getViaviaFlight(
+            "VIA1757"
+        );
+
+    const via1758 =
+        getViaviaFlight(
+            "VIA1758"
+        );
+
+
+    const fixedTrip001Flights =
+        (
+            via1757 &&
+            via1758 &&
+            isViaviaValidConnection(
+                via1757,
+                via1758
+            )
+        )
+            ? [
+                cloneViaviaPairingFlight(
+                    via1757,
+                    1
+                ),
+
+                cloneViaviaPairingFlight(
+                    via1758,
+                    1
+                )
+            ]
+            : null;
+
+
+    if (
+        fixedTrip001Flights
+    ) {
+
+        const fixedSignature =
+            getViaviaPairingSignature(
+                fixedTrip001Flights
+            );
+
+
+        /*
+         * Remove an automatically generated duplicate of the
+         * fixed RSW-MDE-RSW sequence if one exists.
+         */
+        const duplicateIndex =
+            generated.findIndex(
+                item =>
+                    getViaviaPairingSignature(
+                        item.flights
+                    ) ===
+                    fixedSignature
+            );
+
+
+        if (
+            duplicateIndex !== -1
+        ) {
+
+            generated.splice(
+                duplicateIndex,
+                1
+            );
+
+        }
+
+
+        generated.unshift({
+
+            base:
+                "RSW",
+
+            days:
+                1,
+
+            flights:
+                fixedTrip001Flights
+
+        });
+
+    }
+
+
+    /*
+     * Stable final ordering:
+     *
+     * 1. TRIP-001 fixed RSW-MDE-RSW
+     * 2. Remaining pairings by base
+     * 3. Shorter trips before longer trips
+     * 4. Stable route / flight-number ordering
+     */
+    const first =
+        generated.length > 0
+            ? generated[0]
+            : null;
+
+
+    const remainder =
+        generated
+            .slice(
+                first ? 1 : 0
+            )
+            .sort(
+                (a, b) => {
+
+                    const baseOrder = {
+                        DFW: 1,
+                        RSW: 2,
+                        SMF: 3
+                    };
+
+
+                    const aBase =
+                        baseOrder[
+                            a.base
+                        ] || 99;
+
+                    const bBase =
+                        baseOrder[
+                            b.base
+                        ] || 99;
+
+
+                    if (
+                        aBase !==
+                        bBase
+                    ) {
+
+                        return (
+                            aBase -
+                            bBase
+                        );
+
+                    }
+
+
+                    if (
+                        a.days !==
+                        b.days
+                    ) {
+
+                        return (
+                            a.days -
+                            b.days
+                        );
+
+                    }
+
+
+                    return (
+                        getViaviaPairingSignature(
+                            a.flights
+                        )
+                        .localeCompare(
+                            getViaviaPairingSignature(
+                                b.flights
+                            ),
+                            undefined,
+                            {
+                                numeric: true
+                            }
+                        )
+                    );
+
+                }
+            );
+
+
+    const ordered =
+        first
+            ? [
+                first,
+                ...remainder
+            ]
+            : remainder;
+
+
+    return (
+        ordered
+            .map(
+                (
+                    item,
+                    index
+                ) => {
+
+                    const pairingId =
+                        `TRIP-${String(
+                            index + 1
+                        ).padStart(
+                            3,
+                            "0"
+                        )}`;
+
+
+                    return (
+                        createViaviaPairing(
+                            pairingId,
+                            item.base,
+                            item.flights
+                        )
+                    );
+
+                }
+            )
+            .filter(
+                Boolean
+            )
+    );
+
+}
+
+
+/* ============================================================
+   PAIRING LOOKUP HELPERS
+============================================================ */
+
+/**
+ * Find a pairing by its Viavia trip ID.
+ */
+function getViaviaPairing(
+    pairingId,
+    options = {}
+) {
+
+    const normalized =
+        String(
+            pairingId ||
+            ""
+        )
+        .trim()
+        .toUpperCase();
+
+
+    if (!normalized) {
+
+        return null;
+
+    }
+
+
+    return (
+        generateViaviaPairings(
+            options
+        )
+        .find(
+            pairing =>
+                pairing.pairingId ===
+                normalized
+        ) ||
+        null
+    );
+
+}
+
+
+/**
+ * Return pairings for one pilot base.
+ */
+function getViaviaPairingsForBase(
+    base,
+    options = {}
+) {
+
+    const normalizedBase =
+        String(
+            base ||
+            ""
+        )
+        .trim()
+        .toUpperCase();
+
+
+    return (
+        generateViaviaPairings(
+            options
+        )
+        .filter(
+            pairing =>
+                pairing.base ===
+                normalizedBase
+        )
+    );
+
+}
+
+
+/**
+ * Return pairings of a particular duration.
+ */
+function getViaviaPairingsByDays(
+    days,
+    options = {}
+) {
+
+    const normalizedDays =
+        Number(
+            days
+        );
+
+
+    return (
+        generateViaviaPairings(
+            options
+        )
+        .filter(
+            pairing =>
+                pairing.days ===
+                normalizedDays
+        )
+    );
+
+}
+
+
+/* ============================================================
+   VALIDATION
+============================================================ */
+
+/**
+ * Validate the master flight schedule.
+ */
+function validateViaviaSchedule() {
+
+    const flights =
+        VIAVIA_SCHEDULE
+            .flights;
+
+
+    const flightNumbers =
+        flights.map(
+            flight =>
+                flight.flightNumber
+        );
+
+
+    const duplicateFlightNumbers =
+        flightNumbers.filter(
+            (
+                flightNumber,
+                index
+            ) =>
+                flightNumbers.indexOf(
+                    flightNumber
+                ) !==
+                index
+        );
+
+
+    const missingData =
+        flights.filter(
+            flight =>
+                !flight.flightNumber ||
+                !flight.origin ||
+                !flight.destination ||
+                !flight.departure ||
+                !flight.arrival ||
+                !flight.aircraft
+        );
+
+
+    const expectedFlights =
+        131;
+
+
+    return {
+
+        totalFlights:
+            flights.length,
+
+        expectedFlights:
+            expectedFlights,
+
+        totalCorrect:
+            flights.length ===
+            expectedFlights,
+
+        duplicateFlightNumbers:
+            [
+                ...new Set(
+                    duplicateFlightNumbers
+                )
+            ],
+
+        duplicatesCorrect:
+            duplicateFlightNumbers.length ===
+            0,
+
+        missingData:
+            missingData.map(
+                flight =>
+                    flight.flightNumber ||
+                    "UNKNOWN"
+            ),
+
+        dataComplete:
+            missingData.length ===
+            0,
+
+        valid:
+            (
+                flights.length ===
+                    expectedFlights &&
+                duplicateFlightNumbers.length ===
+                    0 &&
+                missingData.length ===
+                    0
+            )
+
+    };
+
+}
+
+
+/**
+ * Validate one generated pairing.
+ */
+function validateViaviaPairing(
+    pairing
+) {
+
+    const errors = [];
+
+
+    if (!pairing) {
+
+        return {
+            valid: false,
+            errors: [
+                "Pairing is missing."
+            ]
+        };
+
+    }
+
+
+    if (
+        !VIAVIA_SCHEDULE
+            .airline
+            .pilotBases
+            .includes(
+                pairing.base
+            )
+    ) {
+
+        errors.push(
+            "Invalid pilot base."
+        );
+
+    }
+
+
+    if (
+        !Array.isArray(
+            pairing.flights
+        ) ||
+        pairing.flights.length === 0
+    ) {
+
+        errors.push(
+            "Pairing has no flights."
+        );
+
+
+        return {
+            valid: false,
+            errors:
+                errors
+        };
+
+    }
+
+
+    if (
+        pairing.startAirport !==
+        pairing.base
+    ) {
+
+        errors.push(
+            "Pairing does not begin at its pilot base."
+        );
+
+    }
+
+
+    if (
+        pairing.endAirport !==
+        pairing.base
+    ) {
+
+        errors.push(
+            "Pairing does not return to its pilot base."
+        );
+
+    }
+
+
+    if (
+        pairing.days < 1 ||
+        pairing.days >
+            VIAVIA_MAX_PAIRING_DAYS
+    ) {
+
+        errors.push(
+            "Pairing duration is outside the 1–4 day limit."
+        );
+
+    }
+
+
+    /*
+     * Confirm every pairing flight exists in the master
+     * Viavia schedule.
+     */
+    pairing.flights.forEach(
+        flight => {
+
+            const scheduled =
+                getViaviaFlight(
+                    flight.flightNumber
+                );
+
+
+            if (!scheduled) {
+
+                errors.push(
+                    `${flight.flightNumber} is not in the master schedule.`
+                );
+
+
+                return;
+
+            }
+
+
+            if (
+                scheduled.origin !==
+                    flight.origin ||
+                scheduled.destination !==
+                    flight.destination
+            ) {
+
+                errors.push(
+                    `${flight.flightNumber} route does not match the master schedule.`
+                );
+
+            }
+
+        }
+    );
+
+
+    /*
+     * Validate airport continuity.
+     */
+    for (
+        let index = 1;
+        index < pairing.flights.length;
+        index++
+    ) {
+
+        const previous =
+            pairing.flights[
+                index - 1
+            ];
+
+        const current =
+            pairing.flights[
+                index
+            ];
+
+
+        if (
+            previous.destination !==
+            current.origin
+        ) {
+
+            errors.push(
+                (
+                    `Airport discontinuity between ` +
+                    `${previous.flightNumber} and ` +
+                    `${current.flightNumber}.`
+                )
+            );
+
+
+            continue;
+
+        }
+
+
+        const previousDay =
+            Number(
+                previous.pairingDay ||
+                1
+            );
+
+        const currentDay =
+            Number(
+                current.pairingDay ||
+                1
+            );
+
+
+        if (
+            currentDay ===
+            previousDay
+        ) {
+
+            const connection =
+                getViaviaConnectionMinutes(
+                    previous,
+                    current
+                );
+
+
+            if (
+                connection === null ||
+                connection <
+                    VIAVIA_MIN_CONNECTION_MINUTES
+            ) {
+
+                errors.push(
+                    (
+                        `Invalid same-day connection between ` +
+                        `${previous.flightNumber} and ` +
+                        `${current.flightNumber}.`
+                    )
+                );
+
+            }
+
+        }
+
+
+        if (
+            currentDay <
+            previousDay ||
+            currentDay >
+                previousDay + 1
+        ) {
+
+            errors.push(
+                (
+                    `Invalid pairing-day sequence between ` +
+                    `${previous.flightNumber} and ` +
+                    `${current.flightNumber}.`
+                )
+            );
+
+        }
+
+    }
+
+
+    return {
+
+        valid:
+            errors.length ===
+            0,
+
+        errors:
+            errors
+
+    };
+
+}
+
+
+/**
+ * Validate the complete generated pairing catalog.
+ */
+function validateViaviaPairings(
+    options = {}
+) {
+
+    const pairings =
+        generateViaviaPairings(
+            options
+        );
+
+
+    const invalidPairings =
+        [];
+
+
+    pairings.forEach(
+        pairing => {
+
+            const result =
+                validateViaviaPairing(
+                    pairing
+                );
+
+
+            if (
+                !result.valid
+            ) {
+
+                invalidPairings.push({
+
+                    pairingId:
+                        pairing.pairingId,
+
+                    errors:
+                        result.errors
+
+                });
+
+            }
+
+        }
+    );
+
+
+    const trip001 =
+        pairings.find(
+            pairing =>
+                pairing.pairingId ===
+                "TRIP-001"
+        );
+
+
+    const trip001Exists =
+        Boolean(
+            trip001
+        );
+
+
+    const trip001Correct =
+        Boolean(
+            trip001 &&
+            trip001.base ===
+                "RSW" &&
+            trip001.days ===
+                1 &&
+            trip001.flightNumbers.length ===
+                2 &&
+            trip001.flightNumbers[0] ===
+                "VIA1757" &&
+            trip001.flightNumbers[1] ===
+                "VIA1758" &&
+            trip001.aircraft.includes(
+                "A320"
+            )
+        );
+
+
+    return {
+
+        totalPairings:
+            pairings.length,
+
+        invalidPairings:
+            invalidPairings,
+
+        trip001Exists:
+            trip001Exists,
+
+        trip001Correct:
+            trip001Correct,
+
+        valid:
+            (
+                invalidPairings.length ===
+                    0 &&
+                trip001Exists &&
+                trip001Correct
+            )
+
+    };
+
+}
+
+
+/**
+ * Run the complete schedule + pairing validation.
+ */
+function validateViaviaOperations() {
+
+    const schedule =
+        validateViaviaSchedule();
+
+    const pairings =
+        validateViaviaPairings();
+
+
+    return {
+
+        schedule:
+            schedule,
+
+        pairings:
+            pairings,
+
+        valid:
+            (
+                schedule.valid &&
+                pairings.valid
+            )
+
+    };
+
+}
+
+
+/* ============================================================
+   BROWSER GLOBALS
+============================================================ */
+
+/*
+ * Expose Viavia schedule and pairing helpers globally so the
+ * public site and Crew Portal pages can use one shared source.
+ */
+window.VIAVIA_SCHEDULE =
+    VIAVIA_SCHEDULE;
+
+
+window.VIAVIA_PAIRING_RULES =
+    Object.freeze({
+
+        minimumConnectionMinutes:
+            VIAVIA_MIN_CONNECTION_MINUTES,
+
+        minimumOvernightRestMinutes:
+            VIAVIA_MIN_OVERNIGHT_MINUTES,
+
+        maximumSameDayConnectionMinutes:
+            VIAVIA_MAX_SAME_DAY_CONNECTION_MINUTES,
+
+        maximumLegsPerDutyDay:
+            VIAVIA_MAX_LEGS_PER_DAY,
+
+        maximumTripDays:
+            VIAVIA_MAX_PAIRING_DAYS,
+
+        maximumTripLegs:
+            9
+
+    });
+
+
+window.getViaviaFlights =
+    getViaviaFlights;
+
+window.getViaviaFlight =
+    getViaviaFlight;
+
+window.getViaviaFlightsFrom =
+    getViaviaFlightsFrom;
+
+window.getViaviaFlightsTo =
+    getViaviaFlightsTo;
+
+window.getViaviaBaseFlights =
+    getViaviaBaseFlights;
+
+window.getViaviaRoute =
+    getViaviaRoute;
+
+window.getViaviaFlightLabel =
+    getViaviaFlightLabel;
+
+window.getViaviaGateStatus =
+    getViaviaGateStatus;
+
+window.getViaviaTimeMinutes =
+    getViaviaTimeMinutes;
+
+window.getViaviaFlightDurationMinutes =
+    getViaviaFlightDurationMinutes;
+
+window.getViaviaArrivalMinutes =
+    getViaviaArrivalMinutes;
+
+window.getViaviaConnectionMinutes =
+    getViaviaConnectionMinutes;
+
+window.isViaviaValidConnection =
+    isViaviaValidConnection;
+
+window.buildViaviaPairingRoute =
+    buildViaviaPairingRoute;
+
+window.buildViaviaPairingDays =
+    buildViaviaPairingDays;
+
+window.getViaviaPairingOvernights =
+    getViaviaPairingOvernights;
+
+window.createViaviaPairing =
+    createViaviaPairing;
+
+window.generateViaviaPairings =
+    generateViaviaPairings;
+
+window.getViaviaPairing =
+    getViaviaPairing;
+
+window.getViaviaPairingsForBase =
+    getViaviaPairingsForBase;
+
+window.getViaviaPairingsByDays =
+    getViaviaPairingsByDays;
+
+window.validateViaviaSchedule =
+    validateViaviaSchedule;
+
+window.validateViaviaPairing =
+    validateViaviaPairing;
+
+window.validateViaviaPairings =
+    validateViaviaPairings;
+
+window.validateViaviaOperations =
+    validateViaviaOperations;
+
+
+/* ============================================================
+   STARTUP VALIDATION
+============================================================ */
+
+const VIAVIA_VALIDATION =
+    validateViaviaOperations();
+
+
+window.VIAVIA_VALIDATION =
+    VIAVIA_VALIDATION;
+
+
+if (
+    !VIAVIA_VALIDATION.valid
+) {
+
+    console.error(
+        "Viavia Operations schedule validation failed.",
+        VIAVIA_VALIDATION
+    );
+
+} else {
+
+    console.log(
+        "Viavia Operations schedule loaded.",
+        {
+            flights:
+                VIAVIA_VALIDATION
+                    .schedule
+                    .totalFlights,
+
+            pairings:
+                VIAVIA_VALIDATION
+                    .pairings
+                    .totalPairings,
+
+            callsign:
+                VIAVIA_SCHEDULE
+                    .airline
+                    .callsign
+        }
+    );
+
+}
