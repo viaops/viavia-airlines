@@ -2,13 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
+  <title>Viavia | Crew Portal</title>
+
+  <!-- MAVEN PRO -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet"
   >
-
-  <title>Viavia | Pilot Login</title>
 
   <style>
     * {
@@ -18,16 +22,16 @@
     }
 
     :root {
-      --purple: #7357ff;
-      --purple-dark: #5d43e8;
-      --purple-soft: #eeeaff;
-      --lavender: #b7a8ff;
+      --purple: #3d2d5a;
+      --purple-dark: #32244a;
+      --purple-soft: #eee7f3;
+      --lavender: #bcaace;
 
-      --text: #17171c;
-      --muted: #72727d;
+      --text: #24142f;
+      --muted: #75677e;
 
-      --border: #e7e7ed;
-      --background: #f6f6f9;
+      --border: #e4dce9;
+      --background: #f7f4fa;
       --white: #ffffff;
 
       --success-bg: #eaf8ef;
@@ -39,29 +43,19 @@
 
     body {
       min-height: 100vh;
-      font-family:
-        Inter,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        Roboto,
-        Helvetica,
-        Arial,
-        sans-serif;
-
+      font-family: "Maven Pro", sans-serif;
       background:
         radial-gradient(
           circle at top left,
-          rgba(115, 87, 255, 0.16),
+          rgba(188, 170, 206, 0.30),
           transparent 32%
         ),
         radial-gradient(
           circle at bottom right,
-          rgba(183, 168, 255, 0.18),
+          rgba(61, 45, 90, 0.08),
           transparent 35%
         ),
         var(--background);
-
       color: var(--text);
     }
 
@@ -74,17 +68,23 @@
       cursor: pointer;
     }
 
+    /* =====================================================
+       PAGE
+       ===================================================== */
+
     .page {
       min-height: 100vh;
+
       display: grid;
+
       grid-template-columns:
         minmax(360px, 0.95fr)
         minmax(500px, 1.05fr);
     }
 
-    /* ======================================================
-       LEFT BRAND PANEL
-       ====================================================== */
+    /* =====================================================
+       CREW PORTAL BRAND PANEL
+       ===================================================== */
 
     .brand-panel {
       position: relative;
@@ -99,9 +99,9 @@
       background:
         linear-gradient(
           145deg,
-          #5d43e8 0%,
-          #765cff 50%,
-          #9986ff 100%
+          #3d2d5a 0%,
+          #5b427a 52%,
+          #765a91 100%
         );
 
       color: white;
@@ -109,6 +109,7 @@
 
     .brand-panel::before {
       content: "";
+
       position: absolute;
 
       width: 420px;
@@ -119,13 +120,12 @@
 
       border-radius: 50%;
 
-      border:
-        1px solid
-        rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.16);
     }
 
     .brand-panel::after {
       content: "";
+
       position: absolute;
 
       width: 520px;
@@ -136,8 +136,7 @@
 
       border-radius: 50%;
 
-      background:
-        rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, 0.06);
     }
 
     .brand-top,
@@ -156,17 +155,19 @@
     .logo {
       max-width: 180px;
       max-height: 70px;
+
       object-fit: contain;
     }
 
     .portal-label {
       padding-left: 16px;
+
       border-left:
         1px solid
         rgba(255, 255, 255, 0.35);
 
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 800;
 
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -191,6 +192,7 @@
     .brand-copy h1 {
       font-size: clamp(44px, 5vw, 76px);
       line-height: 0.98;
+
       letter-spacing: -0.045em;
 
       margin-bottom: 24px;
@@ -202,24 +204,23 @@
       font-size: 18px;
       line-height: 1.65;
 
-      color:
-        rgba(255, 255, 255, 0.86);
+      color: rgba(255, 255, 255, 0.86);
     }
 
     .brand-footer {
       display: flex;
       justify-content: space-between;
+
       gap: 20px;
 
       font-size: 13px;
 
-      color:
-        rgba(255, 255, 255, 0.7);
+      color: rgba(255, 255, 255, 0.7);
     }
 
-    /* ======================================================
+    /* =====================================================
        LOGIN PANEL
-       ====================================================== */
+       ===================================================== */
 
     .login-panel {
       display: flex;
@@ -242,6 +243,7 @@
     .mobile-logo img {
       max-width: 160px;
       max-height: 65px;
+
       object-fit: contain;
     }
 
@@ -252,23 +254,27 @@
     .login-header h2 {
       margin-bottom: 10px;
 
-      font-size: 34px;
+      font-size: 38px;
       line-height: 1.1;
 
-      letter-spacing: -0.035em;
+      font-weight: 800;
+
+      color: var(--purple);
     }
 
     .login-header p {
       color: var(--muted);
+
       line-height: 1.6;
     }
 
-    /* ======================================================
+    /* =====================================================
        TABS
-       ====================================================== */
+       ===================================================== */
 
     .tabs {
       display: grid;
+
       grid-template-columns: 1fr 1fr;
 
       margin-bottom: 30px;
@@ -277,11 +283,12 @@
 
       border-radius: 13px;
 
-      background: #ececf1;
+      background: var(--purple-soft);
     }
 
     .tab {
       border: 0;
+
       border-radius: 9px;
 
       padding: 12px 16px;
@@ -300,16 +307,17 @@
 
     .tab.active {
       background: white;
-      color: var(--text);
+
+      color: var(--purple);
 
       box-shadow:
         0 2px 8px
-        rgba(20, 20, 30, 0.08);
+        rgba(36, 20, 47, 0.08);
     }
 
-    /* ======================================================
+    /* =====================================================
        FORMS
-       ====================================================== */
+       ===================================================== */
 
     .auth-form {
       display: none;
@@ -329,7 +337,7 @@
       margin-bottom: 8px;
 
       font-size: 13px;
-      font-weight: 750;
+      font-weight: 700;
 
       color: #44444d;
     }
@@ -361,12 +369,16 @@
 
       box-shadow:
         0 0 0 4px
-        rgba(115, 87, 255, 0.11);
+        rgba(61, 45, 90, 0.11);
     }
 
     .field input::placeholder {
       color: #aaaab3;
     }
+
+    /* =====================================================
+       PASSWORD
+       ===================================================== */
 
     .password-wrap {
       position: relative;
@@ -385,6 +397,7 @@
       transform: translateY(-50%);
 
       border: 0;
+
       background: transparent;
 
       color: var(--purple);
@@ -392,6 +405,10 @@
       font-size: 12px;
       font-weight: 800;
     }
+
+    /* =====================================================
+       BUTTON
+       ===================================================== */
 
     .primary-button {
       width: 100%;
@@ -401,6 +418,7 @@
       padding: 15px 18px;
 
       border: 0;
+
       border-radius: 11px;
 
       background: var(--purple);
@@ -427,18 +445,9 @@
       opacity: 0.65;
     }
 
-    .form-note {
-      margin-top: 18px;
-
-      font-size: 12px;
-      line-height: 1.55;
-
-      color: var(--muted);
-    }
-
-    /* ======================================================
+    /* =====================================================
        MESSAGES
-       ====================================================== */
+       ===================================================== */
 
     .message {
       display: none;
@@ -450,6 +459,7 @@
       border-radius: 10px;
 
       font-size: 13px;
+
       line-height: 1.5;
     }
 
@@ -467,9 +477,23 @@
       color: var(--success-text);
     }
 
-    /* ======================================================
-       STATUS
-       ====================================================== */
+    /* =====================================================
+       FORM NOTE
+       ===================================================== */
+
+    .form-note {
+      margin-top: 18px;
+
+      font-size: 12px;
+
+      line-height: 1.55;
+
+      color: var(--muted);
+    }
+
+    /* =====================================================
+       SYSTEM STATUS
+       ===================================================== */
 
     .system-status {
       margin-top: 34px;
@@ -494,6 +518,7 @@
     .status-indicator {
       display: flex;
       align-items: center;
+
       gap: 7px;
     }
 
@@ -510,11 +535,12 @@
         rgba(53, 183, 111, 0.11);
     }
 
-    /* ======================================================
+    /* =====================================================
        RESPONSIVE
-       ====================================================== */
+       ===================================================== */
 
     @media (max-width: 900px) {
+
       .page {
         display: block;
       }
@@ -526,9 +552,7 @@
       .login-panel {
         min-height: 100vh;
 
-        padding:
-          40px
-          22px;
+        padding: 40px 22px;
       }
 
       .mobile-logo {
@@ -537,6 +561,7 @@
     }
 
     @media (max-width: 520px) {
+
       .login-header h2 {
         font-size: 30px;
       }
@@ -546,6 +571,11 @@
 
         padding-top: 35px;
       }
+
+      .system-status {
+        flex-direction: column;
+        align-items: flex-start;
+      }
     }
   </style>
 </head>
@@ -554,13 +584,14 @@
 
   <main class="page">
 
-    <!-- ====================================================
-         BRAND SIDE
-         ==================================================== -->
+    <!-- =====================================================
+         CREW PORTAL BRAND SIDE
+         ===================================================== -->
 
     <section class="brand-panel">
 
       <div class="brand-top">
+
         <div class="logo-wrap">
 
           <img
@@ -570,10 +601,11 @@
           >
 
           <div class="portal-label">
-            Pilot Portal
+            Crew Portal
           </div>
 
         </div>
+
       </div>
 
 
@@ -612,19 +644,21 @@
     </section>
 
 
-    <!-- ====================================================
+    <!-- =====================================================
          AUTH SIDE
-         ==================================================== -->
+         ===================================================== -->
 
     <section class="login-panel">
 
       <div class="login-container">
 
         <div class="mobile-logo">
+
           <img
             src="viavia-logo.png"
             alt="Viavia Airlines"
           >
+
         </div>
 
 
@@ -635,11 +669,13 @@
           </h2>
 
           <p id="pageDescription">
-            Sign in with your Viavia pilot account.
+            Sign in with your Viavia crew account.
           </p>
 
         </div>
 
+
+        <!-- MESSAGE -->
 
         <div
           id="message"
@@ -647,9 +683,7 @@
         ></div>
 
 
-        <!-- =================================================
-             TABS
-             ================================================= -->
+        <!-- TABS -->
 
         <div class="tabs">
 
@@ -847,7 +881,7 @@
             class="primary-button"
             id="signupButton"
           >
-            Create Pilot Account
+            Create Crew Account
           </button>
 
 
@@ -858,6 +892,8 @@
 
         </form>
 
+
+        <!-- SYSTEM STATUS -->
 
         <div class="system-status">
 
@@ -872,7 +908,7 @@
           </div>
 
           <span>
-            Secure pilot access
+            Secure crew access
           </span>
 
         </div>
@@ -884,22 +920,21 @@
   </main>
 
 
-  <!-- ======================================================
+  <!-- =====================================================
        SUPABASE
-       ====================================================== -->
+       ===================================================== -->
 
-  <script
-    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-  ></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script src="viavia-supabase.js"></script>
 
 
-  <!-- ======================================================
+  <!-- =====================================================
        LOGIN PAGE LOGIC
-       ====================================================== -->
+       ===================================================== -->
 
   <script>
+
     const loginTab =
       document.getElementById("loginTab");
 
@@ -922,9 +957,9 @@
       document.getElementById("pageDescription");
 
 
-    /* ======================================================
+    /* =====================================================
        REDIRECT
-       ====================================================== */
+       ===================================================== */
 
     function getRedirectDestination() {
 
@@ -936,12 +971,6 @@
       const requested =
         params.get("redirect");
 
-      /*
-         Only allow local relative pages.
-
-         This prevents login.html from being used as
-         an open redirect to an outside website.
-      */
       if (
         requested &&
         !requested.startsWith("http://") &&
@@ -955,16 +984,15 @@
     }
 
 
-    /* ======================================================
+    /* =====================================================
        MESSAGES
-       ====================================================== */
+       ===================================================== */
 
     function clearMessage() {
 
       message.textContent = "";
 
-      message.className =
-        "message";
+      message.className = "message";
     }
 
 
@@ -980,9 +1008,9 @@
     }
 
 
-    /* ======================================================
+    /* =====================================================
        TAB SWITCHING
-       ====================================================== */
+       ===================================================== */
 
     function showLogin() {
 
@@ -998,7 +1026,7 @@
         "Welcome back";
 
       pageDescription.textContent =
-        "Sign in with your Viavia pilot account.";
+        "Sign in with your Viavia crew account.";
     }
 
 
@@ -1016,7 +1044,7 @@
         "Join the flight deck";
 
       pageDescription.textContent =
-        "Create your Viavia pilot account.";
+        "Create your Viavia crew account.";
     }
 
 
@@ -1032,9 +1060,9 @@
     );
 
 
-    /* ======================================================
+    /* =====================================================
        PASSWORD VISIBILITY
-       ====================================================== */
+       ===================================================== */
 
     document
       .querySelectorAll(".password-toggle")
@@ -1063,20 +1091,21 @@
 
             } else {
 
-              input.type =
-                "password";
+              input.type = "password";
 
               button.textContent =
                 "Show";
             }
+
           }
         );
+
       });
 
 
-    /* ======================================================
+    /* =====================================================
        LOGIN
-       ====================================================== */
+       ===================================================== */
 
     loginForm.addEventListener(
       "submit",
@@ -1102,8 +1131,10 @@
           );
 
         button.disabled = true;
+
         button.textContent =
           "Signing in...";
+
 
         try {
 
@@ -1139,13 +1170,14 @@
           button.textContent =
             "Sign In";
         }
+
       }
     );
 
 
-    /* ======================================================
+    /* =====================================================
        SIGN UP
-       ====================================================== */
+       ===================================================== */
 
     signupForm.addEventListener(
       "submit",
@@ -1225,19 +1257,13 @@
             );
 
 
-          /*
-             With Confirm Email enabled in Supabase,
-             signUp normally returns a user but no
-             active session until verification.
-          */
-
           if (
             result &&
             result.session
           ) {
 
             showMessage(
-              "Pilot account created. Opening Viavia Operations...",
+              "Crew account created. Opening Viavia Operations...",
               "success"
             );
 
@@ -1250,7 +1276,7 @@
 
 
           showMessage(
-            "Pilot account created. Check your email and confirm your address, then return here to sign in.",
+            "Crew account created. Check your email and confirm your address, then return here to sign in.",
             "success"
           );
 
@@ -1273,19 +1299,21 @@
           button.disabled = false;
 
           button.textContent =
-            "Create Pilot Account";
+            "Create Crew Account";
         }
+
       }
     );
 
 
-    /* ======================================================
+    /* =====================================================
        FRIENDLY AUTH ERRORS
-       ====================================================== */
+       ===================================================== */
 
     function getFriendlyAuthError(error) {
 
       if (!error) {
+
         return (
           "Something went wrong. " +
           "Please try again."
@@ -1339,12 +1367,8 @@
 
 
       if (
-        raw.includes(
-          "password"
-        ) &&
-        raw.includes(
-          "characters"
-        )
+        raw.includes("password") &&
+        raw.includes("characters")
       ) {
 
         return (
@@ -1355,9 +1379,7 @@
 
 
       if (
-        raw.includes(
-          "rate limit"
-        )
+        raw.includes("rate limit")
       ) {
 
         return (
@@ -1374,9 +1396,9 @@
     }
 
 
-    /* ======================================================
+    /* =====================================================
        ALREADY LOGGED IN
-       ====================================================== */
+       ===================================================== */
 
     async function checkExistingSession() {
 
