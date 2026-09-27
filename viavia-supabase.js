@@ -1,9 +1,9 @@
 /* ============================================================
    VIAVIA VIRTUAL AIRLINES
-   Supabase Connection + Authentication Helpers
+   Supabase Connection + Authentication + Operations Helpers
 
    Project: Viavia Operations
-   Version: 2026-09-26
+   Version: 2026-09-27
    ============================================================ */
 
 const VIAVIA_SUPABASE_URL =
@@ -375,15 +375,6 @@ function normalizeViaviaOperatingDate(
 
 /* ============================================================
    GET ASSIGNED TRIPS FOR DATE
-
-   IMPORTANT:
-   pilot_id is intentionally included.
-
-   This lets Available Trips determine:
-
-   - Available
-   - Assigned to another pilot
-   - Awarded to the current pilot
    ============================================================ */
 
 async function getViaviaAssignedTrips(
@@ -484,13 +475,6 @@ async function isViaviaTripAssigned(
 
 /* ============================================================
    CLAIM TRIP
-
-   PostgreSQL is the final authority.
-
-   UNIQUE:
-       trip_id + operating_date
-
-   prevents two pilots from receiving the same dated trip.
    ============================================================ */
 
 async function claimViaviaTrip(
@@ -635,13 +619,6 @@ async function claimViaviaTrip(
 
 
   if (error) {
-
-    /*
-       PostgreSQL 23505 =
-       unique constraint violation.
-
-       Another pilot won the assignment first.
-    */
 
     if (
       error.code ===
@@ -843,9 +820,7 @@ async function getMyViaviaTrip(
 
 
 /* ============================================================
-   OWNERSHIP CHECK
-
-   Useful for Available Trips.
+   OWNERSHIP / AVAILABILITY CHECK
    ============================================================ */
 
 async function getViaviaTripAvailability(
@@ -926,6 +901,699 @@ async function getViaviaTripAvailability(
     assignment:
       data
 
+  };
+}
+
+
+/* ============================================================
+   VIAVIA GATE SYSTEM
+
+   Supabase tables:
+
+   viavia_gate_pools
+   flight_gate_assignments
+
+   Gate assignments are shared between all pilots/devices.
+   ============================================================ */
+
+
+/* ============================================================
+   NORMALIZE AIRPORT
+   ============================================================ */
+
+function normalizeViaviaAirport(
+  airport
+) {
+
+  if (
+    typeof airport !== "string" ||
+    !airport.trim()
+  ) {
+
+    throw new Error(
+      "A valid airport code is required."
+    );
+
+  }
+
+  return airport
+    .trim()
+    .toUpperCase();
+}
+
+
+/* ============================================================
+   NORMALIZE FLIGHT NUMBER
+
+   Database format:
+   VIA1757
+   ============================================================ */
+
+function normalizeViaviaFlightNumber(
+  flightNumber
+) {
+
+  if (
+    flightNumber === null ||
+    flightNumber === undefined
+  ) {
+
+    throw new Error(
+      "A valid flight number is required."
+    );
+
+  }
+
+
+  let value =
+    String(flightNumber)
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, "");
+
+
+  if (/^\d+$/.test(value)) {
+
+    value =
+      "VIA" + value;
+
+  }
+
+
+  if (
+    !/^VIA\d+$/.test(value)
+  ) {
+
+    throw new Error(
+      "Invalid Viavia flight number."
+    );
+
+  }
+
+
+  return value;
+}
+
+
+/* ============================================================
+   GET APPROVED GATE POOL
+
+   Example:
+   ViaviaGates.getPool("DFW")
+   ============================================================ */
+
+async function getViaviaGatePool(
+  airport
+) {
+
+  const airportCode =
+    normalizeViaviaAirport(
+      airport
+    );
+
+
+  const { data, error } =
+    await viaviaSupabase
+      .from("viavia_gate_pools")
+      .select(
+        `
+        airport,
+        terminal_concourse,
+        gates
+        `
+      )
+      .eq(
+        "airport",
+        airportCode
+      )
+      .maybeSingle();
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  return data;
+}
+
+
+/* ============================================================
+   GET ALL APPROVED GATE POOLS
+   ============================================================ */
+
+async function getAllViaviaGatePools() {
+
+  const { data, error } =
+    await viaviaSupabase
+      .from("viavia_gate_pools")
+      .select(
+        `
+        airport,
+        terminal_concourse,
+        gates
+        `
+      )
+      .order(
+        "airport",
+        {
+          ascending: true
+        }
+      );
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  return data || [];
+}
+
+
+/* ============================================================
+   GET ONE EXISTING FLIGHT GATE ASSIGNMENT
+
+   A flight can have an assignment at its departure airport
+   and another assignment at its arrival airport.
+
+   Example:
+   VIA1757 / 2026-09-27 / RSW
+   ============================================================ */
+
+async function getViaviaGateAssignment(
+  flightNumber,
+  operatingDate,
+  airport
+) {
+
+  const flight =
+    normalizeViaviaFlightNumber(
+      flightNumber
+    );
+
+  const date =
+    normalizeViaviaOperatingDate(
+      operatingDate
+    );
+
+  const airportCode =
+    normalizeViaviaAirport(
+      airport
+    );
+
+
+  const { data, error } =
+    await viaviaSupabase
+      .from("flight_gate_assignments")
+      .select(
+        `
+        id,
+        operating_date,
+        flight_number,
+        airport,
+        gate,
+        assigned_at,
+        created_at,
+        updated_at
+        `
+      )
+      .eq(
+        "flight_number",
+        flight
+      )
+      .eq(
+        "operating_date",
+        date
+      )
+      .eq(
+        "airport",
+        airportCode
+      )
+      .maybeSingle();
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  return data;
+}
+
+
+/* ============================================================
+   GET ALL GATE ASSIGNMENTS FOR ONE AIRPORT / DATE
+   ============================================================ */
+
+async function getViaviaAirportGateAssignments(
+  airport,
+  operatingDate
+) {
+
+  const airportCode =
+    normalizeViaviaAirport(
+      airport
+    );
+
+  const date =
+    normalizeViaviaOperatingDate(
+      operatingDate
+    );
+
+
+  const { data, error } =
+    await viaviaSupabase
+      .from("flight_gate_assignments")
+      .select(
+        `
+        id,
+        operating_date,
+        flight_number,
+        airport,
+        gate,
+        assigned_at,
+        created_at,
+        updated_at
+        `
+      )
+      .eq(
+        "airport",
+        airportCode
+      )
+      .eq(
+        "operating_date",
+        date
+      )
+      .order(
+        "assigned_at",
+        {
+          ascending: true
+        }
+      );
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  return data || [];
+}
+
+
+/* ============================================================
+   GET ALL GATE ASSIGNMENTS FOR ONE FLIGHT / DATE
+
+   Useful because a flight can have:
+
+   origin gate
+   destination gate
+   ============================================================ */
+
+async function getViaviaFlightGateAssignments(
+  flightNumber,
+  operatingDate
+) {
+
+  const flight =
+    normalizeViaviaFlightNumber(
+      flightNumber
+    );
+
+  const date =
+    normalizeViaviaOperatingDate(
+      operatingDate
+    );
+
+
+  const { data, error } =
+    await viaviaSupabase
+      .from("flight_gate_assignments")
+      .select(
+        `
+        id,
+        operating_date,
+        flight_number,
+        airport,
+        gate,
+        assigned_at,
+        created_at,
+        updated_at
+        `
+      )
+      .eq(
+        "flight_number",
+        flight
+      )
+      .eq(
+        "operating_date",
+        date
+      )
+      .order(
+        "airport",
+        {
+          ascending: true
+        }
+      );
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  return data || [];
+}
+
+
+/* ============================================================
+   CREATE / GET SHARED GATE ASSIGNMENT
+
+   This function:
+
+   1. Checks for an existing assignment.
+   2. Loads the airport's approved gate pool.
+   3. Looks at gates already assigned at that airport/date.
+   4. Chooses an available approved gate.
+   5. Saves it to Supabase.
+   6. If another client created the same flight assignment
+      first, it retrieves that shared assignment.
+
+   IMPORTANT:
+   The 12-hour eligibility decision remains in Flight Planning.
+   This helper does not decide when a gate should be released.
+   ============================================================ */
+
+async function assignViaviaGate(
+  flightNumber,
+  operatingDate,
+  airport
+) {
+
+  const user =
+    await getViaviaUser();
+
+
+  if (!user) {
+
+    throw new Error(
+      "Pilot is not authenticated."
+    );
+
+  }
+
+
+  const flight =
+    normalizeViaviaFlightNumber(
+      flightNumber
+    );
+
+  const date =
+    normalizeViaviaOperatingDate(
+      operatingDate
+    );
+
+  const airportCode =
+    normalizeViaviaAirport(
+      airport
+    );
+
+
+  /* ----------------------------------------------------------
+     EXISTING ASSIGNMENT
+     ---------------------------------------------------------- */
+
+  const existing =
+    await getViaviaGateAssignment(
+      flight,
+      date,
+      airportCode
+    );
+
+
+  if (existing) {
+    return existing;
+  }
+
+
+  /* ----------------------------------------------------------
+     APPROVED AIRPORT GATE POOL
+     ---------------------------------------------------------- */
+
+  const pool =
+    await getViaviaGatePool(
+      airportCode
+    );
+
+
+  if (
+    !pool ||
+    !Array.isArray(pool.gates) ||
+    pool.gates.length === 0
+  ) {
+
+    const noPoolError =
+      new Error(
+        `No approved Viavia gate pool exists for ${airportCode}.`
+      );
+
+    noPoolError.code =
+      "VIAVIA_NO_GATE_POOL";
+
+    throw noPoolError;
+  }
+
+
+  /* ----------------------------------------------------------
+     CURRENT ASSIGNMENTS AT AIRPORT
+     ---------------------------------------------------------- */
+
+  const airportAssignments =
+    await getViaviaAirportGateAssignments(
+      airportCode,
+      date
+    );
+
+
+  const usedGates =
+    new Set(
+      airportAssignments
+        .map(
+          assignment =>
+            String(
+              assignment.gate
+            ).toUpperCase()
+        )
+    );
+
+
+  const availableGates =
+    pool.gates.filter(
+      gate =>
+        !usedGates.has(
+          String(gate).toUpperCase()
+        )
+    );
+
+
+  /*
+     If every gate has already been assigned somewhere on that
+     operating date, allow the pool to cycle.
+
+     This is intentional for now because the current table does
+     not yet store arrival/departure occupancy timestamps.
+
+     Flight Planning will later provide the actual timing logic.
+  */
+
+  const candidateGates =
+    availableGates.length > 0
+      ? availableGates
+      : pool.gates;
+
+
+  /*
+     Deterministic selection instead of Math.random().
+
+     The same flight/date/airport combination produces a stable
+     starting position in the approved gate pool.
+  */
+
+  const seed =
+    (
+      flight +
+      date +
+      airportCode
+    )
+      .split("")
+      .reduce(
+        (total, character) =>
+          total +
+          character.charCodeAt(0),
+        0
+      );
+
+
+  const gate =
+    candidateGates[
+      seed %
+      candidateGates.length
+    ];
+
+
+  const newAssignment = {
+
+    operating_date:
+      date,
+
+    flight_number:
+      flight,
+
+    airport:
+      airportCode,
+
+    gate:
+      String(gate)
+
+  };
+
+
+  const { data, error } =
+    await viaviaSupabase
+      .from("flight_gate_assignments")
+      .insert(
+        newAssignment
+      )
+      .select()
+      .single();
+
+
+  if (!error) {
+    return data;
+  }
+
+
+  /* ----------------------------------------------------------
+     RACE CONDITION
+
+     PostgreSQL 23505 means another browser/pilot created the
+     same flight/date/airport assignment before this insert
+     completed.
+
+     Retrieve the winning shared assignment.
+     ---------------------------------------------------------- */
+
+  if (
+    error.code ===
+    "23505"
+  ) {
+
+    const winningAssignment =
+      await getViaviaGateAssignment(
+        flight,
+        date,
+        airportCode
+      );
+
+
+    if (winningAssignment) {
+      return winningAssignment;
+    }
+
+
+    const conflictError =
+      new Error(
+        "The gate assignment changed while it was being created."
+      );
+
+    conflictError.code =
+      "VIAVIA_GATE_ASSIGNMENT_CONFLICT";
+
+    throw conflictError;
+  }
+
+
+  throw error;
+}
+
+
+/* ============================================================
+   GET OR ASSIGN
+
+   Convenience function for Flight Planning.
+
+   If the gate already exists:
+       return it.
+
+   Otherwise:
+       create it.
+   ============================================================ */
+
+async function getOrAssignViaviaGate(
+  flightNumber,
+  operatingDate,
+  airport
+) {
+
+  const existing =
+    await getViaviaGateAssignment(
+      flightNumber,
+      operatingDate,
+      airport
+    );
+
+
+  if (existing) {
+    return existing;
+  }
+
+
+  return await assignViaviaGate(
+    flightNumber,
+    operatingDate,
+    airport
+  );
+}
+
+
+/* ============================================================
+   GATE DISPLAY HELPER
+   ============================================================ */
+
+async function getViaviaGateDisplay(
+  flightNumber,
+  operatingDate,
+  airport
+) {
+
+  const assignment =
+    await getViaviaGateAssignment(
+      flightNumber,
+      operatingDate,
+      airport
+    );
+
+
+  if (!assignment) {
+
+    return {
+      assigned: false,
+      gate: null,
+      text:
+        "TBD — Gate assignment pending"
+    };
+
+  }
+
+
+  return {
+    assigned: true,
+    gate:
+      assignment.gate,
+    text:
+      `Gate ${assignment.gate}`,
+    assignment
   };
 }
 
@@ -1022,6 +1690,61 @@ window.ViaviaTrips = {
 
   getAvailability:
     getViaviaTripAvailability
+
+};
+
+
+/* ============================================================
+   GLOBAL GATE API
+
+   Usage examples:
+
+   ViaviaGates.getPool("DFW")
+
+   ViaviaGates.getAssignment(
+     "VIA1757",
+     "2026-09-27",
+     "RSW"
+   )
+
+   ViaviaGates.getOrAssign(
+     "VIA1757",
+     "2026-09-27",
+     "RSW"
+   )
+   ============================================================ */
+
+window.ViaviaGates = {
+
+  normalizeAirport:
+    normalizeViaviaAirport,
+
+  normalizeFlightNumber:
+    normalizeViaviaFlightNumber,
+
+  getPool:
+    getViaviaGatePool,
+
+  getAllPools:
+    getAllViaviaGatePools,
+
+  getAssignment:
+    getViaviaGateAssignment,
+
+  getAirportAssignments:
+    getViaviaAirportGateAssignments,
+
+  getFlightAssignments:
+    getViaviaFlightGateAssignments,
+
+  assign:
+    assignViaviaGate,
+
+  getOrAssign:
+    getOrAssignViaviaGate,
+
+  getDisplay:
+    getViaviaGateDisplay
 
 };
 
