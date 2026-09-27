@@ -53,6 +53,11 @@
             border-radius: 7px;
         }
 
+        .pilot-button:hover {
+            background: #481c61;
+            color: white !important;
+        }
+
         /* HERO */
         .hero {
             background: linear-gradient(135deg, #6d4a91, #3d2857);
@@ -79,6 +84,10 @@
             border-radius: 8px;
             text-decoration: none;
             font-weight: bold;
+        }
+
+        .hero-button:hover {
+            background: #f3edf7;
         }
 
         /* SECTIONS */
@@ -135,6 +144,34 @@
         footer p {
             margin: 6px;
         }
+
+        /* MOBILE */
+        @media (max-width: 850px) {
+            header {
+                padding: 18px 25px;
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            nav {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            nav a {
+                margin-left: 0;
+                padding: 8px 10px;
+            }
+
+            .logo img {
+                height: 80px;
+            }
+
+            .hero h1 {
+                font-size: 42px;
+            }
+        }
     </style>
 </head>
 
@@ -144,15 +181,18 @@
     <header>
 
         <div class="logo">
-            <img src="./viavia-logo.png" alt="Viavia Airlines">
+            <a href="index.html">
+                <img src="./viavia-logo.png" alt="Viavia Airlines">
+            </a>
         </div>
 
         <nav>
-            <a href="#">Home</a>
             <a href="destinations.html">Destinations</a>
             <a href="#">Fleet</a>
             <a href="#">About</a>
-            <a href="pilot-center.html" class="pilot-button">Pilot Center</a>
+            <a href="resources.html">Resources</a>
+            <a href="#">Join</a>
+            <a href="login.html" class="pilot-button">Pilot Center</a>
         </nav>
 
     </header>
@@ -167,7 +207,7 @@
             Welcome aboard Viavia Airlines.
         </p>
 
-        <a href="#" class="hero-button">
+        <a href="destinations.html" class="hero-button">
             Explore Viavia
         </a>
 
@@ -221,7 +261,7 @@
     </section>
 
 
-    <!-- PILOT CENTER -->
+    <!-- JOIN -->
     <section class="section">
 
         <h2>Ready for departure?</h2>
