@@ -241,6 +241,7 @@ async function updateViaviaPilotProfile(
 
   }
 
+
   const allowedUpdates = {};
 
 
@@ -636,6 +637,189 @@ async function claimViaviaTrip(
 
     throw error;
   }
+
+
+  return data;
+}
+
+
+/* ============================================================
+   DROP TRIP
+
+   The assignment is preserved in the database and its status
+   becomes "cancelled".
+
+   Viavia's availability queries already exclude cancelled
+   assignments. Therefore the same trip/date becomes available
+   to another pilot immediately after the drop succeeds.
+   ============================================================ */
+
+async function dropViaviaTrip(
+  tripId,
+  operatingDate
+) {
+
+  const user =
+    await getViaviaUser();
+
+
+  if (!user) {
+
+    throw new Error(
+      "You must be signed in to drop a trip."
+    );
+
+  }
+
+
+  const normalizedTripId =
+    String(
+      tripId || ""
+    ).trim();
+
+
+  if (!normalizedTripId) {
+
+    throw new Error(
+      "A valid Trip ID is required."
+    );
+
+  }
+
+
+  const date =
+    normalizeViaviaOperatingDate(
+      operatingDate
+    );
+
+
+  /*
+   * Find the active assignment first.
+   *
+   * The authenticated user ID is used here so the browser
+   * cannot use this helper to drop another pilot's assignment.
+   */
+
+  const {
+    data: assignment,
+    error: lookupError
+  } =
+    await viaviaSupabase
+      .from(
+        "trip_assignments"
+      )
+      .select(
+        "id,trip_id,operating_date,pilot_id,status"
+      )
+      .eq(
+        "pilot_id",
+        user.id
+      )
+      .eq(
+        "trip_id",
+        normalizedTripId
+      )
+      .eq(
+        "operating_date",
+        date
+      )
+      .neq(
+        "status",
+        "cancelled"
+      )
+      .maybeSingle();
+
+
+  if (lookupError) {
+
+    console.error(
+      "Viavia Trips: Could not locate trip to drop.",
+      lookupError
+    );
+
+    throw lookupError;
+
+  }
+
+
+  if (!assignment) {
+
+    const notFoundError =
+      new Error(
+        "This trip is no longer assigned to your account."
+      );
+
+    notFoundError.code =
+      "VIAVIA_TRIP_NOT_ASSIGNED";
+
+    throw notFoundError;
+
+  }
+
+
+  /*
+   * Keep the historical row.
+   * Only its operational status changes.
+   */
+
+  const {
+    data,
+    error
+  } =
+    await viaviaSupabase
+      .from(
+        "trip_assignments"
+      )
+      .update({
+        status:
+          "cancelled"
+      })
+      .eq(
+        "id",
+        assignment.id
+      )
+      .eq(
+        "pilot_id",
+        user.id
+      )
+      .neq(
+        "status",
+        "cancelled"
+      )
+      .select()
+      .maybeSingle();
+
+
+  if (error) {
+
+    console.error(
+      "Viavia Trips: Could not drop trip.",
+      error
+    );
+
+    throw error;
+
+  }
+
+
+  if (!data) {
+
+    const conflictError =
+      new Error(
+        "The trip could not be dropped because the assignment changed."
+      );
+
+    conflictError.code =
+      "VIAVIA_TRIP_DROP_CONFLICT";
+
+    throw conflictError;
+
+  }
+
+
+  console.log(
+    `Viavia Trips: ${normalizedTripId} for ${date} was dropped.`
+  );
 
 
   return data;
@@ -1293,1408 +1477,3 @@ async function getViaviaFlightGateAssignments(
 
   return data || [];
 }
-
-
-/* ============================================================
-   ATOMIC GATE ASSIGNMENT
-   ============================================================ */
-
-async function assignViaviaGate(
-  flightNumber,
-  operatingDate,
-  airport,
-  scheduledArrival = null,
-  scheduledDeparture = null
-) {
-
-  const user =
-    await getViaviaUser();
-
-
-  if (!user) {
-
-    throw new Error(
-      "Pilot is not authenticated."
-    );
-
-  }
-
-
-  const flight =
-    normalizeViaviaFlightNumber(
-      flightNumber
-    );
-
-  const date =
-    normalizeViaviaOperatingDate(
-      operatingDate
-    );
-
-  const airportCode =
-    normalizeViaviaAirport(
-      airport
-    );
-
-
-  const arrivalTimestamp =
-    normalizeViaviaTimestamp(
-      scheduledArrival
-    );
-
-  const departureTimestamp =
-    normalizeViaviaTimestamp(
-      scheduledDeparture
-    );
-
-
-  const existing =
-    await getViaviaGateAssignment(
-      flight,
-      date,
-      airportCode
-    );
-
-
-  if (existing) {
-    return existing;
-  }
-
-
-  const { data, error } =
-    await viaviaSupabase.rpc(
-      "assign_viavia_gate",
-      {
-        p_flight_number:
-          flight,
-
-        p_operating_date:
-          date,
-
-        p_airport:
-          airportCode,
-
-        p_scheduled_arrival:
-          arrivalTimestamp,
-
-        p_scheduled_departure:
-          departureTimestamp
-      }
-    );
-
-
-  if (error) {
-
-    const message =
-      String(
-        error.message ||
-        ""
-      );
-
-
-    if (
-      message.includes(
-        "No conflict-free Viavia gate"
-      )
-    ) {
-
-      const unavailableError =
-        new Error(
-          `No conflict-free Viavia gate is currently available at ${airportCode}.`
-        );
-
-      unavailableError.code =
-        "VIAVIA_NO_GATE_AVAILABLE";
-
-      throw unavailableError;
-
-    }
-
-
-    if (
-      message.includes(
-        "No approved Viavia gate pool"
-      )
-    ) {
-
-      const poolError =
-        new Error(
-          `No approved Viavia gate pool exists for ${airportCode}.`
-        );
-
-      poolError.code =
-        "VIAVIA_NO_GATE_POOL";
-
-      throw poolError;
-
-    }
-
-
-    throw error;
-  }
-
-
-  const assignment =
-    Array.isArray(data)
-      ? data[0]
-      : data;
-
-
-  if (!assignment) {
-
-    const persisted =
-      await getViaviaGateAssignment(
-        flight,
-        date,
-        airportCode
-      );
-
-
-    if (persisted) {
-      return persisted;
-    }
-
-
-    throw new Error(
-      "Viavia Operations did not return the new gate assignment."
-    );
-  }
-
-
-  return assignment;
-}
-
-
-/* ============================================================
-   GET OR ASSIGN GATE
-   ============================================================ */
-
-async function getOrAssignViaviaGate(
-  flightNumber,
-  operatingDate,
-  airport,
-  scheduledArrival = null,
-  scheduledDeparture = null
-) {
-
-  const existing =
-    await getViaviaGateAssignment(
-      flightNumber,
-      operatingDate,
-      airport
-    );
-
-
-  if (existing) {
-    return existing;
-  }
-
-
-  return await assignViaviaGate(
-    flightNumber,
-    operatingDate,
-    airport,
-    scheduledArrival,
-    scheduledDeparture
-  );
-}
-
-
-/* ============================================================
-   GATE DISPLAY
-   ============================================================ */
-
-async function getViaviaGateDisplay(
-  flightNumber,
-  operatingDate,
-  airport
-) {
-
-  const assignment =
-    await getViaviaGateAssignment(
-      flightNumber,
-      operatingDate,
-      airport
-    );
-
-
-  if (!assignment) {
-
-    return {
-      assigned:false,
-      gate:null,
-      text:
-        "TBD — Gate assignment pending",
-      occupancyStatus:null
-    };
-
-  }
-
-
-  return {
-    assigned:true,
-
-    gate:
-      assignment.gate,
-
-    text:
-      `Gate ${assignment.gate}`,
-
-    occupancyStatus:
-      assignment.occupancy_status,
-
-    assignment
-  };
-}
-
-
-/* ============================================================
-   LIVE GATE STATUS
-   ============================================================ */
-
-async function getViaviaLiveGateStatus(
-  airport
-) {
-
-  const airportCode =
-    normalizeViaviaAirport(
-      airport
-    );
-
-
-  const { data, error } =
-    await viaviaSupabase
-      .from(
-        "viavia_live_gate_status"
-      )
-      .select("*")
-      .eq(
-        "airport",
-        airportCode
-      );
-
-
-  if (error) {
-    throw error;
-  }
-
-  return data || [];
-}
-
-
-/* ============================================================
-   IS GATE PHYSICALLY OCCUPIED
-   ============================================================ */
-
-async function isViaviaGateOccupied(
-  airport,
-  gate
-) {
-
-  const airportCode =
-    normalizeViaviaAirport(
-      airport
-    );
-
-
-  if (
-    gate === null ||
-    gate === undefined ||
-    !String(gate).trim()
-  ) {
-
-    throw new Error(
-      "A gate is required."
-    );
-
-  }
-
-
-  const { data, error } =
-    await viaviaSupabase.rpc(
-      "viavia_gate_is_occupied",
-      {
-        p_airport:
-          airportCode,
-
-        p_gate:
-          String(gate)
-            .trim()
-            .toUpperCase()
-      }
-    );
-
-
-  if (error) {
-    throw error;
-  }
-
-
-  return data === true;
-}
-
-
-/* ============================================================
-   ACARS GATE IN
-   ============================================================ */
-
-async function reportViaviaAcarsGateIn(
-  flightNumber,
-  operatingDate,
-  airport,
-  gate
-) {
-
-  const flight =
-    normalizeViaviaFlightNumber(
-      flightNumber
-    );
-
-  const date =
-    normalizeViaviaOperatingDate(
-      operatingDate
-    );
-
-  const airportCode =
-    normalizeViaviaAirport(
-      airport
-    );
-
-
-  if (
-    gate === null ||
-    gate === undefined ||
-    !String(gate).trim()
-  ) {
-
-    throw new Error(
-      "A gate is required for ACARS gate-in."
-    );
-
-  }
-
-
-  const { error } =
-    await viaviaSupabase.rpc(
-      "viavia_acars_gate_in",
-      {
-        p_flight_number:
-          flight,
-
-        p_operating_date:
-          date,
-
-        p_airport:
-          airportCode,
-
-        p_gate:
-          String(gate)
-            .trim()
-            .toUpperCase()
-      }
-    );
-
-
-  if (error) {
-    throw error;
-  }
-
-
-  return await getViaviaGateAssignment(
-    flight,
-    date,
-    airportCode
-  );
-}
-
-
-/* ============================================================
-   ACARS GATE OUT
-   ============================================================ */
-
-async function reportViaviaAcarsGateOut(
-  flightNumber,
-  operatingDate,
-  airport
-) {
-
-  const flight =
-    normalizeViaviaFlightNumber(
-      flightNumber
-    );
-
-  const date =
-    normalizeViaviaOperatingDate(
-      operatingDate
-    );
-
-  const airportCode =
-    normalizeViaviaAirport(
-      airport
-    );
-
-
-  const { error } =
-    await viaviaSupabase.rpc(
-      "viavia_acars_gate_out",
-      {
-        p_flight_number:
-          flight,
-
-        p_operating_date:
-          date,
-
-        p_airport:
-          airportCode
-      }
-    );
-
-
-  if (error) {
-    throw error;
-  }
-
-
-  return await getViaviaGateAssignment(
-    flight,
-    date,
-    airportCode
-  );
-}
-
-
-/* ============================================================
-   AIRCRAFT ASSIGNMENTS
-   ============================================================ */
-
-const VIAVIA_AIRCRAFT_FIELDS = `
-  id,
-  operating_date,
-  flight_number,
-  registration,
-  origin,
-  destination,
-  aircraft_family,
-  scheduled_departure,
-  scheduled_arrival,
-  actual_departure,
-  actual_arrival,
-  assignment_status,
-  assignment_source,
-  created_at,
-  updated_at
-`;
-
-
-/* ============================================================
-   24-HOUR AIRCRAFT REGISTRATION RELEASE
-   ============================================================ */
-
-const VIAVIA_AIRCRAFT_RELEASE_HOURS = 24;
-
-
-function isViaviaAircraftRegistrationReleased(
-  scheduledDeparture
-) {
-
-  if (!scheduledDeparture) {
-    return false;
-  }
-
-
-  const departure =
-    new Date(
-      scheduledDeparture
-    );
-
-
-  if (
-    Number.isNaN(
-      departure.getTime()
-    )
-  ) {
-
-    return false;
-  }
-
-
-  const releaseTime =
-    departure.getTime() -
-    (
-      VIAVIA_AIRCRAFT_RELEASE_HOURS *
-      60 *
-      60 *
-      1000
-    );
-
-
-  return Date.now() >= releaseTime;
-}
-
-
-/* ============================================================
-   GET SCHEDULED AIRCRAFT FAMILY
-   ============================================================ */
-
-async function getViaviaScheduledAircraftFamily(
-  flightNumber
-) {
-
-  const flight =
-    normalizeViaviaFlightNumber(
-      flightNumber
-    );
-
-
-  const { data, error } =
-    await viaviaSupabase
-      .from(
-        "viavia_flights"
-      )
-      .select(
-        "aircraft_family"
-      )
-      .eq(
-        "flight_number",
-        flight
-      )
-      .maybeSingle();
-
-
-  if (error) {
-
-    console.error(
-      `Viavia Aircraft: Could not load scheduled aircraft family for ${flight}.`,
-      error
-    );
-
-    throw error;
-  }
-
-
-  return (
-    data &&
-    data.aircraft_family
-      ? String(
-          data.aircraft_family
-        )
-          .trim()
-          .toUpperCase()
-      : null
-  );
-}
-
-
-/* ============================================================
-   GET STORED AIRCRAFT ASSIGNMENT
-   ============================================================ */
-
-async function getStoredViaviaAircraftAssignment(
-  flightNumber,
-  operatingDate
-) {
-
-  const flight =
-    normalizeViaviaFlightNumber(
-      flightNumber
-    );
-
-  const date =
-    normalizeViaviaOperatingDate(
-      operatingDate
-    );
-
-
-  const { data, error } =
-    await viaviaSupabase
-      .from(
-        "aircraft_assignments"
-      )
-      .select(
-        VIAVIA_AIRCRAFT_FIELDS
-      )
-      .eq(
-        "flight_number",
-        flight
-      )
-      .eq(
-        "operating_date",
-        date
-      )
-      .neq(
-        "assignment_status",
-        "cancelled"
-      )
-      .maybeSingle();
-
-
-  if (error) {
-
-    console.error(
-      `Viavia Aircraft: Could not load ${flight} for ${date}.`,
-      error
-    );
-
-    throw error;
-  }
-
-
-  return data || null;
-}
-
-
-/* ============================================================
-   GET ONE AIRCRAFT ASSIGNMENT
-
-   >24 HOURS:
-   Registration is hidden.
-
-   <=24 HOURS:
-   Existing assignment is returned.
-
-   If no assignment exists:
-   Supabase randomly assigns an available registration from
-   the correct aircraft family and permanently stores it.
-   ============================================================ */
-
-async function getViaviaAircraftAssignment(
-  flightNumber,
-  operatingDate
-) {
-
-  const flight =
-    normalizeViaviaFlightNumber(
-      flightNumber
-    );
-
-  const date =
-    normalizeViaviaOperatingDate(
-      operatingDate
-    );
-
-
-  /*
-   * First check the database.
-   *
-   * This is important because October 11-24 already have
-   * pre-generated assignments. We keep those assignments,
-   * but do NOT expose their registrations before 24 hours.
-   */
-
-  const existing =
-    await getStoredViaviaAircraftAssignment(
-      flight,
-      date
-    );
-
-
-  if (existing) {
-
-    if (
-      !isViaviaAircraftRegistrationReleased(
-        existing.scheduled_departure
-      )
-    ) {
-
-      return null;
-    }
-
-
-    return existing;
-  }
-
-
-  /*
-   * No stored aircraft exists.
-   *
-   * Ask the database to create one.
-   *
-   * The SQL function itself enforces the 24-hour rule.
-   * Therefore JavaScript cannot accidentally generate an
-   * aircraft early.
-   */
-
-  const user =
-    await getViaviaUser();
-
-
-  if (!user) {
-
-    throw new Error(
-      "Pilot is not authenticated."
-    );
-
-  }
-
-
-  const {
-    data: assignedData,
-    error: assignError
-  } =
-    await viaviaSupabase.rpc(
-      "assign_random_viavia_aircraft",
-      {
-        p_flight_number:
-          flight,
-
-        p_operating_date:
-          date
-      }
-    );
-
-
-  if (assignError) {
-
-    const message =
-      String(
-        assignError.message ||
-        ""
-      );
-
-
-    /*
-     * This is expected when the flight is still more
-     * than 24 hours away.
-     */
-
-    if (
-      message.includes(
-        "VIAVIA_AIRCRAFT_NOT_RELEASED"
-      )
-    ) {
-
-      return null;
-    }
-
-
-    console.error(
-      `Viavia Aircraft: Could not automatically assign ${flight} for ${date}.`,
-      assignError
-    );
-
-    throw assignError;
-  }
-
-
-  const assignment =
-    Array.isArray(
-      assignedData
-    )
-      ? assignedData[0]
-      : assignedData;
-
-
-  if (assignment) {
-
-    if (
-      !isViaviaAircraftRegistrationReleased(
-        assignment.scheduled_departure
-      )
-    ) {
-
-      return null;
-    }
-
-
-    return assignment;
-  }
-
-
-  /*
-   * Safety fallback.
-   *
-   * If Supabase inserted the assignment but the RPC response
-   * did not contain the row, query the database one more time.
-   */
-
-  const persisted =
-    await getStoredViaviaAircraftAssignment(
-      flight,
-      date
-    );
-
-
-  if (
-    persisted &&
-    isViaviaAircraftRegistrationReleased(
-      persisted.scheduled_departure
-    )
-  ) {
-
-    return persisted;
-  }
-
-
-  return null;
-}
-
-
-/* ============================================================
-   GET AIRCRAFT ASSIGNMENTS FOR DATE
-   ============================================================ */
-
-async function getViaviaAircraftAssignmentsForDate(
-  operatingDate
-) {
-
-  const date =
-    normalizeViaviaOperatingDate(
-      operatingDate
-    );
-
-
-  const { data, error } =
-    await viaviaSupabase
-      .from(
-        "aircraft_assignments"
-      )
-      .select(
-        VIAVIA_AIRCRAFT_FIELDS
-      )
-      .eq(
-        "operating_date",
-        date
-      )
-      .neq(
-        "assignment_status",
-        "cancelled"
-      )
-      .order(
-        "scheduled_departure",
-        {
-          ascending:true
-        }
-      );
-
-
-  if (error) {
-    throw error;
-  }
-
-
-  /*
-   * Never expose future registrations before their individual
-   * 24-hour release times.
-   */
-
-  return (
-    data || []
-  ).filter(
-    assignment =>
-      isViaviaAircraftRegistrationReleased(
-        assignment.scheduled_departure
-      )
-  );
-}
-
-
-/* ============================================================
-   GET MULTIPLE AIRCRAFT ASSIGNMENTS
-   ============================================================ */
-
-async function getViaviaAircraftAssignments(
-  flights
-) {
-
-  if (
-    !Array.isArray(flights) ||
-    flights.length === 0
-  ) {
-
-    return [];
-  }
-
-
-  const results =
-    await Promise.all(
-      flights.map(
-        async item => {
-
-          if (
-            !item ||
-            !item.flightNumber ||
-            !item.operatingDate
-          ) {
-
-            return null;
-          }
-
-
-          return await getViaviaAircraftAssignment(
-            item.flightNumber,
-            item.operatingDate
-          );
-
-        }
-      )
-    );
-
-
-  return results.filter(Boolean);
-}
-
-
-/* ============================================================
-   GET AIRCRAFT ASSIGNMENT HISTORY
-   ============================================================ */
-
-async function getViaviaAircraftRotation(
-  registration,
-  startDate = null,
-  endDate = null
-) {
-
-  const tail =
-    String(
-      registration || ""
-    )
-      .trim()
-      .toUpperCase();
-
-
-  if (!tail) {
-
-    throw new Error(
-      "An aircraft registration is required."
-    );
-
-  }
-
-
-  let query =
-    viaviaSupabase
-      .from(
-        "aircraft_assignments"
-      )
-      .select(
-        VIAVIA_AIRCRAFT_FIELDS
-      )
-      .eq(
-        "registration",
-        tail
-      )
-      .neq(
-        "assignment_status",
-        "cancelled"
-      );
-
-
-  if (startDate) {
-
-    query =
-      query.gte(
-        "operating_date",
-        normalizeViaviaOperatingDate(
-          startDate
-        )
-      );
-
-  }
-
-
-  if (endDate) {
-
-    query =
-      query.lte(
-        "operating_date",
-        normalizeViaviaOperatingDate(
-          endDate
-        )
-      );
-
-  }
-
-
-  const { data, error } =
-    await query.order(
-      "scheduled_departure",
-      {
-        ascending:true
-      }
-    );
-
-
-  if (error) {
-    throw error;
-  }
-
-
-  /*
-   * Even this compatibility/history function will not expose
-   * registrations before their 24-hour release.
-   */
-
-  return (
-    data || []
-  ).filter(
-    assignment =>
-      isViaviaAircraftRegistrationReleased(
-        assignment.scheduled_departure
-      )
-  );
-}
-
-
-/* ============================================================
-   AIRCRAFT VARIANT
-   ============================================================ */
-
-function getViaviaAircraftVariant(
-  aircraftFamily
-) {
-
-  const family =
-    String(
-      aircraftFamily || ""
-    )
-      .trim()
-      .toUpperCase();
-
-
-  const variants = {
-    A319:"A319-132",
-    A320:"A320-232",
-    A321:"A321-232"
-  };
-
-
-  return (
-    variants[family] ||
-    family ||
-    null
-  );
-}
-
-
-/* ============================================================
-   AIRCRAFT DISPLAY
-   ============================================================ */
-
-function formatViaviaAircraftAssignment(
-  assignment
-) {
-
-  if (!assignment) {
-    return null;
-  }
-
-
-  const variant =
-    getViaviaAircraftVariant(
-      assignment.aircraft_family
-    );
-
-
-  const registration =
-    assignment.registration
-      ? String(
-          assignment.registration
-        )
-          .trim()
-          .toUpperCase()
-      : null;
-
-
-  if (
-    variant &&
-    registration
-  ) {
-
-    return (
-      `${variant} · ${registration}`
-    );
-
-  }
-
-
-  return (
-    registration ||
-    variant ||
-    null
-  );
-}
-
-
-async function getViaviaAircraftDisplay(
-  flightNumber,
-  operatingDate
-) {
-
-  /*
-   * Aircraft TYPE remains visible even when registration
-   * has not yet been released.
-   */
-
-  const family =
-    await getViaviaScheduledAircraftFamily(
-      flightNumber
-    );
-
-  const variant =
-    getViaviaAircraftVariant(
-      family
-    );
-
-
-  /*
-   * This either:
-   *
-   * 1. returns an existing released assignment,
-   * 2. creates one when <=24 hours,
-   * 3. or returns null when >24 hours.
-   */
-
-  const assignment =
-    await getViaviaAircraftAssignment(
-      flightNumber,
-      operatingDate
-    );
-
-
-  if (!assignment) {
-
-    return {
-
-      assigned:false,
-
-      released:false,
-
-      assignment:null,
-
-      family,
-
-      variant,
-
-      registration:null,
-
-      text:
-        variant
-          ? `${variant} · Aircraft registration pending`
-          : "Aircraft registration pending"
-
-    };
-
-  }
-
-
-  return {
-
-    assigned:true,
-
-    released:true,
-
-    assignment,
-
-    family:
-      assignment.aircraft_family ||
-      family,
-
-    variant:
-      getViaviaAircraftVariant(
-        assignment.aircraft_family ||
-        family
-      ),
-
-    registration:
-      assignment.registration,
-
-    text:
-      formatViaviaAircraftAssignment(
-        assignment
-      )
-
-  };
-}
-
-
-/* ============================================================
-   AUTH STATE
-   ============================================================ */
-
-function onViaviaAuthStateChange(
-  callback
-) {
-
-  return viaviaSupabase.auth
-    .onAuthStateChange(
-      (
-        event,
-        session
-      ) => {
-
-        callback(
-          event,
-          session
-        );
-
-      }
-    );
-}
-
-
-/* ============================================================
-   GLOBAL ACCESS
-   ============================================================ */
-
-window.viaviaSupabase =
-  viaviaSupabase;
-
-
-window.ViaviaAuth = {
-
-  getUser:
-    getViaviaUser,
-
-  getSession:
-    getViaviaSession,
-
-  signUp:
-    signUpViaviaPilot,
-
-  signIn:
-    signInViaviaPilot,
-
-  signOut:
-    signOutViaviaPilot,
-
-  requireAuth:
-    requireViaviaAuth,
-
-  onAuthStateChange:
-    onViaviaAuthStateChange
-
-};
-
-
-window.ViaviaPilots = {
-
-  getProfile:
-    getViaviaPilotProfile,
-
-  updateProfile:
-    updateViaviaPilotProfile
-
-};
-
-
-window.ViaviaTrips = {
-
-  normalizeDate:
-    normalizeViaviaOperatingDate,
-
-  getAssignedTrips:
-    getViaviaAssignedTrips,
-
-  isAssigned:
-    isViaviaTripAssigned,
-
-  claim:
-    claimViaviaTrip,
-
-  getMyTrips:
-    getMyViaviaTrips,
-
-  getMyTripsForDate:
-    getMyViaviaTripsForDate,
-
-  getMyTrip:
-    getMyViaviaTrip,
-
-  getAvailability:
-    getViaviaTripAvailability
-
-};
-
-
-/* ============================================================
-   GLOBAL GATE API
-   ============================================================ */
-
-window.ViaviaGates = {
-
-  normalizeAirport:
-    normalizeViaviaAirport,
-
-  normalizeFlightNumber:
-    normalizeViaviaFlightNumber,
-
-  normalizeTimestamp:
-    normalizeViaviaTimestamp,
-
-  getPool:
-    getViaviaGatePool,
-
-  getAllPools:
-    getAllViaviaGatePools,
-
-  getAssignment:
-    getViaviaGateAssignment,
-
-  getAirportAssignments:
-    getViaviaAirportGateAssignments,
-
-  getFlightAssignments:
-    getViaviaFlightGateAssignments,
-
-  assign:
-    assignViaviaGate,
-
-  getOrAssign:
-    getOrAssignViaviaGate,
-
-  getDisplay:
-    getViaviaGateDisplay,
-
-  getLiveStatus:
-    getViaviaLiveGateStatus,
-
-  isOccupied:
-    isViaviaGateOccupied,
-
-  acarsGateIn:
-    reportViaviaAcarsGateIn,
-
-  acarsGateOut:
-    reportViaviaAcarsGateOut
-
-};
-
-
-/* ============================================================
-   GLOBAL AIRCRAFT API
-   ============================================================ */
-
-window.ViaviaAircraft = {
-
-  getAssignment:
-    getViaviaAircraftAssignment,
-
-  getAssignments:
-    getViaviaAircraftAssignments,
-
-  getAssignmentsForDate:
-    getViaviaAircraftAssignmentsForDate,
-
-  getRotation:
-    getViaviaAircraftRotation,
-
-  getVariant:
-    getViaviaAircraftVariant,
-
-  format:
-    formatViaviaAircraftAssignment,
-
-  getDisplay:
-    getViaviaAircraftDisplay,
-
-  isRegistrationReleased:
-    isViaviaAircraftRegistrationReleased,
-
-  releaseHours:
-    VIAVIA_AIRCRAFT_RELEASE_HOURS
-
-};
-
-
-console.log(
-  "Viavia Operations: Supabase connection initialized."
-);
