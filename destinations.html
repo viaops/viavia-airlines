@@ -5,10 +5,87 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Destinations | Viavia Airlines</title>
+
+    <!-- MAVEN PRO -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- LEAFLET -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
     <style>
+        body {
+            margin: 0;
+            font-family: "Maven Pro", sans-serif;
+            background: #f7f4fa;
+            color: #24142f;
+        }
 
+        /* HEADER */
+        header {
+            background: #bcaace;
+            padding: 18px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5dff0;
+        }
+
+        .logo img {
+            height: 90px;
+            width: auto;
+            display: block;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav a {
+            color: #3d2857;
+            text-decoration: none;
+            margin-left: 30px;
+            font-weight: 700;
+        }
+
+        nav a:hover {
+            color: #6d4a91;
+        }
+
+        .pilot-button {
+            background: #3d2d5a;
+            color: white !important;
+            padding: 12px 20px;
+            border-radius: 7px;
+        }
+
+        .pilot-button:hover {
+            background: #32244a;
+            color: white !important;
+        }
+
+        /* PAGE TITLE */
+        .page-title {
+            background: linear-gradient(135deg, #6d4a91, #3d2857);
+            color: white;
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .page-title h1 {
+            font-size: 48px;
+            font-weight: 800;
+            margin: 0 0 12px;
+        }
+
+        .page-title p {
+            font-size: 20px;
+            margin: 0;
+        }
+
+        /* MAP */
         .map-section {
             padding: 60px 8%;
             text-align: center;
@@ -16,6 +93,7 @@
 
         .map-section h2 {
             font-size: 34px;
+            font-weight: 800;
             margin-bottom: 10px;
         }
 
@@ -31,68 +109,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f7f4fa;
-            color: #24142f;
-        }
-
-        header {
-            background: #c6b4d9;
-            padding: 18px 50px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #e5dff0;
-        }
-
-        .logo img {
-            height: 75px;
-            width: auto;
-            display: block;
-        }
-
-        nav {
-            display: flex;
-            align-items: center;
-        }
-
-        nav a {
-            color: #3d2857;
-            text-decoration: none;
-            margin-left: 30px;
-            font-weight: bold;
-        }
-
-        nav a:hover {
-            color: #6d4a91;
-        }
-
-        .pilot-button {
-            background: #5b247a;
-            color: white !important;
-            padding: 12px 20px;
-            border-radius: 7px;
-        }
-
-        .page-title {
-            background: linear-gradient(135deg, #6d4a91, #3d2857);
-            color: white;
-            text-align: center;
-            padding: 80px 20px;
-        }
-
-        .page-title h1 {
-            font-size: 48px;
-            margin: 0 0 12px;
-        }
-
-        .page-title p {
-            font-size: 20px;
-            margin: 0;
-        }
-
+        /* DESTINATIONS */
         .section {
             padding: 60px 8%;
             text-align: center;
@@ -100,6 +117,7 @@
 
         .section h2 {
             font-size: 34px;
+            font-weight: 800;
             margin-bottom: 10px;
         }
 
@@ -121,6 +139,7 @@
         .base h3 {
             color: #5b247a;
             font-size: 28px;
+            font-weight: 700;
             margin-top: 0;
         }
 
@@ -137,9 +156,10 @@
             color: #3d2857;
             padding: 10px 18px;
             border-radius: 20px;
-            font-weight: bold;
+            font-weight: 700;
         }
 
+        /* FOOTER */
         footer {
             background: #24142f;
             color: white;
@@ -151,226 +171,286 @@
         footer p {
             margin: 6px;
         }
+
+        /* MOBILE */
+        @media (max-width: 850px) {
+            header {
+                padding: 18px 25px;
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            nav {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            nav a {
+                margin-left: 0;
+                padding: 8px 10px;
+            }
+
+            .logo img {
+                height: 80px;
+            }
+
+            .page-title h1 {
+                font-size: 40px;
+            }
+
+            #route-map {
+                height: 450px;
+            }
+        }
     </style>
 </head>
 
 <body>
 
-<header>
+    <!-- HEADER -->
+    <header>
 
-    <div class="logo">
-        <img src="viavia-logo.png" alt="Viavia Airlines">
-    </div>
+        <div class="logo">
+            <a href="index.html">
+                <img src="./viavia-logo.png" alt="Viavia Airlines">
+            </a>
+        </div>
 
-    <nav>
-        <a href="index.html">Home</a>
-        <a href="destinations.html">Destinations</a>
-        <a href="#">Fleet</a>
-        <a href="#">About</a>
-        <a href="#" class="pilot-button">Pilot Center</a>
-    </nav>
+        <nav>
+            <a href="about.html">About</a>
+            <a href="destinations.html">Destinations</a>
+            <a href="fleet.html">Fleet</a>
+            <a href="resources.html">Resources</a>
+            <a href="join.html">Join</a>
+            <a href="login.html" class="pilot-button">Pilot Center</a>
+        </nav>
 
-</header>
+    </header>
 
-<section class="page-title">
 
-    <h1>Our Network</h1>
+    <!-- PAGE TITLE -->
+    <section class="page-title">
 
-    <p>Explore the Viavia Airlines route network.</p>
+        <h1>Our Network</h1>
 
-</section>
+        <p>Explore the Viavia Airlines route network.</p>
 
-<section class="map-section">
-    <h2>Viavia Route Map</h2>
-    <p>Explore our destinations and routes.</p>
-    <div id="route-map"></div>
-</section>
-    
-<section class="section">
+    </section>
 
-    <h2>Viavia Destinations</h2>
 
-    <p class="section-intro">
-        From our three domicile bases, Viavia Airlines connects
-        passengers across the United States, Latin America, and the Caribbean.
-    </p>
+    <!-- ROUTE MAP -->
+    <section class="map-section">
 
-    <!-- KRSW -->
+        <h2>Viavia Route Map</h2>
 
-    <div class="base">
+        <p>Explore our destinations and routes.</p>
 
-        <h3>RSW — Fort Myers, FL</h3>
+        <div id="route-map"></div>
 
-        <div class="routes">
+    </section>
 
-            <span class="route">ATL — Atlanta, GA</span>
-            <span class="route">DFW — Dallas/Fort Worth, TX</span>
-            <span class="route">LAS — Las Vegas, NV</span>
-            <span class="route">CLT — Charlotte, NC</span>
-            <span class="route">CMH — Columbus, OH</span>
-            <span class="route">CTG — Cartagena, Colombia</span>
-            <span class="route">MDE — Medellín, Colombia</span>
-            <span class="route">SXM — Sint Maarten</span>
-            <span class="route">JAX — Jacksonville, FL</span>
-            <span class="route">LGA — New York, NY</span>
-            <span class="route">LIT — Little Rock, AR</span>
-            <span class="route">MKE — Milwaukee, WI</span>
-            <span class="route">PTY — Panama City, Panama</span>
-            <span class="route">PUJ — Punta Cana, Dominican Republic</span>
-            <span class="route">SDQ — Santo Domingo, Dominican Republic</span>
-            <span class="route">SJU — San Juan, Puerto Rico</span>
-            <span class="route">VPS — Destin/Fort Walton Beach, FL</span>
-            <span class="route">XPL — Comayagua, Honduras</span>
+
+    <!-- DESTINATIONS -->
+    <section class="section">
+
+        <h2>Viavia Destinations</h2>
+
+        <p class="section-intro">
+            From our three domicile bases, Viavia Airlines connects
+            passengers across the United States, Latin America, and the Caribbean.
+        </p>
+
+
+        <!-- RSW -->
+        <div class="base">
+
+            <h3>RSW — Fort Myers, FL</h3>
+
+            <div class="routes">
+
+                <span class="route">ATL — Atlanta, GA</span>
+                <span class="route">DFW — Dallas/Fort Worth, TX</span>
+                <span class="route">LAS — Las Vegas, NV</span>
+                <span class="route">CLT — Charlotte, NC</span>
+                <span class="route">CMH — Columbus, OH</span>
+                <span class="route">CTG — Cartagena, Colombia</span>
+                <span class="route">MDE — Medellín, Colombia</span>
+                <span class="route">SXM — Sint Maarten</span>
+                <span class="route">JAX — Jacksonville, FL</span>
+                <span class="route">LGA — New York, NY</span>
+                <span class="route">LIT — Little Rock, AR</span>
+                <span class="route">MKE — Milwaukee, WI</span>
+                <span class="route">PTY — Panama City, Panama</span>
+                <span class="route">PUJ — Punta Cana, Dominican Republic</span>
+                <span class="route">SDQ — Santo Domingo, Dominican Republic</span>
+                <span class="route">SJU — San Juan, Puerto Rico</span>
+                <span class="route">VPS — Destin/Fort Walton Beach, FL</span>
+                <span class="route">XPL — Comayagua, Honduras</span>
+
+            </div>
 
         </div>
 
-    </div>
 
-    <!-- KDFW -->
+        <!-- DFW -->
+        <div class="base">
 
-    <div class="base">
+            <h3>DFW — Dallas/Fort Worth, TX</h3>
 
-        <h3>DFW — Dallas/Fort Worth, TX</h3>
+            <div class="routes">
 
-        <div class="routes">
+                <span class="route">ATL — Atlanta, GA</span>
+                <span class="route">BWI — Baltimore, MD</span>
+                <span class="route">CLT — Charlotte, NC</span>
+                <span class="route">CMH — Columbus, OH</span>
+                <span class="route">EYW — Key West, FL</span>
+                <span class="route">FLL — Fort Lauderdale, FL</span>
+                <span class="route">MIA — Miami, FL</span>
+                <span class="route">JAX — Jacksonville, FL</span>
+                <span class="route">JFK — New York, NY</span>
+                <span class="route">LAS — Las Vegas, NV</span>
+                <span class="route">LAX — Los Angeles, CA</span>
+                <span class="route">LGA — New York, NY</span>
+                <span class="route">MCO — Orlando, FL</span>
+                <span class="route">MKE — Milwaukee, WI</span>
+                <span class="route">RSW — Fort Myers, FL</span>
+                <span class="route">SEA — Seattle, WA</span>
+                <span class="route">SMF — Sacramento, CA</span>
+                <span class="route">SJU — San Juan, Puerto Rico</span>
+                <span class="route">SNA — Santa Ana, CA</span>
+                <span class="route">TUS — Tucson, AZ</span>
+                <span class="route">VPS — Destin/Fort Walton Beach, FL</span>
 
-            <span class="route">ATL — Atlanta, GA</span>
-            <span class="route">BWI — Baltimore, MD</span>
-            <span class="route">CLT — Charlotte, NC</span>
-            <span class="route">CMH — Columbus, OH</span>
-            <span class="route">EYW — Key West, FL</span>
-            <span class="route">FLL — Fort Lauderdale, FL</span>
-            <span class="route">MIA — Miami, FL</span>
-            <span class="route">JAX — Jacksonville, FL</span>
-            <span class="route">JFK — New York, NY</span>
-            <span class="route">LAS — Las Vegas, NV</span>
-            <span class="route">LAX — Los Angeles, CA</span>
-            <span class="route">LGA — New York, NY</span>
-            <span class="route">MCO — Orlando, FL</span>
-            <span class="route">MKE — Milwaukee, WI</span>
-            <span class="route">RSW — Fort Myers, FL</span>
-            <span class="route">SEA — Seattle, WA</span>
-            <span class="route">SMF — Sacramento, CA</span>
-            <span class="route">SJU — San Juan, Puerto Rico</span>
-            <span class="route">SNA — Santa Ana, CA</span>
-            <span class="route">TUS — Tucson, AZ</span>
-            <span class="route">VPS — Destin/Fort Walton Beach, FL</span>
-        </div>
-
-    </div>
-
-    <!-- KSMF -->
-
-    <div class="base">
-
-        <h3>SMF — Sacramento, CA</h3>
-
-        <div class="routes">
-
-            <span class="route">DFW — Dallas/Fort Worth, TX</span>
-            <span class="route">LIT — Little Rock, AR</span>
-            <span class="route">LAS — Las Vegas, NV</span>
-            <span class="route">LAX — Los Angeles, CA</span>
-            <span class="route">TUS — Tucson, AZ</span>
-            <span class="route">MFR — Medford, OR</span>
-            <span class="route">SBA — Santa Barbara, CA</span>
+            </div>
 
         </div>
 
-    </div>
 
-</section>
+        <!-- SMF -->
+        <div class="base">
 
-<footer>
+            <h3>SMF — Sacramento, CA</h3>
 
-    <p>© 2026 Viavia Airlines</p>
+            <div class="routes">
 
-    <p>Your destination, via us!</p>
+                <span class="route">DFW — Dallas/Fort Worth, TX</span>
+                <span class="route">LIT — Little Rock, AR</span>
+                <span class="route">LAS — Las Vegas, NV</span>
+                <span class="route">LAX — Los Angeles, CA</span>
+                <span class="route">TUS — Tucson, AZ</span>
+                <span class="route">MFR — Medford, OR</span>
+                <span class="route">SBA — Santa Barbara, CA</span>
 
-</footer>
+            </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        </div>
 
-<script>
-    const map = L.map('route-map').setView([35, -95], 4);
+    </section>
 
-    const routeStyle = {
-         color: '#5b247a',
-         weight: 2.5,
-         opacity: 0.75
-    };
 
-    L.marker([26.5362, -81.7552])
-        .addTo(map)
-        .bindPopup("<b>RSW — Fort Myers, FL</b><br>Viavia Airlines Base");
+    <!-- FOOTER -->
+    <footer>
 
-    L.marker([32.8998, -97.0403])
-        .addTo(map)
-        .bindPopup("<b>DFW — Dallas/Fort Worth, TX</b><br>Viavia Airlines Base");
+        <p>© 2026 Viavia Airlines</p>
 
-    L.marker([38.6951, -121.5908])
-        .addTo(map)
-        .bindPopup("<b>SMF — Sacramento, CA</b><br>Viavia Airlines Base");
-   L.polyline([
-        [26.5362, -81.7552],
-        [33.6407, -84.4277]
-   ], routeStyle).addTo(map);
+        <p>Your destination, via us!</p>
 
-       // RSW routes
-        L.polyline([[26.5362, -81.7552], [32.8968, -97.0380]], routeStyle).addTo(map); // RSW → DFW
-        L.polyline([[26.5362, -81.7552], [36.0801, -115.1522]], routeStyle).addTo(map); // RSW → LAS
-        L.polyline([[26.5362, -81.7552], [35.2140, -80.9431]], routeStyle).addTo(map); // RSW → CLT
-        L.polyline([[26.5362, -81.7552], [39.9980, -82.8919]], routeStyle).addTo(map); // RSW → CMH
-        L.polyline([[26.5362, -81.7552], [10.4424, -75.5130]], routeStyle).addTo(map); // RSW → CTG
-        L.polyline([[26.5362, -81.7552], [6.1645, -75.4231]], routeStyle).addTo(map); // RSW → MDE
-        L.polyline([[26.5362, -81.7552], [18.0409, -63.1089]], routeStyle).addTo(map); // RSW → SXM
-        L.polyline([[26.5362, -81.7552], [30.4941, -81.6879]], routeStyle).addTo(map); // RSW → JAX
-        L.polyline([[26.5362, -81.7552], [40.7769, -73.8740]], routeStyle).addTo(map); // RSW → LGA
-        L.polyline([[26.5362, -81.7552], [34.7294, -92.2243]], routeStyle).addTo(map); // RSW → LIT
-        L.polyline([[26.5362, -81.7552], [42.9472, -87.8966]], routeStyle).addTo(map); // RSW → MKE
-        L.polyline([[26.5362, -81.7552], [9.0714, -79.3835]], routeStyle).addTo(map); // RSW → PTY
-        L.polyline([[26.5362, -81.7552], [18.5674, -68.3634]], routeStyle).addTo(map); // RSW → PUJ
-        L.polyline([[26.5362, -81.7552], [18.4297, -69.6689]], routeStyle).addTo(map); // RSW → SDQ
-        L.polyline([[26.5362, -81.7552], [18.4394, -66.0018]], routeStyle).addTo(map); // RSW → SJU
-        L.polyline([[26.5362, -81.7552], [30.4832, -86.5254]], routeStyle).addTo(map); // RSW → VPS
-        L.polyline([[26.5362, -81.7552], [14.3824, -87.6211]], routeStyle).addTo(map); // RSW → XPL
+    </footer>
 
-        // DFW routes
-        L.polyline([[32.8998, -97.0403], [33.6407, -84.4277]], routeStyle).addTo(map); // DFW → ATL
-        L.polyline([[32.8998, -97.0403], [39.1754, -76.6684]], routeStyle).addTo(map); // DFW → BWI
-        L.polyline([[32.8998, -97.0403], [35.2140, -80.9431]], routeStyle).addTo(map); // DFW → CLT
-        L.polyline([[32.8998, -97.0403], [39.9980, -82.8919]], routeStyle).addTo(map); // DFW → CMH
-        L.polyline([[32.8998, -97.0403], [24.5561, -81.7596]], routeStyle).addTo(map); // DFW → EYW
-        L.polyline([[32.8998, -97.0403], [26.0726, -80.1527]], routeStyle).addTo(map); // DFW → FLL
-        L.polyline([[32.8998, -97.0403], [25.7932, -80.2906]], routeStyle).addTo(map); // DFW → MIA
-        L.polyline([[32.8998, -97.0403], [30.4941, -81.6879]], routeStyle).addTo(map); // DFW → JAX
-        L.polyline([[32.8998, -97.0403], [40.6413, -73.7781]], routeStyle).addTo(map); // DFW → JFK
-        L.polyline([[32.8998, -97.0403], [36.0801, -115.1522]], routeStyle).addTo(map); // DFW → LAS
-        L.polyline([[32.8998, -97.0403], [33.9416, -118.4085]], routeStyle).addTo(map); // DFW → LAX
-        L.polyline([[32.8998, -97.0403], [40.7769, -73.8740]], routeStyle).addTo(map); // DFW → LGA
-        L.polyline([[32.8998, -97.0403], [28.4294, -81.3089]], routeStyle).addTo(map); // DFW → MCO
-        L.polyline([[32.8998, -97.0403], [42.9472, -87.8966]], routeStyle).addTo(map); // DFW → MKE
-        L.polyline([[32.8998, -97.0403], [26.5362, -81.7552]], routeStyle).addTo(map); // DFW → RSW
-        L.polyline([[32.8998, -97.0403], [47.4502, -122.3088]], routeStyle).addTo(map); // DFW → SEA
-        L.polyline([[32.8998, -97.0403], [38.6951, -121.5908]], routeStyle).addTo(map); // DFW → SMF
-        L.polyline([[32.8998, -97.0403], [18.4394, -66.0018]], routeStyle).addTo(map); // DFW → SJU
-        L.polyline([[32.8998, -97.0403], [33.6757, -117.8682]], routeStyle).addTo(map); // DFW → SNA
-        L.polyline([[32.8998, -97.0403], [32.1161, -110.9410]], routeStyle).addTo(map); // DFW → TUS
-        L.polyline([[32.8998, -97.0403], [30.4832, -86.5254]], routeStyle).addTo(map); // DFW → VPS
 
-        // SMF routes
-        L.polyline([[38.6951, -121.5908], [32.8968, -97.0380]], routeStyle).addTo(map); // SMF → DFW
-        L.polyline([[38.6951, -121.5908], [34.7294, -92.2243]], routeStyle).addTo(map); // SMF → LIT
-        L.polyline([[38.6951, -121.5908], [36.0801, -115.1522]], routeStyle).addTo(map); // SMF → LAS
-        L.polyline([[38.6951, -121.5908], [33.9416, -118.4085]], routeStyle).addTo(map); // SMF → LAX
-        L.polyline([[38.6951, -121.5908], [32.1161, -110.9410]], routeStyle).addTo(map); // SMF → TUS
-        L.polyline([[38.6951, -121.5908], [42.3744, -122.8735]], routeStyle).addTo(map); // SMF → MFR
-        L.polyline([[38.6951, -121.5908], [34.4262, -119.8404]], routeStyle).addTo(map); // SMF → SBA
+    <!-- LEAFLET -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-</script>
-    
+    <script>
+        const map = L.map('route-map').setView([35, -95], 4);
+
+        const routeStyle = {
+            color: '#5b247a',
+            weight: 2.5,
+            opacity: 0.75
+        };
+
+        /* BASE MARKERS */
+
+        L.marker([26.5362, -81.7552])
+            .addTo(map)
+            .bindPopup("<b>RSW — Fort Myers, FL</b><br>Viavia Airlines Base");
+
+        L.marker([32.8998, -97.0403])
+            .addTo(map)
+            .bindPopup("<b>DFW — Dallas/Fort Worth, TX</b><br>Viavia Airlines Base");
+
+        L.marker([38.6951, -121.5908])
+            .addTo(map)
+            .bindPopup("<b>SMF — Sacramento, CA</b><br>Viavia Airlines Base");
+
+
+        /* RSW ROUTES */
+
+        L.polyline([[26.5362, -81.7552], [33.6407, -84.4277]], routeStyle).addTo(map); // ATL
+        L.polyline([[26.5362, -81.7552], [32.8968, -97.0380]], routeStyle).addTo(map); // DFW
+        L.polyline([[26.5362, -81.7552], [36.0801, -115.1522]], routeStyle).addTo(map); // LAS
+        L.polyline([[26.5362, -81.7552], [35.2140, -80.9431]], routeStyle).addTo(map); // CLT
+        L.polyline([[26.5362, -81.7552], [39.9980, -82.8919]], routeStyle).addTo(map); // CMH
+        L.polyline([[26.5362, -81.7552], [10.4424, -75.5130]], routeStyle).addTo(map); // CTG
+        L.polyline([[26.5362, -81.7552], [6.1645, -75.4231]], routeStyle).addTo(map); // MDE
+        L.polyline([[26.5362, -81.7552], [18.0409, -63.1089]], routeStyle).addTo(map); // SXM
+        L.polyline([[26.5362, -81.7552], [30.4941, -81.6879]], routeStyle).addTo(map); // JAX
+        L.polyline([[26.5362, -81.7552], [40.7769, -73.8740]], routeStyle).addTo(map); // LGA
+        L.polyline([[26.5362, -81.7552], [34.7294, -92.2243]], routeStyle).addTo(map); // LIT
+        L.polyline([[26.5362, -81.7552], [42.9472, -87.8966]], routeStyle).addTo(map); // MKE
+        L.polyline([[26.5362, -81.7552], [9.0714, -79.3835]], routeStyle).addTo(map); // PTY
+        L.polyline([[26.5362, -81.7552], [18.5674, -68.3634]], routeStyle).addTo(map); // PUJ
+        L.polyline([[26.5362, -81.7552], [18.4297, -69.6689]], routeStyle).addTo(map); // SDQ
+        L.polyline([[26.5362, -81.7552], [18.4394, -66.0018]], routeStyle).addTo(map); // SJU
+        L.polyline([[26.5362, -81.7552], [30.4832, -86.5254]], routeStyle).addTo(map); // VPS
+        L.polyline([[26.5362, -81.7552], [14.3824, -87.6211]], routeStyle).addTo(map); // XPL
+
+
+        /* DFW ROUTES */
+
+        L.polyline([[32.8998, -97.0403], [33.6407, -84.4277]], routeStyle).addTo(map); // ATL
+        L.polyline([[32.8998, -97.0403], [39.1754, -76.6684]], routeStyle).addTo(map); // BWI
+        L.polyline([[32.8998, -97.0403], [35.2140, -80.9431]], routeStyle).addTo(map); // CLT
+        L.polyline([[32.8998, -97.0403], [39.9980, -82.8919]], routeStyle).addTo(map); // CMH
+        L.polyline([[32.8998, -97.0403], [24.5561, -81.7596]], routeStyle).addTo(map); // EYW
+        L.polyline([[32.8998, -97.0403], [26.0726, -80.1527]], routeStyle).addTo(map); // FLL
+        L.polyline([[32.8998, -97.0403], [25.7932, -80.2906]], routeStyle).addTo(map); // MIA
+        L.polyline([[32.8998, -97.0403], [30.4941, -81.6879]], routeStyle).addTo(map); // JAX
+        L.polyline([[32.8998, -97.0403], [40.6413, -73.7781]], routeStyle).addTo(map); // JFK
+        L.polyline([[32.8998, -97.0403], [36.0801, -115.1522]], routeStyle).addTo(map); // LAS
+        L.polyline([[32.8998, -97.0403], [33.9416, -118.4085]], routeStyle).addTo(map); // LAX
+        L.polyline([[32.8998, -97.0403], [40.7769, -73.8740]], routeStyle).addTo(map); // LGA
+        L.polyline([[32.8998, -97.0403], [28.4294, -81.3089]], routeStyle).addTo(map); // MCO
+        L.polyline([[32.8998, -97.0403], [42.9472, -87.8966]], routeStyle).addTo(map); // MKE
+        L.polyline([[32.8998, -97.0403], [26.5362, -81.7552]], routeStyle).addTo(map); // RSW
+        L.polyline([[32.8998, -97.0403], [47.4502, -122.3088]], routeStyle).addTo(map); // SEA
+        L.polyline([[32.8998, -97.0403], [38.6951, -121.5908]], routeStyle).addTo(map); // SMF
+        L.polyline([[32.8998, -97.0403], [18.4394, -66.0018]], routeStyle).addTo(map); // SJU
+        L.polyline([[32.8998, -97.0403], [33.6757, -117.8682]], routeStyle).addTo(map); // SNA
+        L.polyline([[32.8998, -97.0403], [32.1161, -110.9410]], routeStyle).addTo(map); // TUS
+        L.polyline([[32.8998, -97.0403], [30.4832, -86.5254]], routeStyle).addTo(map); // VPS
+
+
+        /* SMF ROUTES */
+
+        L.polyline([[38.6951, -121.5908], [32.8968, -97.0380]], routeStyle).addTo(map); // DFW
+        L.polyline([[38.6951, -121.5908], [34.7294, -92.2243]], routeStyle).addTo(map); // LIT
+        L.polyline([[38.6951, -121.5908], [36.0801, -115.1522]], routeStyle).addTo(map); // LAS
+        L.polyline([[38.6951, -121.5908], [33.9416, -118.4085]], routeStyle).addTo(map); // LAX
+        L.polyline([[38.6951, -121.5908], [32.1161, -110.9410]], routeStyle).addTo(map); // TUS
+        L.polyline([[38.6951, -121.5908], [42.3744, -122.8735]], routeStyle).addTo(map); // MFR
+        L.polyline([[38.6951, -121.5908], [34.4262, -119.8404]], routeStyle).addTo(map); // SBA
+
+
+        /* MAP TILES */
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+    </script>
+
 </body>
 </html>
