@@ -126,7 +126,7 @@ nav button:hover {
     width: 9px;
     height: 9px;
     border-radius: 50%;
-    background: #b8afbD;
+    background: #b8afbd;
 }
 
 .connection-dot.connected {
@@ -432,6 +432,126 @@ nav button:hover {
     flex-wrap: wrap;
 }
 
+.drop-trip-button {
+    display: inline-block;
+    padding: 8px 11px;
+    border-radius: 7px;
+    border: 1px solid #e1bcbc;
+    background: #fff3f3;
+    color: #9a3030;
+    font-size: 12px;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.drop-trip-button:hover {
+    background: #fbe2e2;
+}
+
+.drop-trip-button:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+.drop-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(36,20,47,.58);
+}
+
+.drop-modal-backdrop.open {
+    display: flex;
+}
+
+.drop-modal {
+    width: min(480px, 100%);
+    background: white;
+    border: 1px solid #e5dff0;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(36,20,47,.24);
+    overflow: hidden;
+}
+
+.drop-modal-header {
+    padding: 22px 24px 12px;
+}
+
+.drop-modal-header h2 {
+    margin: 0;
+    color: #5b247a;
+    font-size: 22px;
+}
+
+.drop-modal-body {
+    padding: 0 24px 22px;
+    color: #66586c;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.drop-modal-trip {
+    margin-top: 14px;
+    padding: 13px 15px;
+    border-radius: 10px;
+    background: #faf8fc;
+    border: 1px solid #e8e1ed;
+    color: #24142f;
+    font-weight: 800;
+}
+
+.drop-modal-error {
+    display: none;
+    margin-top: 14px;
+    padding: 11px 13px;
+    border-radius: 9px;
+    background: #fff0f0;
+    border: 1px solid #efc6c6;
+    color: #922f2f;
+    font-size: 13px;
+}
+
+.drop-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px 22px;
+    border-top: 1px solid #ece6f0;
+}
+
+.modal-button {
+    border: 0;
+    border-radius: 9px;
+    padding: 10px 15px;
+    font-family: inherit;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.modal-button.keep {
+    background: #eee5f7;
+    color: #5b247a;
+}
+
+.modal-button.drop {
+    background: #a43b3b;
+    color: white;
+}
+
+.modal-button.drop:hover {
+    background: #892f2f;
+}
+
+.modal-button:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
 footer {
     text-align: center;
     color: #776d7e;
@@ -641,6 +761,66 @@ footer {
 </main>
 
 
+<div
+    id="dropTripModal"
+    class="drop-modal-backdrop"
+    aria-hidden="true"
+>
+    <div
+        class="drop-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dropTripModalTitle"
+    >
+
+        <div class="drop-modal-header">
+            <h2 id="dropTripModalTitle">
+                Drop Trip?
+            </h2>
+        </div>
+
+        <div class="drop-modal-body">
+
+            You are about to drop this awarded trip.
+            The assignment will be released and may immediately
+            become available to another Viavia pilot.
+
+            <div
+                id="dropTripModalTrip"
+                class="drop-modal-trip"
+            ></div>
+
+            <div
+                id="dropTripModalError"
+                class="drop-modal-error"
+            ></div>
+
+        </div>
+
+        <div class="drop-modal-actions">
+
+            <button
+                type="button"
+                id="keepTripButton"
+                class="modal-button keep"
+            >
+                Keep Trip
+            </button>
+
+            <button
+                type="button"
+                id="confirmDropTripButton"
+                class="modal-button drop"
+            >
+                Drop Trip
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+
 <footer>
     Viavia Airlines · Pilot Operations · Your destination, via us!
 </footer>
@@ -662,7 +842,7 @@ footer {
 /* ============================================================
    VIAVIA MY TRIPS
    Supabase Assignment System
-   Version: 2026-09-26
+   Version: 2026-09-27
    ============================================================ */
 
 const GATE_PENDING_TEXT =
@@ -672,6 +852,9 @@ let currentUser = null;
 let currentPilot = null;
 let masterPairings = [];
 let myAssignments = [];
+
+let pendingDropAssignment = null;
+let dropTripInProgress = false;
 
 
 /* ============================================================
@@ -1318,9 +1501,7 @@ function renderTrip(assignment) {
                                     </div>
 
                                 </div>
-
-
-                                <div class="gate-row">
+                                                                <div class="gate-row">
 
                                     <div class="gate-label">
                                         Gate
@@ -1512,12 +1693,34 @@ function renderTrip(assignment) {
 
                 <div class="footer-links">
 
+                    ${
+                        status !== "completed"
+                            ? `
+                                <button
+                                    type="button"
+                                    class="drop-trip-button"
+                                    data-drop-trip="true"
+                                    data-trip-id="${escapeHTML(
+                                        assignment.trip_id
+                                    )}"
+                                    data-operating-date="${escapeHTML(
+                                        assignment.operating_date
+                                    )}"
+                                >
+                                    Drop Trip
+                                </button>
+                            `
+                            : ""
+                    }
+
+
                     <a
                         class="small-button"
                         href="crew-calendar.html"
                     >
                         Crew Calendar
                     </a>
+
 
                     <a
                         class="small-button"
@@ -1539,6 +1742,359 @@ function renderTrip(assignment) {
     `;
 
 }
+
+
+/* ============================================================
+   DROP TRIP
+   ============================================================ */
+
+function openDropTripModal(
+    tripId,
+    operatingDate
+) {
+
+    const assignment =
+        myAssignments.find(
+            item =>
+                String(item.trip_id) ===
+                    String(tripId) &&
+                String(item.operating_date) ===
+                    String(operatingDate) &&
+                item.status !== "cancelled"
+        );
+
+
+    if (!assignment) {
+
+        showError(
+            "This trip is no longer assigned to your account."
+        );
+
+        return;
+
+    }
+
+
+    pendingDropAssignment =
+        assignment;
+
+
+    const modal =
+        document.getElementById(
+            "dropTripModal"
+        );
+
+
+    const tripDisplay =
+        document.getElementById(
+            "dropTripModalTrip"
+        );
+
+
+    const errorBox =
+        document.getElementById(
+            "dropTripModalError"
+        );
+
+
+    tripDisplay.textContent =
+        `${assignment.trip_id} · ` +
+        `${formatOperatingDate(
+            assignment.operating_date
+        )}`;
+
+
+    errorBox.style.display =
+        "none";
+
+    errorBox.textContent =
+        "";
+
+
+    modal.classList.add(
+        "open"
+    );
+
+    modal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+
+    document
+        .getElementById(
+            "keepTripButton"
+        )
+        .focus();
+
+}
+
+
+function closeDropTripModal() {
+
+    if (dropTripInProgress) {
+        return;
+    }
+
+
+    const modal =
+        document.getElementById(
+            "dropTripModal"
+        );
+
+
+    modal.classList.remove(
+        "open"
+    );
+
+    modal.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+
+    pendingDropAssignment =
+        null;
+
+}
+
+
+async function confirmDropTrip() {
+
+    if (
+        dropTripInProgress ||
+        !pendingDropAssignment
+    ) {
+        return;
+    }
+
+
+    const assignment =
+        pendingDropAssignment;
+
+
+    const keepButton =
+        document.getElementById(
+            "keepTripButton"
+        );
+
+
+    const dropButton =
+        document.getElementById(
+            "confirmDropTripButton"
+        );
+
+
+    const errorBox =
+        document.getElementById(
+            "dropTripModalError"
+        );
+
+
+    dropTripInProgress =
+        true;
+
+
+    keepButton.disabled =
+        true;
+
+    dropButton.disabled =
+        true;
+
+    dropButton.textContent =
+        "Dropping...";
+
+
+    errorBox.style.display =
+        "none";
+
+    errorBox.textContent =
+        "";
+
+
+    try {
+
+        if (
+            !window.ViaviaTrips ||
+            typeof ViaviaTrips.drop !==
+                "function"
+        ) {
+
+            throw new Error(
+                "Drop Trip is not available. Make sure the updated viavia-supabase.js is loaded."
+            );
+
+        }
+
+
+        await ViaviaTrips.drop(
+            assignment.trip_id,
+            assignment.operating_date
+        );
+
+
+        pendingDropAssignment =
+            null;
+
+
+        document
+            .getElementById(
+                "dropTripModal"
+            )
+            .classList.remove(
+                "open"
+            );
+
+
+        document
+            .getElementById(
+                "dropTripModal"
+            )
+            .setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+
+        /*
+         * Reload directly from Supabase.
+         * getMyTrips() excludes cancelled assignments,
+         * so the dropped trip disappears immediately.
+         */
+
+        await loadMyTrips();
+
+
+    } catch (error) {
+
+        console.error(
+            "Viavia My Trips: Drop Trip failed:",
+            error
+        );
+
+
+        errorBox.textContent =
+            error?.message ||
+            "Unable to drop this trip.";
+
+        errorBox.style.display =
+            "block";
+
+
+    } finally {
+
+        dropTripInProgress =
+            false;
+
+
+        keepButton.disabled =
+            false;
+
+        dropButton.disabled =
+            false;
+
+        dropButton.textContent =
+            "Drop Trip";
+
+    }
+
+}
+
+
+/* ============================================================
+   DROP TRIP EVENTS
+   ============================================================ */
+
+document
+    .getElementById(
+        "tripsContainer"
+    )
+    .addEventListener(
+        "click",
+        event => {
+
+            const button =
+                event.target.closest(
+                    "[data-drop-trip='true']"
+                );
+
+
+            if (!button) {
+                return;
+            }
+
+
+            openDropTripModal(
+                button.dataset.tripId,
+                button.dataset.operatingDate
+            );
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "keepTripButton"
+    )
+    .addEventListener(
+        "click",
+        closeDropTripModal
+    );
+
+
+document
+    .getElementById(
+        "confirmDropTripButton"
+    )
+    .addEventListener(
+        "click",
+        confirmDropTrip
+    );
+
+
+document
+    .getElementById(
+        "dropTripModal"
+    )
+    .addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target.id ===
+                    "dropTripModal"
+            ) {
+
+                closeDropTripModal();
+
+            }
+
+        }
+    );
+
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "Escape" &&
+            document
+                .getElementById(
+                    "dropTripModal"
+                )
+                .classList.contains(
+                    "open"
+                )
+        ) {
+
+            closeDropTripModal();
+
+        }
+
+    }
+);
 
 
 /* ============================================================
@@ -1667,11 +2223,15 @@ function renderTrips() {
                             )
                         );
 
+
                     if (
                         dateCompare !== 0
                     ) {
+
                         return dateCompare;
+
                     }
+
 
                     return String(
                         a.trip_id
@@ -1724,268 +2284,11 @@ function renderTrips() {
             .join("");
 
 }
+                .join("");
+
+}
 
 
 /* ============================================================
    CONNECTION
    ============================================================ */
-
-function showConnected() {
-
-    document
-        .getElementById(
-            "connectionDot"
-        )
-        .classList.add(
-            "connected"
-        );
-
-
-    document
-        .getElementById(
-            "connectionText"
-        )
-        .textContent =
-        "Connected";
-
-}
-
-
-function updatePilotDisplay() {
-
-    const element =
-        document.getElementById(
-            "pilotDisplay"
-        );
-
-
-    if (
-        currentPilot?.display_name
-    ) {
-
-        element.textContent =
-            currentPilot.display_name;
-
-        return;
-
-    }
-
-
-    if (currentUser?.email) {
-
-        element.textContent =
-            currentUser.email;
-
-        return;
-
-    }
-
-
-    element.textContent =
-        "Viavia Pilot";
-
-}
-
-
-/* ============================================================
-   ERROR
-   ============================================================ */
-
-function showError(message) {
-
-    const box =
-        document.getElementById(
-            "errorBox"
-        );
-
-    box.style.display =
-        "block";
-
-    box.textContent =
-        message;
-
-}
-
-
-/* ============================================================
-   LOAD ASSIGNMENTS
-   ============================================================ */
-
-async function loadMyTrips() {
-
-    myAssignments =
-        await ViaviaTrips.getMyTrips();
-
-
-    if (
-        !Array.isArray(
-            myAssignments
-        )
-    ) {
-
-        myAssignments = [];
-
-    }
-
-
-    renderSummary();
-
-    renderTrips();
-
-}
-
-
-/* ============================================================
-   SIGN OUT
-   ============================================================ */
-
-document
-    .getElementById(
-        "signOutButton"
-    )
-    .addEventListener(
-        "click",
-        async () => {
-
-            try {
-
-                await ViaviaAuth.signOut();
-
-            } catch (error) {
-
-                console.error(
-                    "Viavia sign out error:",
-                    error
-                );
-
-            }
-
-
-            window.location.replace(
-                "login.html"
-            );
-
-        }
-    );
-
-
-/* ============================================================
-   INITIALIZATION
-   ============================================================ */
-
-async function initializeMyTrips() {
-
-    try {
-
-        currentUser =
-            await ViaviaAuth.requireAuth();
-
-
-        if (!currentUser) {
-            return;
-        }
-
-
-        currentPilot =
-            await ViaviaPilots.getProfile();
-
-
-        updatePilotDisplay();
-
-
-        /*
-         * My Trips is driven by awarded Supabase assignments.
-         * Do not block the page on regenerated pairing IDs.
-         */
-
-        masterPairings = [];
-
-
-        await loadMyTrips();
-
-
-        showConnected();
-
-
-    } catch (error) {
-
-        console.error(
-            "Viavia My Trips initialization failed:",
-            error
-        );
-
-
-        showError(
-            error?.message ||
-            "Unable to load your Viavia trips."
-        );
-
-
-        document
-            .getElementById(
-                "tripsContainer"
-            )
-            .innerHTML = `
-
-                <div class="empty">
-
-                    <h2>
-                        Unable to Load Trips
-                    </h2>
-
-                    <p>
-                        Viavia Operations could not
-                        retrieve your assignments.
-                    </p>
-
-                </div>
-
-            `;
-
-    }
-
-}
-
-
-/* ============================================================
-   REFRESH WHEN RETURNING TO PAGE
-   ============================================================ */
-
-window.addEventListener(
-    "pageshow",
-    async event => {
-
-        if (
-            event.persisted &&
-            currentUser
-        ) {
-
-            try {
-
-                await loadMyTrips();
-
-            } catch (error) {
-
-                console.error(
-                    "Unable to refresh My Trips:",
-                    error
-                );
-
-            }
-
-        }
-
-    }
-);
-
-
-/* ============================================================
-   START
-   ============================================================ */
-
-initializeMyTrips();
-
-</script>
-
-</body>
-</html>
