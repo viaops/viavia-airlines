@@ -2679,37 +2679,76 @@ function renderDispatchRelease(release,signature,flight,legDate,ofp){
   }
 }
 
+async function createDispatchReleaseFromOfp(ofpId){
+  if(!ofpId)throw new Error("The imported OFP snapshot ID is missing.");
+
+  const result=await viaviaSupabase.rpc(
+    "create_dispatch_release_from_ofp",
+    {p_ofp_id:Number(ofpId)}
+  );
+
+  if(result.error)throw result.error;
+
+  // Postgres functions returning a composite row may be surfaced as
+  // either one object or a one-row array depending on the client/API shape.
+  const release=Array.isArray(result.data)?result.data[0]:result.data;
+  if(!release)throw new Error("Viavia Dispatch did not return Release 01.");
+
+  return release;
+}
+
 async function openFlightDocuments(index){
   const ctx=currentFlightPlanningContext;if(!ctx)throw new Error("Flight Planning data is not ready.");
   if(!window.ViaviaDispatch)throw new Error("Dispatch helpers are not loaded. Make sure the updated viavia-supabase.js is installed.");
-  const flight=ctx.flights[index],legDate=ctx.legDates[index];if(!flight||!legDate)throw new Error("This flight leg could not be found.");
-  const modal=document.getElementById("dispatchModal"),body=document.getElementById("dispatchModalBody");
-  modal.classList.add("open");modal.setAttribute("aria-hidden","false");
-  body.innerHTML=`<div class="empty"><h2>Loading Flight Documents</h2><p>Checking the imported OFP and Viavia dispatch release for ${escapeHtml(flight.flightNumber)}...</p></div>`;
-  try{
-    const [ofp,release]=await Promise.all([
-      getLatestImportedOfp(flight.flightNumber,legDate),
-      ViaviaDispatch.getRelease(flight.flightNumber,legDate)
-    ]);
 
+  const flight=ctx.flights[index],legDate=ctx.legDates[index];
+  if(!flight||!legDate)throw new Error("This flight leg could not be found.");
+
+  const modal=document.getElementById("dispatchModal");
+  const body=document.getElementById("dispatchModalBody");
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden","false");
+  body.innerHTML=`<div class="empty"><h2>Loading Flight Documents</h2><p>Checking the imported OFP and Viavia dispatch release for ${escapeHtml(flight.flightNumber)}...</p></div>`;
+
+  try{
+    const ofp=await getLatestImportedOfp(flight.flightNumber,legDate);
+    let release=await ViaviaDispatch.getRelease(flight.flightNumber,legDate);
+
+    /*
+      No existing release:
+      create Release 01 only from the pilot's imported immutable OFP snapshot.
+    */
+    if(!release&&ofp){
+      body.innerHTML=`<div class="empty"><h2>Preparing Release 01</h2><p>Creating the Viavia Dispatch Release from imported OFP snapshot ${escapeHtml(ofp.id)}...</p></div>`;
+      release=await createDispatchReleaseFromOfp(ofp.id);
+    }
+
+    /*
+      There is still no release because no OFP has been imported.
+    */
     if(!release){
       activeDispatchRelease=null;
       activeDispatchSignature=null;
       document.getElementById("dispatchModalSubtitle").textContent=`${flight.flightNumber} · ${flight.origin} → ${flight.destination} · ${formatDate(legDate)}`;
+
       body.innerHTML=`
         ${renderImportedOfpSection(ofp,flight,legDate)}
         <div class="dispatch-section">
           <h3>Dispatch Release</h3>
           <div class="dispatch-status pending">NO RELEASE AVAILABLE</div>
-          <p class="signature-help">No released Viavia operational flight release exists yet for ${escapeHtml(flight.flightNumber)} on ${escapeHtml(formatDate(legDate))}.</p>
+          <p class="signature-help">Import the SimBrief OFP for this flight first. Viavia will then generate Release 01 from that OFP snapshot.</p>
         </div>`;
       return;
     }
 
     const signature=await ViaviaDispatch.getMySignature(release.id);
+
     activeDispatchRelease={release,flight,legDate};
     activeDispatchSignature=signature;
+
     renderDispatchRelease(release,signature,flight,legDate,ofp);
+
   }catch(error){
     console.error("Flight documents load failed:",error);
     body.innerHTML=`<div class="error" style="display:block">${escapeHtml(error?.message||"Unable to load the flight documents.")}</div>`;
