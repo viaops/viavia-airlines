@@ -709,6 +709,10 @@ footer {
         height: 58px;
     }
 }
+
+.completed-flight-row{background:#f2f8f4}
+.completed-flight-badge{display:inline-block;margin-left:6px;padding:3px 7px;border-radius:999px;background:#e7f5ec;color:#21844d;font-size:10px;font-weight:800}
+.trip-completed-badge{background:#f4eff8!important;color:#3d2d5a!important}
 </style>
 </head>
 
@@ -952,6 +956,7 @@ const GATE_PENDING_TEXT =
 
 let currentUser = null;
 let currentPilot = null;
+let completedFlightKeys = new Set();
 let masterPairings = [];
 let myAssignments = [];
 let myTripGateAssignments = new Map();
@@ -1997,6 +2002,8 @@ async function confirmDropTrip() {
 
         await loadMyTrips();
 
+        await loadCompletedFlights();
+
 
     } catch (error) {
 
@@ -2429,6 +2436,67 @@ async function loadMyTrips() {
 
 }
 
+
+
+
+function completionAddDays(value, days) {
+    const parts=String(value||"").split("-").map(Number);
+    if(parts.length!==3||parts.some(Number.isNaN))return value;
+    const d=new Date(parts[0],parts[1]-1,parts[2]);
+    d.setDate(d.getDate()+Number(days||0));
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+
+function tripCompletionInfo(trip) {
+    const flights=Array.isArray(trip?.flights)?trip.flights:[];
+    let completed=0;
+    flights.forEach(f=>{
+        const day=Math.max(1,Number(f?.pairingDay)||1);
+        const date=completionAddDays(trip.operatingDate,day-1);
+        if(isFlightCompleted(f.flightNumber,date))completed++;
+    });
+    return {completed,total:flights.length,all:flights.length>0&&completed===flights.length};
+}
+
+/* ============================================================
+   POSTFLIGHT COMPLETION STATUS
+   ============================================================ */
+
+function completedFlightKey(flightNumber, operatingDate) {
+    return `${String(flightNumber || "").trim().toUpperCase()}|${String(operatingDate || "").trim()}`;
+}
+
+function isFlightCompleted(flightNumber, operatingDate) {
+    return completedFlightKeys.has(
+        completedFlightKey(flightNumber, operatingDate)
+    );
+}
+
+async function loadCompletedFlights() {
+    completedFlightKeys = new Set();
+
+    if (!currentUser?.id || typeof viaviaSupabase === "undefined") {
+        return;
+    }
+
+    const result = await viaviaSupabase
+        .from("postflight_reports")
+        .select("flight_number, operating_date")
+        .eq("pilot_id", currentUser.id);
+
+    if (result.error) {
+        throw result.error;
+    }
+
+    (result.data || []).forEach(report => {
+        completedFlightKeys.add(
+            completedFlightKey(
+                report.flight_number,
+                report.operating_date
+            )
+        );
+    });
+}
 
 /* ============================================================
    SIGN OUT
