@@ -2449,12 +2449,90 @@ function setupDispatchCanvas(){
   const stop=()=>{drawing=false};canvas.addEventListener("pointerup",stop);canvas.addEventListener("pointercancel",stop);
 }
 
-function renderDispatchRelease(release,signature,flight,legDate){
+
+function ofpValue(value,fallback="—"){
+  return value===null||value===undefined||value===""?fallback:String(value);
+}
+
+function ofpFuel(value){
+  const n=Number(value);
+  return Number.isFinite(n)?`${Math.round(n).toLocaleString()} lb`:"—";
+}
+
+function ofpTime(value){
+  if(!value)return "—";
+  const d=new Date(value);
+  return Number.isNaN(d.getTime())?String(value):d.toLocaleString();
+}
+
+function renderImportedOfpSection(ofp,flight,legDate){
+  if(!ofp){
+    return `<div class="dispatch-section">
+      <h3>SimBrief OFP</h3>
+      <div class="dispatch-status pending">NO OFP IMPORTED</div>
+      <p class="signature-help">No imported SimBrief OFP snapshot was found for ${escapeHtml(flight.flightNumber)} on ${escapeHtml(formatDate(legDate))}. Use <strong>Import SimBrief OFP</strong> on the flight leg first.</p>
+    </div>`;
+  }
+
+  const registration=isWithinAircraftWindow(legDate,flight)
+    ? ofpValue(ofp.aircraft_registration)
+    : AIRCRAFT_PENDING_TEXT;
+
+  return `<div class="dispatch-section">
+    <h3>SimBrief OFP</h3>
+    <div class="dispatch-status ready">OFP IMPORTED · SNAPSHOT ${escapeHtml(ofp.id)}</div>
+    <div class="dispatch-grid">
+      <div class="dispatch-cell"><span>Flight</span><strong>${escapeHtml(ofpValue(ofp.flight_number))}</strong></div>
+      <div class="dispatch-cell"><span>Route</span><strong>${escapeHtml(ofpValue(ofp.origin))} → ${escapeHtml(ofpValue(ofp.destination))}</strong></div>
+      <div class="dispatch-cell"><span>Aircraft</span><strong>${escapeHtml(ofpValue(ofp.aircraft_type))}</strong></div>
+      <div class="dispatch-cell"><span>Registration</span><strong>${escapeHtml(registration)}</strong></div>
+      <div class="dispatch-cell"><span>Cruise Altitude</span><strong>${escapeHtml(ofp.cruise_altitude_ft?`${Number(ofp.cruise_altitude_ft).toLocaleString()} ft`:"—")}</strong></div>
+      <div class="dispatch-cell"><span>Alternate</span><strong>${escapeHtml(ofpValue(ofp.alternate_airport))}</strong></div>
+    </div>
+    <div class="dispatch-grid" style="margin-top:12px">
+      <div class="dispatch-cell" style="grid-column:1/-1"><span>Filed Route</span><strong>${escapeHtml(ofpValue(ofp.route))}</strong></div>
+      <div class="dispatch-cell"><span>Scheduled Departure</span><strong>${escapeHtml(ofpTime(ofp.scheduled_departure))}</strong></div>
+      <div class="dispatch-cell"><span>Scheduled Arrival</span><strong>${escapeHtml(ofpTime(ofp.scheduled_arrival))}</strong></div>
+      <div class="dispatch-cell"><span>Imported</span><strong>${escapeHtml(ofpTime(ofp.imported_at))}</strong></div>
+      <div class="dispatch-cell"><span>SimBrief Request</span><strong>${escapeHtml(ofpValue(ofp.simbrief_request_id))}</strong></div>
+    </div>
+    <table class="fuel-table" style="margin-top:14px">
+      <tr><td>Taxi</td><td>${ofpFuel(ofp.taxi_fuel_lb)}</td></tr>
+      <tr><td>Trip</td><td>${ofpFuel(ofp.trip_fuel_lb)}</td></tr>
+      <tr><td>Contingency</td><td>${ofpFuel(ofp.contingency_fuel_lb)}</td></tr>
+      <tr><td>Alternate</td><td>${ofpFuel(ofp.alternate_fuel_lb)}</td></tr>
+      <tr><td>Reserve</td><td>${ofpFuel(ofp.reserve_fuel_lb)}</td></tr>
+      <tr><td>Extra</td><td>${ofpFuel(ofp.extra_fuel_lb)}</td></tr>
+      <tr class="fuel-total"><td><strong>BLOCK</strong></td><td>${ofpFuel(ofp.block_fuel_lb)}</td></tr>
+    </table>
+  </div>`;
+}
+
+async function getLatestImportedOfp(flightNumber,legDate){
+  if(!currentUser?.id)throw new Error("Pilot session is not available.");
+  const result=await viaviaSupabase
+    .from("flight_ofps")
+    .select("*")
+    .eq("pilot_id",currentUser.id)
+    .eq("flight_number",flightNumber)
+    .eq("operating_date",legDate)
+    .order("imported_at",{ascending:false})
+    .order("id",{ascending:false})
+    .limit(1)
+    .maybeSingle();
+
+  if(result.error)throw result.error;
+  return result.data||null;
+}
+
+function renderDispatchRelease(release,signature,flight,legDate,ofp){
   const body=document.getElementById("dispatchModalBody");
   const subtitle=document.getElementById("dispatchModalSubtitle");
   subtitle.textContent=`${flight.flightNumber} · ${flight.origin} → ${flight.destination} · ${formatDate(legDate)}`;
   const signed=!!signature;
   body.innerHTML=`
+    ${renderImportedOfpSection(ofp,flight,legDate)}
+    <div class="dispatch-section"><h3>Dispatch Release</h3>
     <div class="dispatch-status ${signed?"ready":"pending"}">${signed?`PIC ACCEPTED · Release ${escapeHtml(release.release_number)}`:`RELEASED · PIC ACCEPTANCE REQUIRED`}</div>
     <div class="dispatch-grid">
       <div class="dispatch-cell"><span>Flight</span><strong>${escapeHtml(release.flight_number)}</strong></div>
@@ -2475,6 +2553,7 @@ function renderDispatchRelease(release,signature,flight,legDate){
     <div class="dispatch-section"><h3>Planned Fuel</h3><table class="fuel-table">
       <tr><td>Taxi</td><td>${dispatchFuel(release.taxi_fuel_lb)}</td></tr><tr><td>Trip</td><td>${dispatchFuel(release.trip_fuel_lb)}</td></tr><tr><td>Contingency</td><td>${dispatchFuel(release.contingency_fuel_lb)}</td></tr><tr><td>Alternate</td><td>${dispatchFuel(release.alternate_fuel_lb)}</td></tr><tr><td>Reserve</td><td>${dispatchFuel(release.reserve_fuel_lb)}</td></tr><tr><td>Extra</td><td>${dispatchFuel(release.extra_fuel_lb)}</td></tr><tr class="fuel-total"><td><strong>BLOCK</strong></td><td>${dispatchFuel(release.block_fuel_lb)}</td></tr>
     </table></div>
+    </div>
     <div class="dispatch-section"><h3>PIC Acceptance</h3>${signed?`<div class="signed-box"><strong>Accepted and electronically signed by ${escapeHtml(signature.pic_name)}</strong><div>Signed ${escapeHtml(dispatchTimestamp(signature.signed_at))} · Release ${escapeHtml(signature.release_number)}</div>${signature.signature_data?`<img class="signed-image" src="${escapeHtml(signature.signature_data)}" alt="PIC signature">`:""}</div>`:`<p class="signature-help">Review the release above, then sign in the box using a mouse, touchscreen, or Apple Pencil.</p><div class="signature-pad-wrap"><canvas id="picSignatureCanvas" class="signature-pad"></canvas></div><div class="signature-actions" style="margin-top:10px"><button id="clearPicSignature" type="button" class="btn btn-secondary">Clear</button><button id="acceptPicRelease" type="button" class="btn btn-primary">PIC Accept & Sign</button></div>`}</div>`;
   if(!signed){
     requestAnimationFrame(()=>{
@@ -2491,12 +2570,35 @@ async function openFlightDocuments(index){
   const flight=ctx.flights[index],legDate=ctx.legDates[index];if(!flight||!legDate)throw new Error("This flight leg could not be found.");
   const modal=document.getElementById("dispatchModal"),body=document.getElementById("dispatchModalBody");
   modal.classList.add("open");modal.setAttribute("aria-hidden","false");
-  body.innerHTML=`<div class="empty"><h2>Loading Release</h2><p>Checking Viavia Operations for ${escapeHtml(flight.flightNumber)}...</p></div>`;
+  body.innerHTML=`<div class="empty"><h2>Loading Flight Documents</h2><p>Checking the imported OFP and Viavia dispatch release for ${escapeHtml(flight.flightNumber)}...</p></div>`;
   try{
-    const release=await ViaviaDispatch.getRelease(flight.flightNumber,legDate);
-    if(!release){body.innerHTML=`<div class="empty"><h2>No Dispatch Release</h2><p>No released operational flight release exists yet for ${escapeHtml(flight.flightNumber)} on ${escapeHtml(formatDate(legDate))}.</p></div>`;return;}
-    const signature=await ViaviaDispatch.getMySignature(release.id);activeDispatchRelease={release,flight,legDate};activeDispatchSignature=signature;renderDispatchRelease(release,signature,flight,legDate);
-  }catch(error){console.error("Dispatch release load failed:",error);body.innerHTML=`<div class="error" style="display:block">${escapeHtml(error?.message||"Unable to load the dispatch release.")}</div>`;}
+    const [ofp,release]=await Promise.all([
+      getLatestImportedOfp(flight.flightNumber,legDate),
+      ViaviaDispatch.getRelease(flight.flightNumber,legDate)
+    ]);
+
+    if(!release){
+      activeDispatchRelease=null;
+      activeDispatchSignature=null;
+      document.getElementById("dispatchModalSubtitle").textContent=`${flight.flightNumber} · ${flight.origin} → ${flight.destination} · ${formatDate(legDate)}`;
+      body.innerHTML=`
+        ${renderImportedOfpSection(ofp,flight,legDate)}
+        <div class="dispatch-section">
+          <h3>Dispatch Release</h3>
+          <div class="dispatch-status pending">NO RELEASE AVAILABLE</div>
+          <p class="signature-help">No released Viavia operational flight release exists yet for ${escapeHtml(flight.flightNumber)} on ${escapeHtml(formatDate(legDate))}.</p>
+        </div>`;
+      return;
+    }
+
+    const signature=await ViaviaDispatch.getMySignature(release.id);
+    activeDispatchRelease={release,flight,legDate};
+    activeDispatchSignature=signature;
+    renderDispatchRelease(release,signature,flight,legDate,ofp);
+  }catch(error){
+    console.error("Flight documents load failed:",error);
+    body.innerHTML=`<div class="error" style="display:block">${escapeHtml(error?.message||"Unable to load the flight documents.")}</div>`;
+  }
 }
 
 async function submitPicDispatchSignature(){
