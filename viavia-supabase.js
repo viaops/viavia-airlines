@@ -618,26 +618,64 @@ async function claimViaviaTrip(
 
   if (error) {
 
-    if (
-      error.code ===
-      "23505"
-    ) {
+    // 23505 means a unique database constraint was hit. Verify the
+    // actual trip/date assignment before deciding that another pilot
+    // owns the trip.
+    if (error.code === "23505") {
 
-      const conflictError =
-        new Error(
-          "This trip was just assigned to another pilot."
-        );
+      const { data: existingRows, error: lookupError } =
+        await viaviaSupabase
+          .from("trip_assignments")
+          .select("id,trip_id,operating_date,pilot_id,status")
+          .eq("trip_id", pairing.pairingId)
+          .eq("operating_date", date)
+          .neq("status", "cancelled")
+          .limit(1);
 
-      conflictError.code =
-        "VIAVIA_TRIP_TAKEN";
+      if (lookupError) {
+        throw error;
+      }
 
-      throw conflictError;
+      const existing =
+        Array.isArray(existingRows)
+          ? existingRows[0] || null
+          : null;
 
+      if (existing?.pilot_id === user.id) {
+        const alreadyMineError =
+          new Error("This trip is already awarded to your account.");
+        alreadyMineError.code = "VIAVIA_TRIP_ALREADY_MINE";
+        throw alreadyMineError;
+      }
+
+      if (existing) {
+        const takenError =
+          new Error(
+            "This trip is no longer available for the selected operating date."
+          );
+        takenError.code = "VIAVIA_TRIP_TAKEN";
+        throw takenError;
+      }
+
+      // The duplicate came from a different database constraint.
+      // Keep the real Supabase error so the exact cause remains visible.
+      console.error(
+        "Viavia Trips: Database uniqueness conflict while claiming trip.",
+        {
+          trip_id: pairing.pairingId,
+          operating_date: date,
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        }
+      );
+
+      throw error;
     }
 
     throw error;
   }
-
 
   return data;
 }
