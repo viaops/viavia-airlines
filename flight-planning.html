@@ -2261,8 +2261,129 @@ function validateSimbriefOfp(ofp,flight,legDate){
   }
 }
 
+function simbriefFirstValue(...values){
+  for(const value of values){
+    if(value!==null&&value!==undefined&&value!=="")return value;
+  }
+  return null;
+}
+
+function simbriefAirportCode(airport){
+  if(!airport)return null;
+  if(typeof airport==="string")return simbriefUpper(airport);
+  return simbriefUpper(
+    simbriefFirstValue(
+      airport.icao_code,
+      airport.icao,
+      airport.icaoCode,
+      airport.ident,
+      airport.airport
+    )
+  ) || null;
+}
+
+function simbriefOfpHtml(ofp){
+  return simbriefText(
+    simbriefFirstValue(
+      ofp?.text?.plan_html,
+      ofp?.text?.plan_text,
+      ofp?.text?.ofp
+    )
+  );
+}
+
+function simbriefHtmlPlainText(html){
+  return String(html||"")
+    .replace(/<br\s*\/?>/gi,"\n")
+    .replace(/<\/p>/gi,"\n")
+    .replace(/<[^>]+>/g," ")
+    .replace(/&nbsp;/gi," ")
+    .replace(/&amp;/gi,"&")
+    .replace(/&#39;/gi,"'")
+    .replace(/&quot;/gi,'"')
+    .replace(/\r/g,"");
+}
+
+function simbriefAlternateFromOfp(ofp){
+  const direct=simbriefAirportCode(ofp?.alternate);
+  if(direct)return direct;
+
+  const alternates=ofp?.alternates;
+  if(Array.isArray(alternates)&&alternates.length){
+    const code=simbriefAirportCode(alternates[0]);
+    if(code)return code;
+  }
+
+  const html=simbriefHtmlPlainText(simbriefOfpHtml(ofp));
+  const altLine=html.match(/\bALT:\s*([A-Z0-9]{4})\b/i);
+  if(altLine)return simbriefUpper(altLine[1]);
+
+  const fpl=simbriefText(ofp?.atc?.flightplan_text);
+  // ICAO FPL destination field normally contains destination/time followed by alternate.
+  const fplAlt=fpl.match(/-[A-Z0-9]{4}\d{4}\s+([A-Z0-9]{4})\b/i);
+  if(fplAlt)return simbriefUpper(fplAlt[1]);
+
+  return null;
+}
+
+function simbriefScheduleFromOfp(ofp,legDate){
+  const directDeparture=simbriefUnixTimestamp(
+    simbriefFirstValue(
+      ofp?.times?.sched_out,
+      ofp?.times?.scheduled_out,
+      ofp?.times?.sched_departure,
+      ofp?.times?.scheduled_departure,
+      ofp?.origin?.scheduled_departure
+    )
+  );
+  const directArrival=simbriefUnixTimestamp(
+    simbriefFirstValue(
+      ofp?.times?.sched_in,
+      ofp?.times?.scheduled_in,
+      ofp?.times?.sched_arrival,
+      ofp?.times?.scheduled_arrival,
+      ofp?.destination?.scheduled_arrival
+    )
+  );
+
+  if(directDeparture&&directArrival){
+    return {scheduledDeparture:directDeparture,scheduledArrival:directArrival};
+  }
+
+  // SimBrief's printable OFP always carries the operational STD/STA line.
+  // Example from the imported Viavia OFP:
+  // KRSW/RSW STD 2305 ETD 2305
+  // SKRG/MDE STA 0245 ETA 0237
+  const plain=simbriefHtmlPlainText(simbriefOfpHtml(ofp));
+  const dep=plain.match(/\b[A-Z0-9]{4}\/[A-Z0-9]{3}\s+STD\s+(\d{4})\b/i);
+  const arr=plain.match(/\b[A-Z0-9]{4}\/[A-Z0-9]{3}\s+STA\s+(\d{4})\b/i);
+
+  function utcIsoFromHHMM(dateString,hhmm,rollNextDay){
+    if(!dateString||!hhmm)return null;
+    const year=Number(dateString.slice(0,4));
+    const month=Number(dateString.slice(5,7))-1;
+    const day=Number(dateString.slice(8,10));
+    const hour=Number(hhmm.slice(0,2));
+    const minute=Number(hhmm.slice(2,4));
+    let ms=Date.UTC(year,month,day,hour,minute,0);
+    if(rollNextDay)ms+=86400000;
+    return new Date(ms).toISOString();
+  }
+
+  const depHHMM=dep?.[1]||null;
+  const arrHHMM=arr?.[1]||null;
+  let arrivalNextDay=false;
+  if(depHHMM&&arrHHMM){
+    arrivalNextDay=Number(arrHHMM)<Number(depHHMM);
+  }
+
+  return {
+    scheduledDeparture:directDeparture||utcIsoFromHHMM(legDate,depHHMM,false),
+    scheduledArrival:directArrival||utcIsoFromHHMM(legDate,arrHHMM,arrivalNextDay)
+  };
+}
+
 function buildSimbriefSnapshot(ofp,flight,legDate,index){
-  const ctx=currentFlightPlanningContext;
   const units=
     ofp?.params?.units ||
     ofp?.params?.units_weight ||
@@ -2270,12 +2391,7 @@ function buildSimbriefSnapshot(ofp,flight,legDate,index){
     "LBS";
 
   const ac=formatAircraftAssignment(flight,legDate);
-  const alternate=
-    simbriefUpper(
-      ofp?.alternate?.icao_code ||
-      ofp?.alternate?.icao ||
-      ofp?.alternate?.airport
-    ) || null;
+  const alternate=simbriefAlternateFromOfp(ofp);
 
   const route=
     simbriefText(
@@ -2290,15 +2406,19 @@ function buildSimbriefSnapshot(ofp,flight,legDate,index){
       ofp?.general?.request_id
     ) || null;
 
-  const generatedAt=
-    simbriefUnixTimestamp(
-      ofp?.params?.time_generated ||
+  const generatedAt=simbriefUnixTimestamp(
+    simbriefFirstValue(
+      ofp?.params?.time_generated,
+      ofp?.general?.time_generated,
       ofp?.times?.generated
-    );
+    )
+  );
+
+  const schedule=simbriefScheduleFromOfp(ofp,legDate);
 
   return {
     pilot_id:currentUser.id,
-    trip_id:ctx.assignment.trip_id,
+    trip_id:currentFlightPlanningContext?.assignment?.trip_id || null,
     flight_number:simbriefUpper(flight.flightNumber),
     operating_date:legDate,
     origin:simbriefUpper(flight.origin),
@@ -2313,16 +2433,11 @@ function buildSimbriefSnapshot(ofp,flight,legDate,index){
     cruise_altitude_ft:simbriefNumber(
       ofp?.general?.initial_altitude ||
       ofp?.general?.cruise_altitude ||
-      ofp?.general?.avg_altitude
+      ofp?.general?.avg_altitude ||
+      ofp?.atc?.initial_alt
     ),
-    scheduled_departure:simbriefUnixTimestamp(
-      ofp?.times?.sched_out ||
-      ofp?.times?.est_out
-    ),
-    scheduled_arrival:simbriefUnixTimestamp(
-      ofp?.times?.sched_in ||
-      ofp?.times?.est_in
-    ),
+    scheduled_departure:schedule.scheduledDeparture,
+    scheduled_arrival:schedule.scheduledArrival,
     taxi_fuel_lb:simbriefFuelLb(ofp?.fuel?.taxi,units),
     trip_fuel_lb:simbriefFuelLb(ofp?.fuel?.enroute_burn||ofp?.fuel?.trip,units),
     contingency_fuel_lb:simbriefFuelLb(ofp?.fuel?.contingency,units),
