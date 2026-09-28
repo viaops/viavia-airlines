@@ -2531,6 +2531,7 @@ document.addEventListener("click",async event=>{
 let activeDispatchRelease=null;
 let activeDispatchSignature=null;
 let activeFuelVerification=null;
+let activeFinalLoad=null;
 let dispatchCanvasHasInk=false;
 
 function dispatchFuel(value){
@@ -2548,7 +2549,7 @@ function closeDispatchModal(){
   const modal=document.getElementById("dispatchModal");
   modal.classList.remove("open");
   modal.setAttribute("aria-hidden","true");
-  activeDispatchRelease=null;activeDispatchSignature=null;activeFuelVerification=null;dispatchCanvasHasInk=false;
+  activeDispatchRelease=null;activeDispatchSignature=null;activeFuelVerification=null;activeFinalLoad=null;dispatchCanvasHasInk=false;
 }
 
 function setupDispatchCanvas(){
@@ -2752,13 +2753,15 @@ async function submitFuelVerification(){
     if(!verification)throw new Error("Viavia Operations did not return the fuel verification.");
 
     activeFuelVerification=verification;
+    activeFinalLoad=await getFinalLoadAcceptance(activeDispatchRelease.release.id);
     renderDispatchRelease(
       activeDispatchRelease.release,
       activeDispatchSignature,
       activeDispatchRelease.flight,
       activeDispatchRelease.legDate,
       activeDispatchRelease.ofp,
-      verification
+      verification,
+      activeFinalLoad
     );
   }catch(error){
     console.error("Fuel verification failed:",error);
@@ -2767,7 +2770,164 @@ async function submitFuelVerification(){
   }
 }
 
-function renderDispatchRelease(release,signature,flight,legDate,ofp,verification=null){
+
+async function getFinalLoadAcceptance(releaseId){
+  if(!releaseId||!currentUser?.id)return null;
+  const result=await viaviaSupabase
+    .from("final_load_acceptances")
+    .select("*")
+    .eq("release_id",releaseId)
+    .eq("pilot_id",currentUser.id)
+    .maybeSingle();
+  if(result.error)throw result.error;
+  return result.data||null;
+}
+
+function finalLoadWeight(value){
+  const n=Number(value);
+  return Number.isFinite(n)?`${n.toLocaleString("en-US")} LB`:"—";
+}
+
+function renderFinalLoadSection(release,signature,verification,finalLoad){
+  if(!signature){
+    return `<div class="dispatch-section">
+      <h3>Final Load / Weight &amp; Balance</h3>
+      <div class="dispatch-status pending">LOCKED · PIC ACCEPTANCE REQUIRED</div>
+      <p class="signature-help">Accept the current Dispatch Release before Final Load can be completed.</p>
+    </div>`;
+  }
+
+  if(!verification){
+    return `<div class="dispatch-section">
+      <h3>Final Load / Weight &amp; Balance</h3>
+      <div class="dispatch-status pending">LOCKED · FUEL VERIFICATION REQUIRED</div>
+      <p class="signature-help">Complete Fuel Verification before accepting the final load.</p>
+    </div>`;
+  }
+
+  if(finalLoad){
+    return `<div class="dispatch-section">
+      <h3>Final Load / Weight &amp; Balance</h3>
+      <div class="dispatch-status ready">FINAL LOAD ACCEPTED</div>
+      <div class="dispatch-grid">
+        <div class="dispatch-cell"><span>Passengers</span><strong>${escapeHtml(finalLoad.passenger_count)}</strong></div>
+        <div class="dispatch-cell"><span>Cargo</span><strong>${finalLoadWeight(finalLoad.cargo_weight_lb)}</strong></div>
+        <div class="dispatch-cell"><span>Zero Fuel Weight</span><strong>${finalLoadWeight(finalLoad.zero_fuel_weight_lb)}</strong></div>
+        <div class="dispatch-cell"><span>Takeoff Weight</span><strong>${finalLoadWeight(finalLoad.takeoff_weight_lb)}</strong></div>
+        <div class="dispatch-cell"><span>Landing Weight</span><strong>${finalLoadWeight(finalLoad.landing_weight_lb)}</strong></div>
+        <div class="dispatch-cell"><span>CG</span><strong>${finalLoad.cg_percent!==null&&finalLoad.cg_percent!==undefined?`${escapeHtml(finalLoad.cg_percent)}%`:"—"}</strong></div>
+        <div class="dispatch-cell"><span>Trim</span><strong>${escapeHtml(finalLoad.trim_setting||"—")}</strong></div>
+        <div class="dispatch-cell"><span>PIC</span><strong>${escapeHtml(finalLoad.pic_name||"—")}</strong></div>
+        <div class="dispatch-cell"><span>Accepted</span><strong>${escapeHtml(dispatchTimestamp(finalLoad.accepted_at))}</strong></div>
+      </div>
+    </div>`;
+  }
+
+  return `<div class="dispatch-section">
+    <h3>Final Load / Weight &amp; Balance</h3>
+    <div class="dispatch-status pending">FINAL LOAD ACCEPTANCE REQUIRED</div>
+    <div class="dispatch-grid">
+      <div class="dispatch-cell">
+        <span>Passengers</span>
+        <input id="finalLoadPassengers" type="number" min="0" step="1" inputmode="numeric"
+          style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid #d9d1df;border-radius:8px">
+      </div>
+      <div class="dispatch-cell">
+        <span>Cargo Weight (LB)</span>
+        <input id="finalLoadCargo" type="number" min="0" step="1" inputmode="numeric"
+          style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid #d9d1df;border-radius:8px">
+      </div>
+      <div class="dispatch-cell">
+        <span>Zero Fuel Weight (LB)</span>
+        <input id="finalLoadZfw" type="number" min="1" step="1" inputmode="numeric"
+          style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid #d9d1df;border-radius:8px">
+      </div>
+      <div class="dispatch-cell">
+        <span>Takeoff Weight (LB)</span>
+        <input id="finalLoadTow" type="number" min="1" step="1" inputmode="numeric"
+          style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid #d9d1df;border-radius:8px">
+      </div>
+      <div class="dispatch-cell">
+        <span>Landing Weight (LB)</span>
+        <input id="finalLoadLw" type="number" min="1" step="1" inputmode="numeric"
+          style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid #d9d1df;border-radius:8px">
+      </div>
+      <div class="dispatch-cell">
+        <span>CG (%)</span>
+        <input id="finalLoadCg" type="number" min="0" max="100" step="0.01" inputmode="decimal"
+          style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid #d9d1df;border-radius:8px">
+      </div>
+      <div class="dispatch-cell">
+        <span>Trim Setting</span>
+        <input id="finalLoadTrim" type="text" placeholder="Optional"
+          style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid #d9d1df;border-radius:8px">
+      </div>
+    </div>
+    <p class="signature-help" style="margin-top:12px">Enter the final operational load values. Once accepted, this record cannot be edited.</p>
+    <button id="acceptFinalLoad" type="button" class="btn btn-primary">PIC Accept Final Load</button>
+  </div>`;
+}
+
+async function submitFinalLoad(){
+  if(!activeDispatchRelease?.release||!activeDispatchSignature||!activeFuelVerification)return;
+
+  const passengers=Number(document.getElementById("finalLoadPassengers")?.value);
+  const cargo=Number(document.getElementById("finalLoadCargo")?.value);
+  const zfw=Number(document.getElementById("finalLoadZfw")?.value);
+  const tow=Number(document.getElementById("finalLoadTow")?.value);
+  const lw=Number(document.getElementById("finalLoadLw")?.value);
+  const cgRaw=String(document.getElementById("finalLoadCg")?.value||"").trim();
+  const cg=cgRaw===""?null:Number(cgRaw);
+  const trim=String(document.getElementById("finalLoadTrim")?.value||"").trim();
+  const button=document.getElementById("acceptFinalLoad");
+
+  if(!Number.isInteger(passengers)||passengers<0){alert("Enter a valid passenger count.");return;}
+  if(!Number.isInteger(cargo)||cargo<0){alert("Enter cargo weight in whole pounds.");return;}
+  if(!Number.isInteger(zfw)||zfw<=0){alert("Enter a valid zero fuel weight.");return;}
+  if(!Number.isInteger(tow)||tow<=0){alert("Enter a valid takeoff weight.");return;}
+  if(!Number.isInteger(lw)||lw<=0){alert("Enter a valid landing weight.");return;}
+  if(tow<zfw){alert("Takeoff weight cannot be less than zero fuel weight.");return;}
+  if(tow<lw){alert("Takeoff weight cannot be less than landing weight.");return;}
+  if(cg!==null&&(!Number.isFinite(cg)||cg<0||cg>100)){alert("CG must be between 0 and 100 percent.");return;}
+
+  if(button){button.disabled=true;button.textContent="Accepting Final Load…";}
+
+  try{
+    const name=currentPilot?.display_name||currentUser?.user_metadata?.display_name||currentUser?.email||"Viavia Pilot";
+    const result=await viaviaSupabase.rpc("accept_final_load",{
+      p_release_id:activeDispatchRelease.release.id,
+      p_passenger_count:passengers,
+      p_cargo_weight_lb:cargo,
+      p_zero_fuel_weight_lb:zfw,
+      p_takeoff_weight_lb:tow,
+      p_landing_weight_lb:lw,
+      p_cg_percent:cg,
+      p_trim_setting:trim||null,
+      p_pic_name:name
+    });
+    if(result.error)throw result.error;
+
+    const finalLoad=Array.isArray(result.data)?result.data[0]:result.data;
+    if(!finalLoad)throw new Error("Viavia Operations did not return the Final Load acceptance.");
+
+    activeFinalLoad=finalLoad;
+    renderDispatchRelease(
+      activeDispatchRelease.release,
+      activeDispatchSignature,
+      activeDispatchRelease.flight,
+      activeDispatchRelease.legDate,
+      activeDispatchRelease.ofp,
+      activeFuelVerification,
+      finalLoad
+    );
+  }catch(error){
+    console.error("Final Load acceptance failed:",error);
+    alert(error?.message||"Unable to accept the Final Load.");
+    if(button){button.disabled=false;button.textContent="PIC Accept Final Load";}
+  }
+}
+
+function renderDispatchRelease(release,signature,flight,legDate,ofp,verification=null,finalLoad=null){
   const body=document.getElementById("dispatchModalBody");
   const subtitle=document.getElementById("dispatchModalSubtitle");
   subtitle.textContent=`${flight.flightNumber} · ${flight.origin} → ${flight.destination} · ${formatDate(legDate)}`;
@@ -2797,7 +2957,8 @@ function renderDispatchRelease(release,signature,flight,legDate,ofp,verification
     </table></div>
     </div>
     <div class="dispatch-section"><h3>PIC Acceptance</h3>${signed?`<div class="signed-box"><strong>Accepted and electronically signed by ${escapeHtml(signature.pic_name)}</strong><div>Signed ${escapeHtml(dispatchTimestamp(signature.signed_at))} · Release ${escapeHtml(signature.release_number)}</div>${signature.signature_data?`<img class="signed-image" src="${escapeHtml(signature.signature_data)}" alt="PIC signature">`:""}</div>`:`<p class="signature-help">Review the release above, then sign in the box using a mouse, touchscreen, or Apple Pencil.</p><div class="signature-pad-wrap"><canvas id="picSignatureCanvas" class="signature-pad"></canvas></div><div class="signature-actions" style="margin-top:10px"><button id="clearPicSignature" type="button" class="btn btn-secondary">Clear</button><button id="acceptPicRelease" type="button" class="btn btn-primary">PIC Accept & Sign</button></div>`}</div>
-    ${renderFuelVerificationSection(release,signature,verification)}`;
+    ${renderFuelVerificationSection(release,signature,verification)}
+    ${renderFinalLoadSection(release,signature,verification,finalLoad)}`;
   if(!signed){
     requestAnimationFrame(()=>{
       setupDispatchCanvas();
@@ -2808,6 +2969,11 @@ function renderDispatchRelease(release,signature,flight,legDate,ofp,verification
   if(signed&&!verification){
     requestAnimationFrame(()=>{
       document.getElementById("acceptFuelVerification")?.addEventListener("click",submitFuelVerification);
+    });
+  }
+  if(signed&&verification&&!finalLoad){
+    requestAnimationFrame(()=>{
+      document.getElementById("acceptFinalLoad")?.addEventListener("click",submitFinalLoad);
     });
   }
 }
@@ -2877,12 +3043,14 @@ async function openFlightDocuments(index){
 
     const signature=await ViaviaDispatch.getMySignature(release.id);
     const verification=signature?await getFuelVerification(release.id):null;
+    const finalLoad=verification?await getFinalLoadAcceptance(release.id):null;
 
     activeDispatchRelease={release,flight,legDate,ofp};
     activeDispatchSignature=signature;
     activeFuelVerification=verification;
+    activeFinalLoad=finalLoad;
 
-    renderDispatchRelease(release,signature,flight,legDate,ofp,verification);
+    renderDispatchRelease(release,signature,flight,legDate,ofp,verification,finalLoad);
 
   }catch(error){
     console.error("Flight documents load failed:",error);
@@ -2900,13 +3068,15 @@ async function submitPicDispatchSignature(){
     const signature=await ViaviaDispatch.signRelease(activeDispatchRelease.release.id,signatureData,name);
     activeDispatchSignature=signature;
     activeFuelVerification=await getFuelVerification(activeDispatchRelease.release.id);
+    activeFinalLoad=activeFuelVerification?await getFinalLoadAcceptance(activeDispatchRelease.release.id):null;
     renderDispatchRelease(
       activeDispatchRelease.release,
       signature,
       activeDispatchRelease.flight,
       activeDispatchRelease.legDate,
       activeDispatchRelease.ofp,
-      activeFuelVerification
+      activeFuelVerification,
+      activeFinalLoad
     );
   }catch(error){console.error("PIC release signature failed:",error);alert(error?.message||"Unable to sign the dispatch release.");if(button){button.disabled=false;button.textContent="PIC Accept & Sign";}}
 }
