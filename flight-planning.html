@@ -2530,6 +2530,7 @@ document.addEventListener("click",async event=>{
    ============================================================ */
 let activeDispatchRelease=null;
 let activeDispatchSignature=null;
+let activeFuelVerification=null;
 let dispatchCanvasHasInk=false;
 
 function dispatchFuel(value){
@@ -2547,7 +2548,7 @@ function closeDispatchModal(){
   const modal=document.getElementById("dispatchModal");
   modal.classList.remove("open");
   modal.setAttribute("aria-hidden","true");
-  activeDispatchRelease=null;activeDispatchSignature=null;dispatchCanvasHasInk=false;
+  activeDispatchRelease=null;activeDispatchSignature=null;activeFuelVerification=null;dispatchCanvasHasInk=false;
 }
 
 function setupDispatchCanvas(){
@@ -2640,7 +2641,133 @@ async function getLatestImportedOfp(flightNumber,legDate){
   return result.data||null;
 }
 
-function renderDispatchRelease(release,signature,flight,legDate,ofp){
+
+async function getFuelVerification(releaseId){
+  if(!releaseId||!currentUser?.id)return null;
+  const result=await viaviaSupabase
+    .from("fuel_verifications")
+    .select("*")
+    .eq("release_id",releaseId)
+    .eq("pilot_id",currentUser.id)
+    .maybeSingle();
+  if(result.error)throw result.error;
+  return result.data||null;
+}
+
+function renderFuelVerificationSection(release,signature,verification){
+  if(!signature){
+    return `<div class="dispatch-section">
+      <h3>Fuel Verification</h3>
+      <div class="dispatch-status pending">LOCKED · PIC ACCEPTANCE REQUIRED</div>
+      <p class="signature-help">Accept the current Dispatch Release before completing fuel verification.</p>
+    </div>`;
+  }
+
+  if(verification){
+    const delta=Number(verification.actual_fuel_onboard_lb)-Number(verification.planned_block_fuel_lb);
+    const deltaText=Number.isFinite(delta)
+      ? `${delta>=0?"+":""}${delta.toLocaleString("en-US")} LB`
+      : "—";
+    return `<div class="dispatch-section">
+      <h3>Fuel Verification</h3>
+      <div class="dispatch-status ready">FUEL ACCEPTED</div>
+      <div class="dispatch-grid">
+        <div class="dispatch-cell"><span>Planned Block</span><strong>${dispatchFuel(verification.planned_block_fuel_lb)}</strong></div>
+        <div class="dispatch-cell"><span>Actual Fuel Onboard</span><strong>${dispatchFuel(verification.actual_fuel_onboard_lb)}</strong></div>
+        <div class="dispatch-cell"><span>Difference</span><strong>${escapeHtml(deltaText)}</strong></div>
+        <div class="dispatch-cell"><span>Additional Fuel</span><strong>${dispatchFuel(verification.additional_fuel_lb)}</strong></div>
+        <div class="dispatch-cell"><span>PIC</span><strong>${escapeHtml(verification.pic_name||"—")}</strong></div>
+        <div class="dispatch-cell"><span>Accepted</span><strong>${escapeHtml(dispatchTimestamp(verification.accepted_at))}</strong></div>
+      </div>
+      ${verification.additional_fuel_reason?`<div class="meta" style="margin-top:10px"><strong>Additional fuel reason:</strong> ${escapeHtml(verification.additional_fuel_reason)}</div>`:""}
+    </div>`;
+  }
+
+  return `<div class="dispatch-section">
+    <h3>Fuel Verification</h3>
+    <div class="dispatch-status pending">PIC FUEL ACCEPTANCE REQUIRED</div>
+    <div class="dispatch-grid">
+      <div class="dispatch-cell"><span>Planned Block Fuel</span><strong>${dispatchFuel(release.block_fuel_lb)}</strong></div>
+      <div class="dispatch-cell">
+        <span>Actual Fuel Onboard (LB)</span>
+        <input id="actualFuelOnboard" type="number" min="0" step="1" inputmode="numeric"
+          value="${escapeHtml(release.block_fuel_lb??"")}"
+          style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid #d9d1df;border-radius:8px">
+      </div>
+      <div class="dispatch-cell">
+        <span>Additional Fuel (LB)</span>
+        <input id="additionalFuel" type="number" min="0" step="1" inputmode="numeric" value="0"
+          style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid #d9d1df;border-radius:8px">
+      </div>
+      <div class="dispatch-cell">
+        <span>Additional Fuel Reason</span>
+        <input id="additionalFuelReason" type="text" placeholder="Required only when additional fuel is entered"
+          style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid #d9d1df;border-radius:8px">
+      </div>
+    </div>
+    <p class="signature-help" style="margin-top:12px">Verify the fuel physically onboard the aircraft before accepting. Once accepted, this record cannot be edited.</p>
+    <button id="acceptFuelVerification" type="button" class="btn btn-primary">PIC Accept Fuel</button>
+  </div>`;
+}
+
+async function submitFuelVerification(){
+  if(!activeDispatchRelease?.release||!activeDispatchSignature)return;
+
+  const actualInput=document.getElementById("actualFuelOnboard");
+  const additionalInput=document.getElementById("additionalFuel");
+  const reasonInput=document.getElementById("additionalFuelReason");
+  const button=document.getElementById("acceptFuelVerification");
+
+  const actual=Number(actualInput?.value);
+  const additional=Number(additionalInput?.value||0);
+  const reason=String(reasonInput?.value||"").trim();
+
+  if(!Number.isInteger(actual)||actual<0){
+    alert("Enter the actual fuel onboard in whole pounds.");
+    return;
+  }
+  if(!Number.isInteger(additional)||additional<0){
+    alert("Additional fuel must be zero or a whole number of pounds.");
+    return;
+  }
+  if(additional>0&&!reason){
+    alert("Enter a reason for the additional fuel.");
+    return;
+  }
+
+  if(button){button.disabled=true;button.textContent="Accepting Fuel…";}
+
+  try{
+    const name=currentPilot?.display_name||currentUser?.user_metadata?.display_name||currentUser?.email||"Viavia Pilot";
+    const result=await viaviaSupabase.rpc("accept_fuel_verification",{
+      p_release_id:activeDispatchRelease.release.id,
+      p_actual_fuel_onboard_lb:actual,
+      p_additional_fuel_lb:additional,
+      p_additional_fuel_reason:reason||null,
+      p_pic_name:name
+    });
+    if(result.error)throw result.error;
+
+    const verification=Array.isArray(result.data)?result.data[0]:result.data;
+    if(!verification)throw new Error("Viavia Operations did not return the fuel verification.");
+
+    activeFuelVerification=verification;
+    renderDispatchRelease(
+      activeDispatchRelease.release,
+      activeDispatchSignature,
+      activeDispatchRelease.flight,
+      activeDispatchRelease.legDate,
+      activeDispatchRelease.ofp,
+      verification
+    );
+  }catch(error){
+    console.error("Fuel verification failed:",error);
+    alert(error?.message||"Unable to accept fuel verification.");
+    if(button){button.disabled=false;button.textContent="PIC Accept Fuel";}
+  }
+}
+
+function renderDispatchRelease(release,signature,flight,legDate,ofp,verification=null){
   const body=document.getElementById("dispatchModalBody");
   const subtitle=document.getElementById("dispatchModalSubtitle");
   subtitle.textContent=`${flight.flightNumber} · ${flight.origin} → ${flight.destination} · ${formatDate(legDate)}`;
@@ -2669,12 +2796,18 @@ function renderDispatchRelease(release,signature,flight,legDate,ofp){
       <tr><td>Taxi</td><td>${dispatchFuel(release.taxi_fuel_lb)}</td></tr><tr><td>Trip</td><td>${dispatchFuel(release.trip_fuel_lb)}</td></tr><tr><td>Contingency</td><td>${dispatchFuel(release.contingency_fuel_lb)}</td></tr><tr><td>Alternate</td><td>${dispatchFuel(release.alternate_fuel_lb)}</td></tr><tr><td>Reserve</td><td>${dispatchFuel(release.reserve_fuel_lb)}</td></tr><tr><td>Extra</td><td>${dispatchFuel(release.extra_fuel_lb)}</td></tr><tr class="fuel-total"><td><strong>BLOCK</strong></td><td>${dispatchFuel(release.block_fuel_lb)}</td></tr>
     </table></div>
     </div>
-    <div class="dispatch-section"><h3>PIC Acceptance</h3>${signed?`<div class="signed-box"><strong>Accepted and electronically signed by ${escapeHtml(signature.pic_name)}</strong><div>Signed ${escapeHtml(dispatchTimestamp(signature.signed_at))} · Release ${escapeHtml(signature.release_number)}</div>${signature.signature_data?`<img class="signed-image" src="${escapeHtml(signature.signature_data)}" alt="PIC signature">`:""}</div>`:`<p class="signature-help">Review the release above, then sign in the box using a mouse, touchscreen, or Apple Pencil.</p><div class="signature-pad-wrap"><canvas id="picSignatureCanvas" class="signature-pad"></canvas></div><div class="signature-actions" style="margin-top:10px"><button id="clearPicSignature" type="button" class="btn btn-secondary">Clear</button><button id="acceptPicRelease" type="button" class="btn btn-primary">PIC Accept & Sign</button></div>`}</div>`;
+    <div class="dispatch-section"><h3>PIC Acceptance</h3>${signed?`<div class="signed-box"><strong>Accepted and electronically signed by ${escapeHtml(signature.pic_name)}</strong><div>Signed ${escapeHtml(dispatchTimestamp(signature.signed_at))} · Release ${escapeHtml(signature.release_number)}</div>${signature.signature_data?`<img class="signed-image" src="${escapeHtml(signature.signature_data)}" alt="PIC signature">`:""}</div>`:`<p class="signature-help">Review the release above, then sign in the box using a mouse, touchscreen, or Apple Pencil.</p><div class="signature-pad-wrap"><canvas id="picSignatureCanvas" class="signature-pad"></canvas></div><div class="signature-actions" style="margin-top:10px"><button id="clearPicSignature" type="button" class="btn btn-secondary">Clear</button><button id="acceptPicRelease" type="button" class="btn btn-primary">PIC Accept & Sign</button></div>`}</div>
+    ${renderFuelVerificationSection(release,signature,verification)}`;
   if(!signed){
     requestAnimationFrame(()=>{
       setupDispatchCanvas();
       document.getElementById("clearPicSignature")?.addEventListener("click",()=>{setupDispatchCanvas()});
       document.getElementById("acceptPicRelease")?.addEventListener("click",submitPicDispatchSignature);
+    });
+  }
+  if(signed&&!verification){
+    requestAnimationFrame(()=>{
+      document.getElementById("acceptFuelVerification")?.addEventListener("click",submitFuelVerification);
     });
   }
 }
@@ -2743,11 +2876,13 @@ async function openFlightDocuments(index){
     }
 
     const signature=await ViaviaDispatch.getMySignature(release.id);
+    const verification=signature?await getFuelVerification(release.id):null;
 
-    activeDispatchRelease={release,flight,legDate};
+    activeDispatchRelease={release,flight,legDate,ofp};
     activeDispatchSignature=signature;
+    activeFuelVerification=verification;
 
-    renderDispatchRelease(release,signature,flight,legDate,ofp);
+    renderDispatchRelease(release,signature,flight,legDate,ofp,verification);
 
   }catch(error){
     console.error("Flight documents load failed:",error);
@@ -2763,7 +2898,16 @@ async function submitPicDispatchSignature(){
     const name=currentPilot?.display_name||currentUser?.user_metadata?.display_name||currentUser?.email||"Viavia Pilot";
     const signatureData=canvas.toDataURL("image/png");
     const signature=await ViaviaDispatch.signRelease(activeDispatchRelease.release.id,signatureData,name);
-    activeDispatchSignature=signature;renderDispatchRelease(activeDispatchRelease.release,signature,activeDispatchRelease.flight,activeDispatchRelease.legDate);
+    activeDispatchSignature=signature;
+    activeFuelVerification=await getFuelVerification(activeDispatchRelease.release.id);
+    renderDispatchRelease(
+      activeDispatchRelease.release,
+      signature,
+      activeDispatchRelease.flight,
+      activeDispatchRelease.legDate,
+      activeDispatchRelease.ofp,
+      activeFuelVerification
+    );
   }catch(error){console.error("PIC release signature failed:",error);alert(error?.message||"Unable to sign the dispatch release.");if(button){button.disabled=false;button.textContent="PIC Accept & Sign";}}
 }
 
