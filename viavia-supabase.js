@@ -268,6 +268,29 @@ async function updateViaviaPilotProfile(
   }
 
 
+  if (
+    typeof updates.simbrief_pilot_id ===
+    "string"
+  ) {
+
+    const simbriefPilotId =
+      updates.simbrief_pilot_id.trim();
+
+    if (
+      simbriefPilotId &&
+      !/^\d+$/.test(simbriefPilotId)
+    ) {
+      throw new Error(
+        "SimBrief Pilot ID must contain numbers only."
+      );
+    }
+
+    allowedUpdates.simbrief_pilot_id =
+      simbriefPilotId || null;
+
+  }
+
+
   const { data, error } =
     await viaviaSupabase
       .from("pilots")
