@@ -521,6 +521,9 @@ footer{
 .duty-day-meta strong,.duty-overnight strong{color:var(--purple-dark)}
 .duty-overnight{margin:12px 15px 15px;padding:11px 13px;border-radius:9px;background:#faf7fc;border:1px solid var(--border);font-size:13px;color:var(--muted)}
 .leg-date{font-size:11px;font-weight:800;color:var(--purple-dark);margin-bottom:3px}
+.leg.completed-leg{background:#f4fbf6;border:1px solid #cfe8d7;border-radius:11px;padding:13px;margin:7px 0}
+.flight-completed-badge{display:inline-block;margin-left:8px;padding:4px 8px;border-radius:999px;background:var(--green-bg);color:var(--green);font-size:10px;font-weight:900;vertical-align:middle}
+.completed-action-note{margin-top:10px;color:var(--green);font-size:12px;font-weight:800}
 
 
 
@@ -2062,6 +2065,55 @@ function populateTripSelect() {
 
 
 /* ============================================================
+   COMPLETED FLIGHT LEGS
+   ============================================================ */
+
+let completedFlightLegs = new Set();
+
+function completedFlightLegKey(flightNumber, operatingDate){
+  return `${String(flightNumber||"").trim().toUpperCase()}|${String(operatingDate||"").trim()}`;
+}
+
+function isCompletedFlightLeg(flightNumber, operatingDate){
+  return completedFlightLegs.has(
+    completedFlightLegKey(flightNumber, operatingDate)
+  );
+}
+
+async function loadCompletedFlightLegs(flights, legDates){
+  completedFlightLegs = new Set();
+
+  if(!currentUser?.id || !Array.isArray(flights) || !Array.isArray(legDates)){
+    return;
+  }
+
+  const flightNumbers = [...new Set(
+    flights
+      .map(f=>String(f?.flightNumber||"").trim().toUpperCase())
+      .filter(Boolean)
+  )];
+
+  if(!flightNumbers.length)return;
+
+  const result = await viaviaSupabase
+    .from("postflight_reports")
+    .select("flight_number, operating_date")
+    .eq("pilot_id", currentUser.id)
+    .in("flight_number", flightNumbers);
+
+  if(result.error)throw result.error;
+
+  (result.data||[]).forEach(report=>{
+    completedFlightLegs.add(
+      completedFlightLegKey(
+        report.flight_number,
+        report.operating_date
+      )
+    );
+  });
+}
+
+/* ============================================================
    RENDER ASSIGNMENT
    ============================================================ */
 
@@ -2085,6 +2137,7 @@ async function renderAssignment(assignment) {
 
   const {gates,legDates}=await resolveTripGates(assignment,flights);
   await loadAircraftAssignments(flights,legDates);
+  await loadCompletedFlightLegs(flights,legDates);
   currentFlightPlanningContext={assignment,flights,gates,legDates};
 
   const first=flights[0],days=getTripDays(pairing,flights),groups=getDutyGroups(pairing,flights,legDates);
@@ -2096,7 +2149,8 @@ async function renderAssignment(assignment) {
     const legs=group.items.map(({flight,index,date})=>{
       const arrival=`${flight.arrival||"—"}${flight.nextDay?"+1":""}`;
       const ac=formatAircraftAssignment(flight,date);
-      return `<div class="leg"><div class="leg-number">Leg ${index+1}</div><div><div class="leg-date">DAY ${group.day} · ${escapeHtml(formatDate(date))}</div><div class="leg-route">${escapeHtml(flight.flightNumber)} &nbsp; ${escapeHtml(flight.origin)} → ${escapeHtml(flight.destination)}</div><div class="leg-time">${escapeHtml(flight.departure||"—")} – ${escapeHtml(arrival)}</div>${renderSmallGate(gates[index])}<button type="button" class="btn btn-primary viacars-start-btn" data-leg-index="${index}" style="margin-top:10px">Start VIACARS</button><button type="button" class="btn btn-secondary simbrief-import-btn" data-leg-index="${index}" style="margin-top:8px;margin-left:6px">Import SimBrief OFP</button><button type="button" class="btn btn-secondary flight-docs-btn" data-leg-index="${index}">Flight Documents</button></div><div class="leg-aircraft">${escapeHtml(ac.label)}<br>${escapeHtml(formatDate(date))}</div></div>`;
+      const completed=isCompletedFlightLeg(flight.flightNumber,date);
+      return `<div class="leg${completed?" completed-leg":""}"><div class="leg-number">Leg ${index+1}</div><div><div class="leg-date">DAY ${group.day} · ${escapeHtml(formatDate(date))}</div><div class="leg-route">${escapeHtml(flight.flightNumber)} &nbsp; ${escapeHtml(flight.origin)} → ${escapeHtml(flight.destination)}${completed?` <span class="flight-completed-badge">FLIGHT COMPLETED</span>`:""}</div><div class="leg-time">${escapeHtml(flight.departure||"—")} – ${escapeHtml(arrival)}</div>${renderSmallGate(gates[index])}${completed?`<div class="completed-action-note">Operational closeout complete · Flight record is closed.</div>`:`<button type="button" class="btn btn-primary viacars-start-btn" data-leg-index="${index}" style="margin-top:10px">Start VIACARS</button><button type="button" class="btn btn-secondary simbrief-import-btn" data-leg-index="${index}" style="margin-top:8px;margin-left:6px">Import SimBrief OFP</button>`}<button type="button" class="btn btn-secondary flight-docs-btn" data-leg-index="${index}">Flight Documents</button></div><div class="leg-aircraft">${escapeHtml(ac.label)}<br>${escapeHtml(formatDate(date))}</div></div>`;
     }).join("");
     return `<section class="duty-day"><div class="duty-day-header"><span>DAY ${group.day} — ${escapeHtml(formatDate(group.items[0]?.date).toUpperCase())}</span><span>${escapeHtml(group.startAirport)} → ${escapeHtml(group.endAirport)}</span></div><div class="duty-day-meta"><span><strong>Show:</strong> ${escapeHtml(dutyShow(group))} · ${escapeHtml(group.startAirport)}</span><span><strong>Release:</strong> ${escapeHtml(dutyRelease(group))} · ${escapeHtml(group.endAirport)}</span><span><strong>Legs:</strong> ${group.items.length}</span></div><div style="padding:0 15px">${legs}</div><div class="duty-overnight">${final?`<strong>Trip Complete:</strong> ${escapeHtml(group.endAirport)}`:`<strong>Overnight:</strong> ${escapeHtml(group.endAirport)} · Crew hotel details are available in My Trips.`}</div></section>`;
   }).join("");
@@ -3087,6 +3141,10 @@ async function submitPostflightReport(){
 
     activePostflightReport=report;
 
+    if(currentFlightPlanningContext?.assignment){
+      await renderAssignment(currentFlightPlanningContext.assignment);
+    }
+
     renderDispatchRelease(
       activeDispatchRelease.release,
       activeDispatchSignature,
@@ -3326,6 +3384,10 @@ async function launchViacars(index){
   const flight=ctx.flights[index];
   const legDate=ctx.legDates[index];
   if(!flight||!legDate) throw new Error("This flight leg could not be found.");
+
+  if(isCompletedFlightLeg(flight.flightNumber,legDate)){
+    throw new Error("This flight has already been completed and closed. VIACARS cannot be started again.");
+  }
 
   const documentStatus=await getPredepartureDocumentStatus(flight,legDate);
   if(!documentStatus.ready){
