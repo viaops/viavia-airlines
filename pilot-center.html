@@ -1286,6 +1286,7 @@ footer {
 
 let currentUser = null;
 let currentPilot = null;
+let completedFlightKeys = new Set();
 let myAssignments = [];
 let masterPairings = [];
 
@@ -1456,6 +1457,26 @@ function renderPilotProfile() {
 }
 
 
+
+function addOperatingDaysForCompletion(value, days) {
+    const parts=String(value||"").split("-").map(Number);
+    if(parts.length!==3||parts.some(Number.isNaN))return value;
+    const d=new Date(parts[0],parts[1]-1,parts[2]);
+    d.setDate(d.getDate()+Number(days||0));
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+
+function isAssignmentCompleted(assignment) {
+    const pairing=findPairing(assignment?.trip_id);
+    const flights=Array.isArray(pairing?.flights)?pairing.flights:[];
+    if(!flights.length)return false;
+    return flights.every(f=>{
+        const day=Math.max(1,Number(f?.pairingDay)||1);
+        const date=addOperatingDaysForCompletion(assignment.operating_date,day-1);
+        return isFlightCompleted(f.flightNumber,date);
+    });
+}
+
 /* AWARDED TRIPS */
 
 function getActiveAssignments() {
@@ -1473,7 +1494,7 @@ function renderAwardedTripCount() {
     document
         .getElementById("awardedTripsValue")
         .textContent =
-        getActiveAssignments().length;
+        getActiveAssignments().filter(assignment => !isAssignmentCompleted(assignment)).length;
 }
 
 
@@ -1489,6 +1510,7 @@ function getNextAssignment() {
         getActiveAssignments()
             .filter(
                 assignment =>
+                    !isAssignmentCompleted(assignment) &&
                     String(
                         assignment.operating_date
                     ) >= today
@@ -1837,6 +1859,9 @@ async function loadCrewOperations() {
         loadMasterPairings();
 
 
+    await loadCompletedFlights();
+
+
     renderPilotProfile();
 
     renderAwardedTripCount();
@@ -1844,6 +1869,47 @@ async function loadCrewOperations() {
     renderUpcomingAssignment();
 }
 
+
+
+/* ============================================================
+   POSTFLIGHT COMPLETION STATUS
+   ============================================================ */
+
+function completedFlightKey(flightNumber, operatingDate) {
+    return `${String(flightNumber || "").trim().toUpperCase()}|${String(operatingDate || "").trim()}`;
+}
+
+function isFlightCompleted(flightNumber, operatingDate) {
+    return completedFlightKeys.has(
+        completedFlightKey(flightNumber, operatingDate)
+    );
+}
+
+async function loadCompletedFlights() {
+    completedFlightKeys = new Set();
+
+    if (!currentUser?.id || typeof viaviaSupabase === "undefined") {
+        return;
+    }
+
+    const result = await viaviaSupabase
+        .from("postflight_reports")
+        .select("flight_number, operating_date")
+        .eq("pilot_id", currentUser.id);
+
+    if (result.error) {
+        throw result.error;
+    }
+
+    (result.data || []).forEach(report => {
+        completedFlightKeys.add(
+            completedFlightKey(
+                report.flight_number,
+                report.operating_date
+            )
+        );
+    });
+}
 
 /* SIGN OUT */
 
