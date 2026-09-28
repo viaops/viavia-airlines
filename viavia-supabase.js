@@ -480,60 +480,43 @@ async function claimViaviaTrip(
   const user =
     await getViaviaUser();
 
-
   if (!user) {
-
     throw new Error(
       "You must be signed in to claim a trip."
     );
-
   }
 
-
   if (!pairing) {
-
     throw new Error(
       "Pairing information is missing."
     );
-
   }
 
-
   if (!pairing.pairingId) {
-
     throw new Error(
       "Pairing does not have a valid Trip ID."
     );
-
   }
 
-
   if (
-    !Array.isArray(
-      pairing.flights
-    ) ||
+    !Array.isArray(pairing.flights) ||
     pairing.flights.length === 0
   ) {
-
     throw new Error(
       "Pairing does not contain any flights."
     );
-
   }
-
 
   const date =
     normalizeViaviaOperatingDate(
       operatingDate
     );
 
-
   const flightNumbers =
     pairing.flights.map(
       flight =>
         flight.flightNumber
     );
-
 
   const aircraft = [
     ...new Set(
@@ -546,9 +529,7 @@ async function claimViaviaTrip(
     )
   ];
 
-
   const assignment = {
-
     trip_id:
       pairing.pairingId,
 
@@ -567,22 +548,16 @@ async function claimViaviaTrip(
       pairing.flights
         .map(
           (flight, index) => {
-
-            if (
-              index === 0
-            ) {
-
+            if (index === 0) {
               return (
                 `${flight.origin} → ` +
                 `${flight.destination}`
               );
-
             }
 
             return (
               `→ ${flight.destination}`
             );
-
           }
         )
         .join(" "),
@@ -600,11 +575,124 @@ async function claimViaviaTrip(
 
     gate_status:
       "TBD — Gate assignment pending"
-
   };
 
 
-  const { data, error } =
+  /*
+   * There is one database row per trip_id + operating_date.
+   * A dropped trip remains in the table with status="cancelled",
+   * so it must be reactivated instead of inserted a second time.
+   */
+  const {
+    data: existing,
+    error: lookupError
+  } =
+    await viaviaSupabase
+      .from(
+        "trip_assignments"
+      )
+      .select(
+        "id,trip_id,operating_date,pilot_id,status"
+      )
+      .eq(
+        "trip_id",
+        pairing.pairingId
+      )
+      .eq(
+        "operating_date",
+        date
+      )
+      .maybeSingle();
+
+
+  if (lookupError) {
+    throw lookupError;
+  }
+
+
+  if (existing) {
+
+    if (existing.status !== "cancelled") {
+
+      if (existing.pilot_id === user.id) {
+        const alreadyMineError =
+          new Error(
+            "This trip is already awarded to your account."
+          );
+
+        alreadyMineError.code =
+          "VIAVIA_TRIP_ALREADY_MINE";
+
+        throw alreadyMineError;
+      }
+
+      const takenError =
+        new Error(
+          "This trip is no longer available for the selected operating date."
+        );
+
+      takenError.code =
+        "VIAVIA_TRIP_TAKEN";
+
+      throw takenError;
+    }
+
+
+    const {
+      data: reactivated,
+      error: reactivateError
+    } =
+      await viaviaSupabase
+        .from(
+          "trip_assignments"
+        )
+        .update({
+          ...assignment,
+          awarded_at:
+            new Date().toISOString()
+        })
+        .eq(
+          "id",
+          existing.id
+        )
+        .eq(
+          "status",
+          "cancelled"
+        )
+        .select()
+        .maybeSingle();
+
+
+    if (reactivateError) {
+      throw reactivateError;
+    }
+
+
+    if (!reactivated) {
+      const conflictError =
+        new Error(
+          "The trip assignment changed while you were claiming it. Please refresh and try again."
+        );
+
+      conflictError.code =
+        "VIAVIA_TRIP_CLAIM_CONFLICT";
+
+      throw conflictError;
+    }
+
+
+    console.log(
+      `Viavia Trips: ${pairing.pairingId} for ${date} was reactivated and awarded.`
+    );
+
+    return reactivated;
+  }
+
+
+  const {
+    data,
+    error
+  } =
     await viaviaSupabase
       .from(
         "trip_assignments"
@@ -618,68 +706,30 @@ async function claimViaviaTrip(
 
   if (error) {
 
-    // 23505 means a unique database constraint was hit. Verify the
-    // actual trip/date assignment before deciding that another pilot
-    // owns the trip.
+    /*
+     * A simultaneous claim can still race between the lookup and
+     * insert. If the unique trip/date constraint wins that race,
+     * report the trip as unavailable rather than exposing raw SQL.
+     */
     if (error.code === "23505") {
 
-      const { data: existingRows, error: lookupError } =
-        await viaviaSupabase
-          .from("trip_assignments")
-          .select("id,trip_id,operating_date,pilot_id,status")
-          .eq("trip_id", pairing.pairingId)
-          .eq("operating_date", date)
-          .neq("status", "cancelled")
-          .limit(1);
+      const conflictError =
+        new Error(
+          "This trip is no longer available for the selected operating date."
+        );
 
-      if (lookupError) {
-        throw error;
-      }
+      conflictError.code =
+        "VIAVIA_TRIP_TAKEN";
 
-      const existing =
-        Array.isArray(existingRows)
-          ? existingRows[0] || null
-          : null;
-
-      if (existing?.pilot_id === user.id) {
-        const alreadyMineError =
-          new Error("This trip is already awarded to your account.");
-        alreadyMineError.code = "VIAVIA_TRIP_ALREADY_MINE";
-        throw alreadyMineError;
-      }
-
-      if (existing) {
-        const takenError =
-          new Error(
-            "This trip is no longer available for the selected operating date."
-          );
-        takenError.code = "VIAVIA_TRIP_TAKEN";
-        throw takenError;
-      }
-
-      // The duplicate came from a different database constraint.
-      // Keep the real Supabase error so the exact cause remains visible.
-      console.error(
-        "Viavia Trips: Database uniqueness conflict while claiming trip.",
-        {
-          trip_id: pairing.pairingId,
-          operating_date: date,
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint
-        }
-      );
-
-      throw error;
+      throw conflictError;
     }
 
     throw error;
   }
 
+
   return data;
 }
-
 
 /* ============================================================
    DROP TRIP
