@@ -2532,6 +2532,7 @@ let activeDispatchRelease=null;
 let activeDispatchSignature=null;
 let activeFuelVerification=null;
 let activeFinalLoad=null;
+let activePostflightReport=null;
 let dispatchCanvasHasInk=false;
 
 function dispatchFuel(value){
@@ -2549,7 +2550,7 @@ function closeDispatchModal(){
   const modal=document.getElementById("dispatchModal");
   modal.classList.remove("open");
   modal.setAttribute("aria-hidden","true");
-  activeDispatchRelease=null;activeDispatchSignature=null;activeFuelVerification=null;activeFinalLoad=null;dispatchCanvasHasInk=false;
+  activeDispatchRelease=null;activeDispatchSignature=null;activeFuelVerification=null;activeFinalLoad=null;activePostflightReport=null;dispatchCanvasHasInk=false;
 }
 
 function setupDispatchCanvas(){
@@ -2911,6 +2912,7 @@ async function submitFinalLoad(){
     if(!finalLoad)throw new Error("Viavia Operations did not return the Final Load acceptance.");
 
     activeFinalLoad=finalLoad;
+    activePostflightReport=await getPostflightReport(activeDispatchRelease.release.id);
     renderDispatchRelease(
       activeDispatchRelease.release,
       activeDispatchSignature,
@@ -2918,7 +2920,8 @@ async function submitFinalLoad(){
       activeDispatchRelease.legDate,
       activeDispatchRelease.ofp,
       activeFuelVerification,
-      finalLoad
+      finalLoad,
+      activePostflightReport
     );
   }catch(error){
     console.error("Final Load acceptance failed:",error);
@@ -2927,7 +2930,181 @@ async function submitFinalLoad(){
   }
 }
 
-function renderDispatchRelease(release,signature,flight,legDate,ofp,verification=null,finalLoad=null){
+
+async function getPostflightReport(releaseId){
+  if(!releaseId||!currentUser?.id)return null;
+  const result=await viaviaSupabase
+    .from("postflight_reports")
+    .select("*")
+    .eq("release_id",releaseId)
+    .eq("pilot_id",currentUser.id)
+    .maybeSingle();
+  if(result.error)throw result.error;
+  return result.data||null;
+}
+
+function postflightLocalValue(value){
+  if(!value)return "—";
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime()))return "—";
+  return d.toLocaleString([],{
+    year:"numeric",month:"short",day:"numeric",
+    hour:"2-digit",minute:"2-digit"
+  });
+}
+
+function postflightInputDateTime(value){
+  const d=value?new Date(value):new Date();
+  if(Number.isNaN(d.getTime()))return "";
+  const pad=n=>String(n).padStart(2,"0");
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function renderPostflightSection(release,signature,verification,finalLoad,report){
+  if(!signature||!verification||!finalLoad){
+    return `<div class="dispatch-section">
+      <h3>Postflight Closeout</h3>
+      <div class="dispatch-status pending">LOCKED · PRE-DEPARTURE DOCUMENTS REQUIRED</div>
+      <p class="signature-help">Complete the Dispatch Release, Fuel Verification, and Final Load / W&amp;B before postflight closeout.</p>
+    </div>`;
+  }
+
+  if(report){
+    return `<div class="dispatch-section">
+      <h3>Postflight Closeout</h3>
+      <div class="dispatch-status ready">FLIGHT COMPLETED</div>
+      <div class="dispatch-grid">
+        <div class="dispatch-cell"><span>OUT</span><strong>${escapeHtml(postflightLocalValue(report.out_time))}</strong></div>
+        <div class="dispatch-cell"><span>OFF</span><strong>${escapeHtml(postflightLocalValue(report.off_time))}</strong></div>
+        <div class="dispatch-cell"><span>ON</span><strong>${escapeHtml(postflightLocalValue(report.on_time))}</strong></div>
+        <div class="dispatch-cell"><span>IN</span><strong>${escapeHtml(postflightLocalValue(report.in_time))}</strong></div>
+        <div class="dispatch-cell"><span>Arrival Fuel</span><strong>${finalLoadWeight(report.arrival_fuel_lb)}</strong></div>
+        <div class="dispatch-cell"><span>Delay</span><strong>${Number(report.delay_minutes||0).toLocaleString("en-US")} MIN</strong></div>
+        <div class="dispatch-cell"><span>Delay Code</span><strong>${escapeHtml(report.delay_code||"—")}</strong></div>
+        <div class="dispatch-cell"><span>Aircraft Discrepancy</span><strong>${report.aircraft_discrepancy?"YES":"NO"}</strong></div>
+        <div class="dispatch-cell"><span>PIC</span><strong>${escapeHtml(report.pic_name||"—")}</strong></div>
+        <div class="dispatch-cell"><span>Completed</span><strong>${escapeHtml(dispatchTimestamp(report.completed_at))}</strong></div>
+      </div>
+      ${report.delay_remarks?`<p class="signature-help"><strong>Delay Remarks:</strong> ${escapeHtml(report.delay_remarks)}</p>`:""}
+      ${report.discrepancy_remarks?`<p class="signature-help"><strong>Discrepancy:</strong> ${escapeHtml(report.discrepancy_remarks)}</p>`:""}
+    </div>`;
+  }
+
+  const now=postflightInputDateTime(new Date());
+
+  return `<div class="dispatch-section">
+    <h3>Postflight Closeout</h3>
+    <div class="dispatch-status pending">POSTFLIGHT REPORT REQUIRED</div>
+
+    <div class="dispatch-grid">
+      <div class="dispatch-cell"><span>OUT</span><input id="postOutTime" type="datetime-local" value="${now}" style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid #d9d1df;border-radius:8px"></div>
+      <div class="dispatch-cell"><span>OFF</span><input id="postOffTime" type="datetime-local" value="${now}" style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid #d9d1df;border-radius:8px"></div>
+      <div class="dispatch-cell"><span>ON</span><input id="postOnTime" type="datetime-local" value="${now}" style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid #d9d1df;border-radius:8px"></div>
+      <div class="dispatch-cell"><span>IN</span><input id="postInTime" type="datetime-local" value="${now}" style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid #d9d1df;border-radius:8px"></div>
+      <div class="dispatch-cell"><span>Arrival Fuel (LB)</span><input id="postArrivalFuel" type="number" min="0" step="1" inputmode="numeric" style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid #d9d1df;border-radius:8px"></div>
+      <div class="dispatch-cell"><span>Delay Minutes</span><input id="postDelayMinutes" type="number" min="0" step="1" value="0" inputmode="numeric" style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid #d9d1df;border-radius:8px"></div>
+      <div class="dispatch-cell"><span>Delay Code</span><input id="postDelayCode" type="text" placeholder="Optional" style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid #d9d1df;border-radius:8px"></div>
+    </div>
+
+    <div style="margin-top:12px">
+      <label for="postDelayRemarks" style="font-weight:700">Delay Remarks</label>
+      <textarea id="postDelayRemarks" rows="3" placeholder="Required if delay minutes are greater than zero." style="width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border:1px solid #d9d1df;border-radius:8px"></textarea>
+    </div>
+
+    <div style="margin-top:12px">
+      <label style="display:flex;gap:8px;align-items:center;font-weight:700">
+        <input id="postAircraftDiscrepancy" type="checkbox">
+        Aircraft discrepancy to report
+      </label>
+      <textarea id="postDiscrepancyRemarks" rows="3" placeholder="Required when an aircraft discrepancy is reported." style="width:100%;box-sizing:border-box;margin-top:8px;padding:10px;border:1px solid #d9d1df;border-radius:8px"></textarea>
+    </div>
+
+    <p class="signature-help" style="margin-top:12px">Review OUT / OFF / ON / IN, arrival fuel, delays, and discrepancies carefully. Completing the flight creates an immutable postflight record.</p>
+    <button id="completePostflight" type="button" class="btn btn-primary">Complete Flight</button>
+  </div>`;
+}
+
+function postflightIsoFromInput(id){
+  const value=String(document.getElementById(id)?.value||"").trim();
+  if(!value)return null;
+  const d=new Date(value);
+  return Number.isNaN(d.getTime())?null:d.toISOString();
+}
+
+async function submitPostflightReport(){
+  if(!activeDispatchRelease?.release||!activeDispatchSignature||!activeFuelVerification||!activeFinalLoad)return;
+
+  const outTime=postflightIsoFromInput("postOutTime");
+  const offTime=postflightIsoFromInput("postOffTime");
+  const onTime=postflightIsoFromInput("postOnTime");
+  const inTime=postflightIsoFromInput("postInTime");
+
+  const arrivalFuel=Number(document.getElementById("postArrivalFuel")?.value);
+  const delayMinutes=Number(document.getElementById("postDelayMinutes")?.value);
+  const delayCode=String(document.getElementById("postDelayCode")?.value||"").trim();
+  const delayRemarks=String(document.getElementById("postDelayRemarks")?.value||"").trim();
+  const discrepancy=Boolean(document.getElementById("postAircraftDiscrepancy")?.checked);
+  const discrepancyRemarks=String(document.getElementById("postDiscrepancyRemarks")?.value||"").trim();
+  const button=document.getElementById("completePostflight");
+
+  if(!outTime||!offTime||!onTime||!inTime){alert("OUT, OFF, ON, and IN times are required.");return;}
+
+  const times=[outTime,offTime,onTime,inTime].map(v=>new Date(v).getTime());
+  if(!(times[0]<=times[1]&&times[1]<=times[2]&&times[2]<=times[3])){
+    alert("Times must follow OUT → OFF → ON → IN sequence.");
+    return;
+  }
+
+  if(!Number.isInteger(arrivalFuel)||arrivalFuel<0){alert("Enter arrival fuel in whole pounds.");return;}
+  if(!Number.isInteger(delayMinutes)||delayMinutes<0){alert("Enter valid delay minutes.");return;}
+  if(delayMinutes>0&&!delayRemarks){alert("Delay remarks are required when a delay is recorded.");return;}
+  if(discrepancy&&!discrepancyRemarks){alert("Enter discrepancy remarks before completing the flight.");return;}
+
+  if(button){button.disabled=true;button.textContent="Completing Flight…";}
+
+  try{
+    const name=currentPilot?.display_name||currentUser?.user_metadata?.display_name||currentUser?.email||"Viavia Pilot";
+
+    const result=await viaviaSupabase.rpc("complete_postflight_report",{
+      p_release_id:activeDispatchRelease.release.id,
+      p_out_time:outTime,
+      p_off_time:offTime,
+      p_on_time:onTime,
+      p_in_time:inTime,
+      p_arrival_fuel_lb:arrivalFuel,
+      p_delay_minutes:delayMinutes,
+      p_delay_code:delayCode||null,
+      p_delay_remarks:delayRemarks||null,
+      p_aircraft_discrepancy:discrepancy,
+      p_discrepancy_remarks:discrepancyRemarks||null,
+      p_pic_name:name
+    });
+
+    if(result.error)throw result.error;
+
+    const report=Array.isArray(result.data)?result.data[0]:result.data;
+    if(!report)throw new Error("Viavia Operations did not return the completed postflight report.");
+
+    activePostflightReport=report;
+
+    renderDispatchRelease(
+      activeDispatchRelease.release,
+      activeDispatchSignature,
+      activeDispatchRelease.flight,
+      activeDispatchRelease.legDate,
+      activeDispatchRelease.ofp,
+      activeFuelVerification,
+      activeFinalLoad,
+      report
+    );
+  }catch(error){
+    console.error("Postflight completion failed:",error);
+    alert(error?.message||"Unable to complete the postflight report.");
+    if(button){button.disabled=false;button.textContent="Complete Flight";}
+  }
+}
+
+function renderDispatchRelease(release,signature,flight,legDate,ofp,verification=null,finalLoad=null,postflight=null){
   const body=document.getElementById("dispatchModalBody");
   const subtitle=document.getElementById("dispatchModalSubtitle");
   subtitle.textContent=`${flight.flightNumber} · ${flight.origin} → ${flight.destination} · ${formatDate(legDate)}`;
@@ -2964,7 +3141,8 @@ function renderDispatchRelease(release,signature,flight,legDate,ofp,verification
       ${signed&&verification&&finalLoad
         ? `<div class="dispatch-status ready">DOCUMENTS COMPLETE · READY FOR DEPARTURE</div><p class="signature-help">Dispatch Release, PIC acceptance, Fuel Verification, and Final Load / W&amp;B are complete. VIACARS is authorized to start.</p>`
         : `<div class="dispatch-status pending">DOCUMENTS INCOMPLETE</div><p class="signature-help">Complete all required pre-departure documents before starting VIACARS.</p>`}
-    </div>`;
+    </div>
+    ${renderPostflightSection(release,signature,verification,finalLoad,postflight)}`;
   if(!signed){
     requestAnimationFrame(()=>{
       setupDispatchCanvas();
@@ -2980,6 +3158,11 @@ function renderDispatchRelease(release,signature,flight,legDate,ofp,verification
   if(signed&&verification&&!finalLoad){
     requestAnimationFrame(()=>{
       document.getElementById("acceptFinalLoad")?.addEventListener("click",submitFinalLoad);
+    });
+  }
+  if(signed&&verification&&finalLoad&&!postflight){
+    requestAnimationFrame(()=>{
+      document.getElementById("completePostflight")?.addEventListener("click",submitPostflightReport);
     });
   }
 }
@@ -3050,13 +3233,15 @@ async function openFlightDocuments(index){
     const signature=await ViaviaDispatch.getMySignature(release.id);
     const verification=signature?await getFuelVerification(release.id):null;
     const finalLoad=verification?await getFinalLoadAcceptance(release.id):null;
+    const postflight=finalLoad?await getPostflightReport(release.id):null;
 
     activeDispatchRelease={release,flight,legDate,ofp};
     activeDispatchSignature=signature;
     activeFuelVerification=verification;
     activeFinalLoad=finalLoad;
+    activePostflightReport=postflight;
 
-    renderDispatchRelease(release,signature,flight,legDate,ofp,verification,finalLoad);
+    renderDispatchRelease(release,signature,flight,legDate,ofp,verification,finalLoad,postflight);
 
   }catch(error){
     console.error("Flight documents load failed:",error);
