@@ -1460,7 +1460,236 @@ async function getViaviaFlightGateAssignments(
 }
 
 
+/* ============================================================
+   GATE ASSIGNMENT — CREATE / RETURN FIXED ASSIGNMENT
+   ============================================================ */
 
+function isViaviaRpcMessage(error, code) {
+
+  if (!error) {
+    return false;
+  }
+
+  return [
+    error.message,
+    error.details,
+    error.hint
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .includes(code);
+}
+
+
+async function getOrAssignViaviaGate(
+  flightNumber,
+  operatingDate,
+  airport,
+  scheduledArrival = null,
+  scheduledDeparture = null
+) {
+
+  const flight =
+    normalizeViaviaFlightNumber(
+      flightNumber
+    );
+
+  const date =
+    normalizeViaviaOperatingDate(
+      operatingDate
+    );
+
+  const airportCode =
+    normalizeViaviaAirport(
+      airport
+    );
+
+
+  // If already assigned, keep and return the fixed gate.
+  const existing =
+    await getViaviaGateAssignment(
+      flight,
+      date,
+      airportCode
+    );
+
+  if (existing) {
+    return existing;
+  }
+
+
+  const { data, error } =
+    await viaviaSupabase.rpc(
+      "assign_viavia_gate",
+      {
+        p_flight_number:
+          flight,
+
+        p_operating_date:
+          date,
+
+        p_airport:
+          airportCode,
+
+        p_scheduled_arrival:
+          normalizeViaviaTimestamp(
+            scheduledArrival
+          ),
+
+        p_scheduled_departure:
+          normalizeViaviaTimestamp(
+            scheduledDeparture
+          )
+      }
+    );
+
+
+  if (error) {
+
+    if (
+      isViaviaRpcMessage(
+        error,
+        "VIAVIA_GATE_NOT_RELEASED"
+      )
+    ) {
+
+      const releaseError =
+        new Error(
+          "TBD — Gate assignment pending"
+        );
+
+      releaseError.code =
+        "VIAVIA_GATE_NOT_RELEASED";
+
+      releaseError.cause =
+        error;
+
+      throw releaseError;
+    }
+
+    throw error;
+  }
+
+
+  return data || null;
+}
+/* ============================================================
+   VIAVIA AIRCRAFT ASSIGNMENT SYSTEM
+   ============================================================ */
+
+async function getViaviaAircraftAssignment(
+  flightNumber,
+  operatingDate
+) {
+
+  const flight =
+    normalizeViaviaFlightNumber(
+      flightNumber
+    );
+
+  const date =
+    normalizeViaviaOperatingDate(
+      operatingDate
+    );
+
+
+  const { data, error } =
+    await viaviaSupabase.rpc(
+      "get_viavia_aircraft_assignment",
+      {
+        p_flight_number:
+          flight,
+
+        p_operating_date:
+          date
+      }
+    );
+
+
+  if (error) {
+    throw error;
+  }
+
+
+  if (Array.isArray(data)) {
+    return data[0] || null;
+  }
+
+
+  return data || null;
+}
+
+
+async function getOrAssignViaviaAircraft(
+  flightNumber,
+  operatingDate
+) {
+
+  const flight =
+    normalizeViaviaFlightNumber(
+      flightNumber
+    );
+
+  const date =
+    normalizeViaviaOperatingDate(
+      operatingDate
+    );
+
+
+  // If already assigned, keep and return the fixed aircraft.
+  const existing =
+    await getViaviaAircraftAssignment(
+      flight,
+      date
+    );
+
+  if (existing) {
+    return existing;
+  }
+
+
+  const { data, error } =
+    await viaviaSupabase.rpc(
+      "assign_viavia_aircraft",
+      {
+        p_flight_number:
+          flight,
+
+        p_operating_date:
+          date
+      }
+    );
+
+
+  if (error) {
+
+    if (
+      isViaviaRpcMessage(
+        error,
+        "VIAVIA_AIRCRAFT_NOT_RELEASED"
+      )
+    ) {
+
+      const releaseError =
+        new Error(
+          "Aircraft registration pending"
+        );
+
+      releaseError.code =
+        "VIAVIA_AIRCRAFT_NOT_RELEASED";
+
+      releaseError.cause =
+        error;
+
+      throw releaseError;
+    }
+
+    throw error;
+  }
+
+
+  return data || null;
+}
 /* ============================================================
    VIACARS — FLIGHTS, EVENTS, MESSAGES
    ============================================================ */
@@ -1575,7 +1804,14 @@ window.ViaviaGates = {
   getAllGatePools: getAllViaviaGatePools,
   getGateAssignment: getViaviaGateAssignment,
   getAirportGateAssignments: getViaviaAirportGateAssignments,
-  getFlightGateAssignments: getViaviaFlightGateAssignments
+  getFlightGateAssignments: getViaviaFlightGateAssignments,
+  getOrAssign: getOrAssignViaviaGate
+};
+
+
+window.ViaviaAircraft = {
+  getAssignment: getViaviaAircraftAssignment,
+  getOrAssign: getOrAssignViaviaAircraft
 };
 
 
