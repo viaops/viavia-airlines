@@ -2958,7 +2958,13 @@ function renderDispatchRelease(release,signature,flight,legDate,ofp,verification
     </div>
     <div class="dispatch-section"><h3>PIC Acceptance</h3>${signed?`<div class="signed-box"><strong>Accepted and electronically signed by ${escapeHtml(signature.pic_name)}</strong><div>Signed ${escapeHtml(dispatchTimestamp(signature.signed_at))} · Release ${escapeHtml(signature.release_number)}</div>${signature.signature_data?`<img class="signed-image" src="${escapeHtml(signature.signature_data)}" alt="PIC signature">`:""}</div>`:`<p class="signature-help">Review the release above, then sign in the box using a mouse, touchscreen, or Apple Pencil.</p><div class="signature-pad-wrap"><canvas id="picSignatureCanvas" class="signature-pad"></canvas></div><div class="signature-actions" style="margin-top:10px"><button id="clearPicSignature" type="button" class="btn btn-secondary">Clear</button><button id="acceptPicRelease" type="button" class="btn btn-primary">PIC Accept & Sign</button></div>`}</div>
     ${renderFuelVerificationSection(release,signature,verification)}
-    ${renderFinalLoadSection(release,signature,verification,finalLoad)}`;
+    ${renderFinalLoadSection(release,signature,verification,finalLoad)}
+    <div class="dispatch-section">
+      <h3>Departure Status</h3>
+      ${signed&&verification&&finalLoad
+        ? `<div class="dispatch-status ready">DOCUMENTS COMPLETE · READY FOR DEPARTURE</div><p class="signature-help">Dispatch Release, PIC acceptance, Fuel Verification, and Final Load / W&amp;B are complete. VIACARS is authorized to start.</p>`
+        : `<div class="dispatch-status pending">DOCUMENTS INCOMPLETE</div><p class="signature-help">Complete all required pre-departure documents before starting VIACARS.</p>`}
+    </div>`;
   if(!signed){
     requestAnimationFrame(()=>{
       setupDispatchCanvas();
@@ -3092,6 +3098,41 @@ document.addEventListener("click",async event=>{
 });
 
 
+async function getPredepartureDocumentStatus(flight,legDate){
+  const status={release:null,signature:null,fuelVerification:null,finalLoad:null,ready:false,missing:[]};
+
+  if(!window.ViaviaDispatch){
+    status.missing.push("Dispatch system");
+    return status;
+  }
+
+  const release=await ViaviaDispatch.getRelease(flight.flightNumber,legDate);
+  status.release=release;
+  if(!release){
+    status.missing.push("Dispatch Release");
+    return status;
+  }
+
+  const signature=await ViaviaDispatch.getMySignature(release.id);
+  status.signature=signature;
+  if(!signature)status.missing.push("PIC Dispatch Acceptance");
+
+  if(signature){
+    const fuel=await getFuelVerification(release.id);
+    status.fuelVerification=fuel;
+    if(!fuel)status.missing.push("Fuel Verification");
+
+    if(fuel){
+      const finalLoad=await getFinalLoadAcceptance(release.id);
+      status.finalLoad=finalLoad;
+      if(!finalLoad)status.missing.push("Final Load / W&B");
+    }
+  }
+
+  status.ready=status.missing.length===0;
+  return status;
+}
+
 async function launchViacars(index){
   const ctx=currentFlightPlanningContext;
   if(!ctx) throw new Error("Flight Planning data is not ready.");
@@ -3100,6 +3141,15 @@ async function launchViacars(index){
   const flight=ctx.flights[index];
   const legDate=ctx.legDates[index];
   if(!flight||!legDate) throw new Error("This flight leg could not be found.");
+
+  const documentStatus=await getPredepartureDocumentStatus(flight,legDate);
+  if(!documentStatus.ready){
+    throw new Error(
+      "Pre-departure documents are incomplete: " +
+      documentStatus.missing.join(", ") +
+      ". Open Flight Documents and complete the required items before starting VIACARS."
+    );
+  }
 
   const ac=formatAircraftAssignment(flight,legDate);
   const departureGate=ctx.gates[index]?.gate || null;
