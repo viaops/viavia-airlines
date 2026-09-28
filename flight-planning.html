@@ -2188,8 +2188,37 @@ function validateSimbriefOfp(ofp,flight,legDate){
   const actualFlight=getSimbriefFlightNumber(ofp);
   const expectedOrigin=simbriefUpper(flight?.origin);
   const expectedDestination=simbriefUpper(flight?.destination);
-  const actualOrigin=simbriefUpper(ofp?.origin?.icao_code);
-  const actualDestination=simbriefUpper(ofp?.destination?.icao_code);
+
+  // Viavia schedules use IATA codes (RSW, MDE, CTG, etc.).
+  // SimBrief may return either IATA or ICAO airport identifiers.
+  const VIAVIA_ICAO_TO_IATA={
+    KRSW:"RSW", KATL:"ATL", KBWI:"BWI", KCLT:"CLT", KCMH:"CMH",
+    KDFW:"DFW", KEYW:"EYW", KFLL:"FLL", KMIA:"MIA", KJAX:"JAX",
+    KJFK:"JFK", KLAS:"LAS", KLAX:"LAX", KLGA:"LGA", KMCO:"MCO",
+    KMKE:"MKE", KSEA:"SEA", KSMF:"SMF", KSJU:"SJU", KSNA:"SNA",
+    KTUS:"TUS", KVPS:"VPS", KLIT:"LIT", KMFR:"MFR", KSBA:"SBA",
+    SKCG:"CTG", SKRG:"MDE", TNCM:"SXM", MPTO:"PTY", MDPC:"PUJ",
+    MDSD:"SDQ", MHPR:"XPL"
+  };
+
+  function simbriefAirportIata(airport){
+    const direct=simbriefUpper(
+      airport?.iata_code ||
+      airport?.iata ||
+      airport?.iataCode
+    );
+    if(direct)return direct;
+
+    const icao=simbriefUpper(
+      airport?.icao_code ||
+      airport?.icao ||
+      airport?.icaoCode
+    );
+    return VIAVIA_ICAO_TO_IATA[icao] || icao;
+  }
+
+  const actualOrigin=simbriefAirportIata(ofp?.origin);
+  const actualDestination=simbriefAirportIata(ofp?.destination);
 
   const problems=[];
 
