@@ -524,6 +524,267 @@ footer{
 
 
 /* ============================================================
+   SIMBRIEF OFP IMPORT
+   ============================================================ */
+
+function simbriefText(value){
+  if(value===null||value===undefined)return "";
+  return String(value).trim();
+}
+
+function simbriefUpper(value){
+  return simbriefText(value).toUpperCase();
+}
+
+function simbriefNumber(value){
+  const n=Number(value);
+  return Number.isFinite(n)?n:null;
+}
+
+function simbriefUnixTimestamp(value){
+  const n=Number(value);
+  if(!Number.isFinite(n)||n<=0)return null;
+  const milliseconds=n<1000000000000?n*1000:n;
+  const d=new Date(milliseconds);
+  return Number.isNaN(d.getTime())?null:d.toISOString();
+}
+
+function simbriefDateFromTimestamp(value){
+  const iso=simbriefUnixTimestamp(value);
+  return iso?iso.slice(0,10):null;
+}
+
+function simbriefFuelLb(value,units){
+  const n=simbriefNumber(value);
+  if(n===null)return null;
+  const u=simbriefUpper(units);
+  return Math.round(u==="KGS"||u==="KG"?n*2.2046226218:n);
+}
+
+function viaviaAircraftFamily(value){
+  const x=simbriefUpper(value).replace(/[^A-Z0-9]/g,"");
+  if(x.includes("319"))return "A319";
+  if(x.includes("320"))return "A320";
+  if(x.includes("321"))return "A321";
+  return x;
+}
+
+function getSimbriefFlightNumber(ofp){
+  const airline=simbriefUpper(ofp?.general?.icao_airline||ofp?.general?.airline_code);
+  const number=simbriefText(ofp?.general?.flight_number);
+  const combined=simbriefUpper(`${airline}${number}`).replace(/\s+/g,"");
+  if(/^VIA\d+$/.test(combined))return combined;
+
+  const raw=simbriefUpper(
+    ofp?.general?.icao_airline?
+      `${ofp.general.icao_airline}${ofp?.general?.flight_number||""}`:
+      ofp?.general?.flight_number
+  ).replace(/\s+/g,"");
+
+  if(/^VIA\d+$/.test(raw))return raw;
+  if(/^\d+$/.test(raw))return `VIA${raw}`;
+  return raw;
+}
+
+function validateSimbriefOfp(ofp,flight,legDate){
+  const expectedFlight=simbriefUpper(flight?.flightNumber).replace(/\s+/g,"");
+  const actualFlight=getSimbriefFlightNumber(ofp);
+  const expectedOrigin=simbriefUpper(flight?.origin);
+  const expectedDestination=simbriefUpper(flight?.destination);
+  const actualOrigin=simbriefUpper(ofp?.origin?.icao_code);
+  const actualDestination=simbriefUpper(ofp?.destination?.icao_code);
+
+  const problems=[];
+
+  if(actualFlight!==expectedFlight){
+    problems.push(`flight number ${actualFlight||"missing"} does not match ${expectedFlight}`);
+  }
+  if(actualOrigin!==expectedOrigin){
+    problems.push(`origin ${actualOrigin||"missing"} does not match ${expectedOrigin}`);
+  }
+  if(actualDestination!==expectedDestination){
+    problems.push(`destination ${actualDestination||"missing"} does not match ${expectedDestination}`);
+  }
+
+  const planDate=
+    simbriefDateFromTimestamp(ofp?.times?.sched_out) ||
+    simbriefDateFromTimestamp(ofp?.times?.est_out) ||
+    simbriefDateFromTimestamp(ofp?.params?.time_generated);
+
+  if(planDate&&planDate!==legDate){
+    problems.push(`operating date ${planDate} does not match ${legDate}`);
+  }
+
+  const expectedFamily=viaviaAircraftFamily(flight?.aircraft);
+  const actualFamily=viaviaAircraftFamily(
+    ofp?.aircraft?.icaocode ||
+    ofp?.aircraft?.icao_code ||
+    ofp?.aircraft?.name
+  );
+
+  if(expectedFamily&&actualFamily&&expectedFamily!==actualFamily){
+    problems.push(`aircraft ${actualFamily} does not match ${expectedFamily}`);
+  }
+
+  if(problems.length){
+    throw new Error(
+      "SimBrief OFP rejected: " +
+      problems.join("; ") +
+      ". Generate the correct OFP in SimBrief, then import again."
+    );
+  }
+}
+
+function buildSimbriefSnapshot(ofp,flight,legDate,index){
+  const ctx=currentFlightPlanningContext;
+  const units=
+    ofp?.params?.units ||
+    ofp?.params?.units_weight ||
+    ofp?.general?.units ||
+    "LBS";
+
+  const ac=formatAircraftAssignment(flight,legDate);
+  const alternate=
+    simbriefUpper(
+      ofp?.alternate?.icao_code ||
+      ofp?.alternate?.icao ||
+      ofp?.alternate?.airport
+    ) || null;
+
+  const route=
+    simbriefText(
+      ofp?.general?.route ||
+      ofp?.general?.route_ifps ||
+      ofp?.general?.route_navigraph
+    ) || null;
+
+  const requestId=
+    simbriefText(
+      ofp?.params?.request_id ||
+      ofp?.general?.request_id
+    ) || null;
+
+  const generatedAt=
+    simbriefUnixTimestamp(
+      ofp?.params?.time_generated ||
+      ofp?.times?.generated
+    );
+
+  return {
+    pilot_id:currentUser.id,
+    trip_id:ctx.assignment.trip_id,
+    flight_number:simbriefUpper(flight.flightNumber),
+    operating_date:legDate,
+    origin:simbriefUpper(flight.origin),
+    destination:simbriefUpper(flight.destination),
+    aircraft_type:ac.variant||ac.family||flight.aircraft||null,
+    aircraft_registration:ac.registration||null,
+    simbrief_pilot_id:simbriefText(currentPilot?.simbrief_pilot_id),
+    simbrief_request_id:requestId,
+    simbrief_generated_at:generatedAt,
+    route,
+    alternate_airport:alternate,
+    cruise_altitude_ft:simbriefNumber(
+      ofp?.general?.initial_altitude ||
+      ofp?.general?.cruise_altitude ||
+      ofp?.general?.avg_altitude
+    ),
+    scheduled_departure:simbriefUnixTimestamp(
+      ofp?.times?.sched_out ||
+      ofp?.times?.est_out
+    ),
+    scheduled_arrival:simbriefUnixTimestamp(
+      ofp?.times?.sched_in ||
+      ofp?.times?.est_in
+    ),
+    taxi_fuel_lb:simbriefFuelLb(ofp?.fuel?.taxi,units),
+    trip_fuel_lb:simbriefFuelLb(ofp?.fuel?.enroute_burn||ofp?.fuel?.trip,units),
+    contingency_fuel_lb:simbriefFuelLb(ofp?.fuel?.contingency,units),
+    alternate_fuel_lb:simbriefFuelLb(ofp?.fuel?.alternate_burn||ofp?.fuel?.alternate,units),
+    reserve_fuel_lb:simbriefFuelLb(ofp?.fuel?.reserve,units),
+    extra_fuel_lb:simbriefFuelLb(ofp?.fuel?.extra,units),
+    block_fuel_lb:simbriefFuelLb(ofp?.fuel?.plan_ramp||ofp?.fuel?.block,units),
+    raw_ofp:ofp
+  };
+}
+
+async function saveSimbriefSnapshot(row){
+  const result=await viaviaSupabase
+    .from("flight_ofps")
+    .insert(row)
+    .select()
+    .single();
+
+  if(result.error)throw result.error;
+  return result.data;
+}
+
+async function importSimbriefOfp(index){
+  const ctx=currentFlightPlanningContext;
+  if(!ctx)throw new Error("Flight Planning data is not ready.");
+
+  const flight=ctx.flights[index];
+  const legDate=ctx.legDates[index];
+  if(!flight||!legDate)throw new Error("This flight leg could not be found.");
+
+  const pilotId=simbriefText(currentPilot?.simbrief_pilot_id);
+  if(!pilotId){
+    throw new Error("No SimBrief Pilot ID is saved on your Viavia pilot profile.");
+  }
+  if(!/^\d{1,7}$/.test(pilotId)){
+    throw new Error("Your saved SimBrief Pilot ID is invalid.");
+  }
+
+  const url=
+    `https://www.simbrief.com/api/xml.fetcher.php?userid=${encodeURIComponent(pilotId)}&json=v2`;
+
+  const response=await fetch(url,{method:"GET",cache:"no-store"});
+  if(!response.ok){
+    throw new Error(`SimBrief returned HTTP ${response.status}. Generate an OFP in SimBrief and try again.`);
+  }
+
+  const ofp=await response.json();
+  if(!ofp||typeof ofp!=="object"){
+    throw new Error("SimBrief did not return a valid OFP.");
+  }
+
+  validateSimbriefOfp(ofp,flight,legDate);
+
+  const row=buildSimbriefSnapshot(ofp,flight,legDate,index);
+  const saved=await saveSimbriefSnapshot(row);
+
+  alert(
+    `SimBrief OFP imported successfully.\n\n` +
+    `${flight.flightNumber} · ${flight.origin} → ${flight.destination}\n` +
+    `${formatDate(legDate)}\n` +
+    `Snapshot ID: ${saved.id}`
+  );
+
+  return saved;
+}
+
+document.addEventListener("click",async event=>{
+  const button=event.target.closest(".simbrief-import-btn");
+  if(!button)return;
+
+  const original=button.textContent;
+  button.disabled=true;
+  button.textContent="Importing SimBrief…";
+
+  try{
+    await importSimbriefOfp(Number(button.dataset.legIndex));
+    button.textContent="SimBrief OFP Imported";
+  }catch(error){
+    console.error("SimBrief OFP import failed:",error);
+    alert(error?.message||"Unable to import the SimBrief OFP.");
+    button.textContent=original;
+  }finally{
+    button.disabled=false;
+  }
+});
+
+
+/* ============================================================
    FLIGHT DOCUMENTS / DISPATCH RELEASE
    ============================================================ */
 .flight-docs-btn{margin-top:8px;margin-left:6px}
@@ -2094,7 +2355,7 @@ async function renderAssignment(assignment) {
     const legs=group.items.map(({flight,index,date})=>{
       const arrival=`${flight.arrival||"—"}${flight.nextDay?"+1":""}`;
       const ac=formatAircraftAssignment(flight,date);
-      return `<div class="leg"><div class="leg-number">Leg ${index+1}</div><div><div class="leg-date">DAY ${group.day} · ${escapeHtml(formatDate(date))}</div><div class="leg-route">${escapeHtml(flight.flightNumber)} &nbsp; ${escapeHtml(flight.origin)} → ${escapeHtml(flight.destination)}</div><div class="leg-time">${escapeHtml(flight.departure||"—")} – ${escapeHtml(arrival)}</div>${renderSmallGate(gates[index])}<button type="button" class="btn btn-primary viacars-start-btn" data-leg-index="${index}" style="margin-top:10px">Start VIACARS</button><button type="button" class="btn btn-secondary flight-docs-btn" data-leg-index="${index}">Flight Documents</button></div><div class="leg-aircraft">${escapeHtml(ac.label)}<br>${escapeHtml(formatDate(date))}</div></div>`;
+      return `<div class="leg"><div class="leg-number">Leg ${index+1}</div><div><div class="leg-date">DAY ${group.day} · ${escapeHtml(formatDate(date))}</div><div class="leg-route">${escapeHtml(flight.flightNumber)} &nbsp; ${escapeHtml(flight.origin)} → ${escapeHtml(flight.destination)}</div><div class="leg-time">${escapeHtml(flight.departure||"—")} – ${escapeHtml(arrival)}</div>${renderSmallGate(gates[index])}<button type="button" class="btn btn-primary viacars-start-btn" data-leg-index="${index}" style="margin-top:10px">Start VIACARS</button><button type="button" class="btn btn-secondary simbrief-import-btn" data-leg-index="${index}" style="margin-top:8px;margin-left:6px">Import SimBrief OFP</button><button type="button" class="btn btn-secondary flight-docs-btn" data-leg-index="${index}">Flight Documents</button></div><div class="leg-aircraft">${escapeHtml(ac.label)}<br>${escapeHtml(formatDate(date))}</div></div>`;
     }).join("");
     return `<section class="duty-day"><div class="duty-day-header"><span>DAY ${group.day} — ${escapeHtml(formatDate(group.items[0]?.date).toUpperCase())}</span><span>${escapeHtml(group.startAirport)} → ${escapeHtml(group.endAirport)}</span></div><div class="duty-day-meta"><span><strong>Show:</strong> ${escapeHtml(dutyShow(group))} · ${escapeHtml(group.startAirport)}</span><span><strong>Release:</strong> ${escapeHtml(dutyRelease(group))} · ${escapeHtml(group.endAirport)}</span><span><strong>Legs:</strong> ${group.items.length}</span></div><div style="padding:0 15px">${legs}</div><div class="duty-overnight">${final?`<strong>Trip Complete:</strong> ${escapeHtml(group.endAirport)}`:`<strong>Overnight:</strong> ${escapeHtml(group.endAirport)} · Crew hotel details are available in My Trips.`}</div></section>`;
   }).join("");
