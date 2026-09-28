@@ -1738,8 +1738,49 @@ function renderTrip(assignment) {
         ? [...new Set(trip.aircraft)].join(" / ")
         : flights.length ? [...new Set(flights.map(getAircraft).filter(Boolean))].join(" / ") : "—";
     const status = String(assignment.status || "awarded").toLowerCase();
-    const statusText = status === "completed" ? "Completed" : "Awarded";
-    const statusClass = status === "completed" ? "status completed" : "status";
+
+    const completionByFlight = new Map();
+
+    flights.forEach((flight, index) => {
+        const flightNumber = getFlightNumber(flight);
+        const legOperatingDate =
+            getFlightOperatingDate(
+                assignment,
+                trip,
+                flight,
+                index
+            );
+
+        completionByFlight.set(
+            flight,
+            isFlightCompleted(
+                flightNumber,
+                legOperatingDate
+            )
+        );
+    });
+
+    const completedLegCount =
+        [...completionByFlight.values()]
+            .filter(Boolean)
+            .length;
+
+    const tripIsCompleted =
+        flights.length > 0 &&
+        completedLegCount === flights.length;
+
+    const statusText =
+        tripIsCompleted
+            ? "Completed"
+            : completedLegCount > 0
+                ? `${completedLegCount}/${flights.length} Legs Completed`
+                : "Awarded";
+
+    const statusClass =
+        tripIsCompleted
+            ? "status completed"
+            : "status";
+
     const duties = getDutyDaysForTrip(trip);
     const tripDays = getTripDays(trip);
     const block = getPairingBlockMinutes(trip);
@@ -1763,7 +1804,8 @@ function renderTrip(assignment) {
             const legRows = duty.flights.map((flight,index) => {
                 const flightNumber=getFlightNumber(flight);
                 const gate=getGateDisplay(flight,actualDate);
-                return `<div class="flight-leg"><div class="flight-main"><div><div class="flight-number">${escapeHTML(flightNumber)}</div><div class="aircraft">${escapeHTML(getAircraft(flight))}</div></div><div><div class="route">${escapeHTML(getOrigin(flight))} → ${escapeHTML(getDestination(flight))}</div><div class="times">${escapeHTML(getDeparture(flight))} — ${escapeHTML(getArrival(flight))}${flight.nextDay?" +1":""}</div></div><div class="flight-actions"><a class="small-button" href="flight-planning.html?flight=${encodeURIComponent(flightNumber)}&date=${encodeURIComponent(actualDate)}&trip=${encodeURIComponent(assignment.trip_id)}&tripdate=${encodeURIComponent(assignment.operating_date)}">Flight Planning</a>${index===0&&duty.day===1&&assignment.trip_id==="TRIP-001"?`<a class="small-button" href="trip-001.html">Trip Details</a>`:""}</div></div><div class="gate-row"><div class="gate-label">Departure Gate</div><div class="${gate.assigned?"gate-assigned":"gate-pending"}">${escapeHTML(gate.text)}</div></div></div>`;
+                const legCompleted=isFlightCompleted(flightNumber,actualDate);
+                return `<div class="flight-leg${legCompleted?" completed-flight-row":""}"><div class="flight-main"><div><div class="flight-number">${escapeHTML(flightNumber)}${legCompleted?` <span class="completed-flight-badge">COMPLETED</span>`:""}</div><div class="aircraft">${escapeHTML(getAircraft(flight))}</div></div><div><div class="route">${escapeHTML(getOrigin(flight))} → ${escapeHTML(getDestination(flight))}</div><div class="times">${escapeHTML(getDeparture(flight))} — ${escapeHTML(getArrival(flight))}${flight.nextDay?" +1":""}</div></div><div class="flight-actions"><a class="small-button" href="flight-planning.html?flight=${encodeURIComponent(flightNumber)}&date=${encodeURIComponent(actualDate)}&trip=${encodeURIComponent(assignment.trip_id)}&tripdate=${encodeURIComponent(assignment.operating_date)}">Flight Planning</a>${index===0&&duty.day===1&&assignment.trip_id==="TRIP-001"?`<a class="small-button" href="trip-001.html">Trip Details</a>`:""}</div></div><div class="gate-row"><div class="gate-label">Departure Gate</div><div class="${gate.assigned?"gate-assigned":"gate-pending"}">${escapeHTML(gate.text)}</div></div></div>`;
             }).join("");
             return `<section class="trip-day"><div class="trip-day-header"><span>DAY ${duty.day} — ${escapeHTML(formatShortOperatingDate(actualDate).toUpperCase())}</span><span>${escapeHTML(duty.startAirport)} → ${escapeHTML(duty.endAirport)}</span></div><div class="trip-day-meta"><span><strong>Show:</strong> ${escapeHTML(getDutyShowTime(duty))} · ${escapeHTML(duty.startAirport)}</span><span><strong>Release:</strong> ${escapeHTML(getDutyReleaseTime(duty))} · ${escapeHTML(duty.endAirport)}</span><span><strong>Duty:</strong> ${formatDuration(getDutyMinutes(duty))}</span><span><strong>Legs:</strong> ${duty.flights.length}</span></div>${legRows}${!finalDay?`<div class="overnight"><strong>Overnight:</strong> ${escapeHTML(duty.endAirport)}<br><strong>Crew Hotel:</strong> ${escapeHTML(hotel)}${rest!==null?`<br><strong>Scheduled Rest:</strong> ${formatDuration(rest)}`:""}</div>`:`<div class="overnight"><strong>Trip Complete:</strong> ${escapeHTML(duty.endAirport)} · Release ${escapeHTML(getDutyReleaseTime(duty))}</div>`}</section>`;
         }).join("");
@@ -1778,7 +1820,7 @@ function renderTrip(assignment) {
     <div class="meta-box"><div class="meta-label">Aircraft</div><div class="meta-value">${escapeHTML(aircraft)}</div></div>
     <div class="meta-box"><div class="meta-label">Base</div><div class="meta-value">${escapeHTML(trip.base)}</div></div>
     <div class="meta-box"><div class="meta-label">Gate Status</div><div class="meta-value">${flights.some((flight,index)=>{const d=getFlightOperatingDate(assignment,trip,flight,index);return getGateDisplay(flight,d).assigned;})?"Assigned / In Progress":"Pending"}</div></div>
-    </div><h3 class="section-title">Pairing Schedule</h3>${daysHTML}</div><div class="trip-footer"><div class="award-info">Automatically awarded${assignment.awarded_at?` · ${escapeHTML(formatAwardTime(assignment.awarded_at))}`:""}</div><div class="footer-links">${status!=="completed"?`<button type="button" class="drop-trip-button" data-drop-trip="true" data-trip-id="${escapeHTML(assignment.trip_id)}" data-operating-date="${escapeHTML(assignment.operating_date)}">Drop Trip</button>`:""}<a class="small-button" href="crew-calendar.html">Crew Calendar</a><a class="small-button" href="flight-planning.html?trip=${encodeURIComponent(assignment.trip_id)}&date=${encodeURIComponent(assignment.operating_date)}">Trip Flight Planning</a></div></div></article>`;
+    </div><h3 class="section-title">Pairing Schedule</h3>${daysHTML}</div><div class="trip-footer"><div class="award-info">Automatically awarded${assignment.awarded_at?` · ${escapeHTML(formatAwardTime(assignment.awarded_at))}`:""}</div><div class="footer-links">${!tripIsCompleted?`<button type="button" class="drop-trip-button" data-drop-trip="true" data-trip-id="${escapeHTML(assignment.trip_id)}" data-operating-date="${escapeHTML(assignment.operating_date)}">Drop Trip</button>`:""}<a class="small-button" href="crew-calendar.html">Crew Calendar</a><a class="small-button" href="flight-planning.html?trip=${encodeURIComponent(assignment.trip_id)}&date=${encodeURIComponent(assignment.operating_date)}">Trip Flight Planning</a></div></div></article>`;
 }
 
 
@@ -2475,7 +2517,7 @@ function isFlightCompleted(flightNumber, operatingDate) {
 async function loadCompletedFlights() {
     completedFlightKeys = new Set();
 
-    if (!currentUser?.id || typeof viaviaSupabase === "undefined") {
+    if (!currentUser?.id) {
         return;
     }
 
@@ -2496,6 +2538,11 @@ async function loadCompletedFlights() {
             )
         );
     });
+
+    console.log(
+        "Viavia My Trips: completed postflight legs loaded:",
+        [...completedFlightKeys]
+    );
 }
 
 /* ============================================================
@@ -2564,6 +2611,8 @@ async function initializeMyTrips() {
         masterPairings = [];
 
 
+        await loadCompletedFlights();
+
         await loadMyTrips();
 
 
@@ -2624,6 +2673,8 @@ window.addEventListener(
         ) {
 
             try {
+
+                await loadCompletedFlights();
 
                 await loadMyTrips();
 
