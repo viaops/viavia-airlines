@@ -1674,7 +1674,7 @@ function getViaviaGateStatus(
  * - 1-day turns are permitted.
  * - 2-day and 3-day trips are the normal pairing structure.
  * - 4-day trips are permitted but intentionally less common.
- * - A duty may contain multiple flight legs.
+ * - A normal duty contains no more than 2 flight legs.
  * - A pairing may pass through its home base without ending.
  * - Overnight stations are permitted.
  * - Only actual flights from VIAVIA_SCHEDULE may be used.
@@ -1709,11 +1709,11 @@ const VIAVIA_MIN_CONNECTION_MINUTES = 50;
  * Maximum same-day sit we will normally consider part
  * of the same duty period.
  *
- * Anything longer is better represented as an overnight
- * / new duty day rather than an extremely long airport sit.
+ * Anything longer ends the duty day. The crew overnights
+ * at that station and resumes on the next pairing day.
  */
 const VIAVIA_MAX_SAME_DAY_CONNECTION_MINUTES =
-    6 * 60;
+    2 * 60;
 
 
 /**
@@ -1737,11 +1737,21 @@ const VIAVIA_MAX_PAIRING_DAYS = 4;
 /**
  * Normal maximum legs per duty day.
  *
- * The current schedule works best with 1–3 legs per
- * duty period. This prevents the generator from creating
- * unrealistic airport-hopping marathon days.
+ * Normal Viavia duty periods use no more than 2 legs.
+ * A single long leg may form the entire duty day.
  */
-const VIAVIA_MAX_LEGS_PER_DAY = 3;
+const VIAVIA_MAX_LEGS_PER_DAY = 2;
+
+
+/**
+ * Maximum elapsed duty span from the first scheduled
+ * departure to the final scheduled arrival on one pairing day.
+ *
+ * This is intentionally capped at 12 hours. The two-hour
+ * connection limit normally keeps duties comfortably shorter.
+ */
+const VIAVIA_MAX_DUTY_MINUTES =
+    12 * 60;
 
 
 /**
@@ -2667,6 +2677,77 @@ function getViaviaLastFlightForDay(
  * Return true if a candidate may follow the previous flight
  * during the SAME duty day.
  */
+function getViaviaDutySpanWithCandidate(
+    currentFlights,
+    candidate,
+    day
+) {
+
+    const dayFlights =
+        currentFlights.filter(
+            flight =>
+                Number(
+                    flight.pairingDay
+                ) ===
+                Number(
+                    day
+                )
+        );
+
+
+    const firstFlight =
+        dayFlights[0] ||
+        candidate;
+
+
+    const dutyStart =
+        getViaviaTimeMinutes(
+            firstFlight.departure
+        );
+
+    let dutyEnd =
+        getViaviaArrivalMinutes(
+            candidate
+        );
+
+
+    if (
+        dutyStart === null ||
+        dutyEnd === null
+    ) {
+
+        return null;
+
+    }
+
+
+    /*
+     * If the candidate arrives after midnight,
+     * getViaviaArrivalMinutes already returns a value
+     * greater than 1440.
+     */
+    if (
+        dutyEnd < dutyStart
+    ) {
+
+        dutyEnd +=
+            24 * 60;
+
+    }
+
+
+    return (
+        dutyEnd -
+        dutyStart
+    );
+
+}
+
+
+/**
+ * Return true if a candidate may follow the previous flight
+ * during the SAME duty day.
+ */
 function canViaviaAddSameDayFlight(
     currentFlights,
     candidate,
@@ -2716,6 +2797,25 @@ function canViaviaAddSameDayFlight(
     if (
         previous.destination !==
         candidate.origin
+    ) {
+
+        return false;
+
+    }
+
+
+    const dutySpan =
+        getViaviaDutySpanWithCandidate(
+            currentFlights,
+            candidate,
+            day
+        );
+
+
+    if (
+        dutySpan === null ||
+        dutySpan >
+            VIAVIA_MAX_DUTY_MINUTES
     ) {
 
         return false;
@@ -3020,13 +3120,13 @@ function getViaviaMinimumLegsForDays(
             return 2;
 
         case 2:
-            return 3;
+            return 2;
 
         case 3:
-            return 5;
+            return 3;
 
         case 4:
-            return 6;
+            return 4;
 
         default:
             return 2;
@@ -3155,8 +3255,8 @@ function getViaviaPairingSignature(
  * The search is intentionally bounded:
  *
  * - maximum 4 duty days
- * - maximum 3 legs per duty day
- * - maximum 9 total legs
+ * - maximum 2 legs per duty day
+ * - maximum 8 total legs
  *
  * Candidates are deterministically ordered, so the same
  * schedule always produces the same pairings.
@@ -3437,7 +3537,7 @@ function buildViaviaMultiDayPairing(
                     seed,
 
                 maximumTripLegs:
-                    9
+                    8
             }
         )
     );
