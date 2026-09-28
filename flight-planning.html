@@ -521,6 +521,24 @@ footer{
 .duty-day-meta strong,.duty-overnight strong{color:var(--purple-dark)}
 .duty-overnight{margin:12px 15px 15px;padding:11px 13px;border-radius:9px;background:#faf7fc;border:1px solid var(--border);font-size:13px;color:var(--muted)}
 .leg-date{font-size:11px;font-weight:800;color:var(--purple-dark);margin-bottom:3px}
+
+
+/* ============================================================
+   FLIGHT DOCUMENTS / DISPATCH RELEASE
+   ============================================================ */
+.flight-docs-btn{margin-top:8px;margin-left:6px}
+.dispatch-modal{position:fixed;inset:0;background:rgba(26,14,35,.62);display:none;align-items:flex-start;justify-content:center;padding:28px 14px;overflow:auto;z-index:9999}
+.dispatch-modal.open{display:flex}
+.dispatch-sheet{width:min(820px,100%);background:#fff;border-radius:16px;box-shadow:0 24px 70px rgba(0,0,0,.28);overflow:hidden}
+.dispatch-sheet-header{padding:18px 20px;background:var(--purple-dark);color:#fff;display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.dispatch-sheet-header h2{margin:0;font-size:21px}.dispatch-sheet-header p{margin:4px 0 0;opacity:.82;font-size:13px}
+.dispatch-close{border:0;background:rgba(255,255,255,.14);color:#fff;border-radius:8px;padding:8px 11px;font:inherit;font-weight:800;cursor:pointer}
+.dispatch-body{padding:20px}.dispatch-status{padding:12px 14px;border-radius:10px;margin-bottom:16px;font-size:13px;font-weight:700}.dispatch-status.ready{background:var(--green-bg);color:var(--green)}.dispatch-status.pending{background:var(--yellow-bg);color:var(--yellow)}
+.dispatch-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:18px}.dispatch-cell{border:1px solid var(--border);border-radius:10px;padding:11px;background:#faf8fc}.dispatch-cell span{display:block;font-size:10px;font-weight:900;text-transform:uppercase;color:var(--muted);margin-bottom:4px}.dispatch-cell strong{font-size:14px;color:var(--purple-dark)}
+.dispatch-section{border-top:1px solid var(--border);padding-top:16px;margin-top:16px}.dispatch-section h3{margin:0 0 10px;color:var(--purple-dark);font-size:16px}.fuel-table{width:100%;border-collapse:collapse}.fuel-table td{padding:7px 4px;border-bottom:1px solid #eee8f2}.fuel-table td:last-child{text-align:right;font-weight:800}.fuel-total td{font-size:16px;color:var(--purple);border-bottom:0;padding-top:11px}
+.signature-pad-wrap{border:1px solid #d9cfe2;border-radius:10px;background:#fff;overflow:hidden}.signature-pad{display:block;width:100%;height:180px;touch-action:none;cursor:crosshair}.signature-help{font-size:12px;color:var(--muted);margin:7px 0 10px}.signature-actions{display:flex;gap:8px;flex-wrap:wrap}.signed-box{background:var(--green-bg);border:1px solid #c8e7d4;border-radius:10px;padding:14px;color:var(--green)}.signed-image{max-width:280px;max-height:90px;display:block;margin-top:10px;background:#fff;border-radius:6px}
+@media(max-width:650px){.dispatch-grid{grid-template-columns:1fr 1fr}.dispatch-body{padding:14px}.dispatch-modal{padding:10px}.flight-docs-btn{margin-left:0}}
+
 </style>
 </head>
 
@@ -642,6 +660,17 @@ footer{
 
 </main>
 
+
+
+<div id="dispatchModal" class="dispatch-modal" aria-hidden="true">
+  <section class="dispatch-sheet" role="dialog" aria-modal="true" aria-labelledby="dispatchModalTitle">
+    <div class="dispatch-sheet-header">
+      <div><h2 id="dispatchModalTitle">Operational Flight Release</h2><p id="dispatchModalSubtitle">Viavia Airlines · Flight Documents</p></div>
+      <button id="dispatchCloseButton" class="dispatch-close" type="button">Close</button>
+    </div>
+    <div id="dispatchModalBody" class="dispatch-body"><div class="empty"><h2>Loading Release</h2><p>Checking Viavia Operations...</p></div></div>
+  </section>
+</div>
 
 <footer>
   Viavia Airlines · Flight Planning · Your destination, via us!
@@ -2065,7 +2094,7 @@ async function renderAssignment(assignment) {
     const legs=group.items.map(({flight,index,date})=>{
       const arrival=`${flight.arrival||"—"}${flight.nextDay?"+1":""}`;
       const ac=formatAircraftAssignment(flight,date);
-      return `<div class="leg"><div class="leg-number">Leg ${index+1}</div><div><div class="leg-date">DAY ${group.day} · ${escapeHtml(formatDate(date))}</div><div class="leg-route">${escapeHtml(flight.flightNumber)} &nbsp; ${escapeHtml(flight.origin)} → ${escapeHtml(flight.destination)}</div><div class="leg-time">${escapeHtml(flight.departure||"—")} – ${escapeHtml(arrival)}</div>${renderSmallGate(gates[index])}<button type="button" class="btn btn-primary viacars-start-btn" data-leg-index="${index}" style="margin-top:10px">Start VIACARS</button></div><div class="leg-aircraft">${escapeHtml(ac.label)}<br>${escapeHtml(formatDate(date))}</div></div>`;
+      return `<div class="leg"><div class="leg-number">Leg ${index+1}</div><div><div class="leg-date">DAY ${group.day} · ${escapeHtml(formatDate(date))}</div><div class="leg-route">${escapeHtml(flight.flightNumber)} &nbsp; ${escapeHtml(flight.origin)} → ${escapeHtml(flight.destination)}</div><div class="leg-time">${escapeHtml(flight.departure||"—")} – ${escapeHtml(arrival)}</div>${renderSmallGate(gates[index])}<button type="button" class="btn btn-primary viacars-start-btn" data-leg-index="${index}" style="margin-top:10px">Start VIACARS</button><button type="button" class="btn btn-secondary flight-docs-btn" data-leg-index="${index}">Flight Documents</button></div><div class="leg-aircraft">${escapeHtml(ac.label)}<br>${escapeHtml(formatDate(date))}</div></div>`;
     }).join("");
     return `<section class="duty-day"><div class="duty-day-header"><span>DAY ${group.day} — ${escapeHtml(formatDate(group.items[0]?.date).toUpperCase())}</span><span>${escapeHtml(group.startAirport)} → ${escapeHtml(group.endAirport)}</span></div><div class="duty-day-meta"><span><strong>Show:</strong> ${escapeHtml(dutyShow(group))} · ${escapeHtml(group.startAirport)}</span><span><strong>Release:</strong> ${escapeHtml(dutyRelease(group))} · ${escapeHtml(group.endAirport)}</span><span><strong>Legs:</strong> ${group.items.length}</span></div><div style="padding:0 15px">${legs}</div><div class="duty-overnight">${final?`<strong>Trip Complete:</strong> ${escapeHtml(group.endAirport)}`:`<strong>Overnight:</strong> ${escapeHtml(group.endAirport)} · Crew hotel details are available in My Trips.`}</div></section>`;
   }).join("");
@@ -2087,6 +2116,118 @@ async function renderAssignment(assignment) {
   document.getElementById("tripSelect").value=assignmentKey(assignment);
 }
 
+
+
+/* ============================================================
+   FLIGHT DOCUMENTS / DISPATCH RELEASE
+   ============================================================ */
+let activeDispatchRelease=null;
+let activeDispatchSignature=null;
+let dispatchCanvasHasInk=false;
+
+function dispatchFuel(value){
+  const n=Number(value);
+  return Number.isFinite(n)?`${n.toLocaleString("en-US")} LB`:"—";
+}
+
+function dispatchTimestamp(value){
+  if(!value)return "—";
+  const d=new Date(value);
+  return Number.isNaN(d.getTime())?String(value):d.toLocaleString("en-US",{dateStyle:"medium",timeStyle:"short"});
+}
+
+function closeDispatchModal(){
+  const modal=document.getElementById("dispatchModal");
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden","true");
+  activeDispatchRelease=null;activeDispatchSignature=null;dispatchCanvasHasInk=false;
+}
+
+function setupDispatchCanvas(){
+  const canvas=document.getElementById("picSignatureCanvas");
+  if(!canvas)return;
+  const rect=canvas.getBoundingClientRect();
+  const ratio=Math.max(1,window.devicePixelRatio||1);
+  canvas.width=Math.round(rect.width*ratio);canvas.height=Math.round(180*ratio);
+  const ctx=canvas.getContext("2d");ctx.scale(ratio,ratio);ctx.lineWidth=2.2;ctx.lineCap="round";ctx.lineJoin="round";ctx.strokeStyle="#24142f";
+  let drawing=false;dispatchCanvasHasInk=false;
+  const point=e=>{const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}};
+  canvas.addEventListener("pointerdown",e=>{drawing=true;canvas.setPointerCapture(e.pointerId);const p=point(e);ctx.beginPath();ctx.moveTo(p.x,p.y);e.preventDefault()});
+  canvas.addEventListener("pointermove",e=>{if(!drawing)return;const p=point(e);ctx.lineTo(p.x,p.y);ctx.stroke();dispatchCanvasHasInk=true;e.preventDefault()});
+  const stop=()=>{drawing=false};canvas.addEventListener("pointerup",stop);canvas.addEventListener("pointercancel",stop);
+}
+
+function renderDispatchRelease(release,signature,flight,legDate){
+  const body=document.getElementById("dispatchModalBody");
+  const subtitle=document.getElementById("dispatchModalSubtitle");
+  subtitle.textContent=`${flight.flightNumber} · ${flight.origin} → ${flight.destination} · ${formatDate(legDate)}`;
+  const signed=!!signature;
+  body.innerHTML=`
+    <div class="dispatch-status ${signed?"ready":"pending"}">${signed?`PIC ACCEPTED · Release ${escapeHtml(release.release_number)}`:`RELEASED · PIC ACCEPTANCE REQUIRED`}</div>
+    <div class="dispatch-grid">
+      <div class="dispatch-cell"><span>Flight</span><strong>${escapeHtml(release.flight_number)}</strong></div>
+      <div class="dispatch-cell"><span>Date</span><strong>${escapeHtml(formatDate(release.operating_date))}</strong></div>
+      <div class="dispatch-cell"><span>Release</span><strong>${escapeHtml(release.release_number)}</strong></div>
+      <div class="dispatch-cell"><span>Route</span><strong>${escapeHtml(release.origin)} → ${escapeHtml(release.destination)}</strong></div>
+      <div class="dispatch-cell"><span>Aircraft</span><strong>${escapeHtml(release.aircraft_type||"—")}</strong></div>
+      <div class="dispatch-cell"><span>Registration</span><strong>${escapeHtml(isWithinAircraftWindow(legDate,flight)?(release.aircraft_registration||"—"):AIRCRAFT_PENDING_TEXT)}</strong></div>
+    </div>
+    <div class="dispatch-section"><h3>Operational Information</h3>
+      <div class="dispatch-grid">
+        <div class="dispatch-cell"><span>Filed Route</span><strong>${escapeHtml(release.route||"—")}</strong></div>
+        <div class="dispatch-cell"><span>Alternate</span><strong>${escapeHtml(release.alternate_airport||"—")}</strong></div>
+        <div class="dispatch-cell"><span>Dispatcher</span><strong>${escapeHtml(release.dispatcher_name||"—")}</strong></div>
+      </div>
+      <div class="meta">Dispatcher released: ${escapeHtml(dispatchTimestamp(release.dispatcher_signed_at))}${release.remarks?` · ${escapeHtml(release.remarks)}`:""}</div>
+    </div>
+    <div class="dispatch-section"><h3>Planned Fuel</h3><table class="fuel-table">
+      <tr><td>Taxi</td><td>${dispatchFuel(release.taxi_fuel_lb)}</td></tr><tr><td>Trip</td><td>${dispatchFuel(release.trip_fuel_lb)}</td></tr><tr><td>Contingency</td><td>${dispatchFuel(release.contingency_fuel_lb)}</td></tr><tr><td>Alternate</td><td>${dispatchFuel(release.alternate_fuel_lb)}</td></tr><tr><td>Reserve</td><td>${dispatchFuel(release.reserve_fuel_lb)}</td></tr><tr><td>Extra</td><td>${dispatchFuel(release.extra_fuel_lb)}</td></tr><tr class="fuel-total"><td><strong>BLOCK</strong></td><td>${dispatchFuel(release.block_fuel_lb)}</td></tr>
+    </table></div>
+    <div class="dispatch-section"><h3>PIC Acceptance</h3>${signed?`<div class="signed-box"><strong>Accepted and electronically signed by ${escapeHtml(signature.pic_name)}</strong><div>Signed ${escapeHtml(dispatchTimestamp(signature.signed_at))} · Release ${escapeHtml(signature.release_number)}</div>${signature.signature_data?`<img class="signed-image" src="${escapeHtml(signature.signature_data)}" alt="PIC signature">`:""}</div>`:`<p class="signature-help">Review the release above, then sign in the box using a mouse, touchscreen, or Apple Pencil.</p><div class="signature-pad-wrap"><canvas id="picSignatureCanvas" class="signature-pad"></canvas></div><div class="signature-actions" style="margin-top:10px"><button id="clearPicSignature" type="button" class="btn btn-secondary">Clear</button><button id="acceptPicRelease" type="button" class="btn btn-primary">PIC Accept & Sign</button></div>`}</div>`;
+  if(!signed){
+    requestAnimationFrame(()=>{
+      setupDispatchCanvas();
+      document.getElementById("clearPicSignature")?.addEventListener("click",()=>{setupDispatchCanvas()});
+      document.getElementById("acceptPicRelease")?.addEventListener("click",submitPicDispatchSignature);
+    });
+  }
+}
+
+async function openFlightDocuments(index){
+  const ctx=currentFlightPlanningContext;if(!ctx)throw new Error("Flight Planning data is not ready.");
+  if(!window.ViaviaDispatch)throw new Error("Dispatch helpers are not loaded. Make sure the updated viavia-supabase.js is installed.");
+  const flight=ctx.flights[index],legDate=ctx.legDates[index];if(!flight||!legDate)throw new Error("This flight leg could not be found.");
+  const modal=document.getElementById("dispatchModal"),body=document.getElementById("dispatchModalBody");
+  modal.classList.add("open");modal.setAttribute("aria-hidden","false");
+  body.innerHTML=`<div class="empty"><h2>Loading Release</h2><p>Checking Viavia Operations for ${escapeHtml(flight.flightNumber)}...</p></div>`;
+  try{
+    const release=await ViaviaDispatch.getRelease(flight.flightNumber,legDate);
+    if(!release){body.innerHTML=`<div class="empty"><h2>No Dispatch Release</h2><p>No released operational flight release exists yet for ${escapeHtml(flight.flightNumber)} on ${escapeHtml(formatDate(legDate))}.</p></div>`;return;}
+    const signature=await ViaviaDispatch.getMySignature(release.id);activeDispatchRelease={release,flight,legDate};activeDispatchSignature=signature;renderDispatchRelease(release,signature,flight,legDate);
+  }catch(error){console.error("Dispatch release load failed:",error);body.innerHTML=`<div class="error" style="display:block">${escapeHtml(error?.message||"Unable to load the dispatch release.")}</div>`;}
+}
+
+async function submitPicDispatchSignature(){
+  if(!activeDispatchRelease)return;
+  const canvas=document.getElementById("picSignatureCanvas");if(!canvas||!dispatchCanvasHasInk){alert("Please sign in the signature box before accepting the release.");return;}
+  const button=document.getElementById("acceptPicRelease");if(button){button.disabled=true;button.textContent="Signing…";}
+  try{
+    const name=currentPilot?.display_name||currentUser?.user_metadata?.display_name||currentUser?.email||"Viavia Pilot";
+    const signatureData=canvas.toDataURL("image/png");
+    const signature=await ViaviaDispatch.signRelease(activeDispatchRelease.release.id,signatureData,name);
+    activeDispatchSignature=signature;renderDispatchRelease(activeDispatchRelease.release,signature,activeDispatchRelease.flight,activeDispatchRelease.legDate);
+  }catch(error){console.error("PIC release signature failed:",error);alert(error?.message||"Unable to sign the dispatch release.");if(button){button.disabled=false;button.textContent="PIC Accept & Sign";}}
+}
+
+document.getElementById("dispatchCloseButton").addEventListener("click",closeDispatchModal);
+document.getElementById("dispatchModal").addEventListener("click",event=>{if(event.target.id==="dispatchModal")closeDispatchModal()});
+document.addEventListener("keydown",event=>{if(event.key==="Escape")closeDispatchModal()});
+document.addEventListener("click",async event=>{
+  const button=event.target.closest(".flight-docs-btn");if(!button)return;
+  const original=button.textContent;button.disabled=true;button.textContent="Loading…";
+  try{await openFlightDocuments(Number(button.dataset.legIndex));}catch(error){console.error("Flight Documents failed:",error);alert(error?.message||"Unable to open Flight Documents.");}
+  finally{button.disabled=false;button.textContent=original;}
+});
 
 
 async function launchViacars(index){
