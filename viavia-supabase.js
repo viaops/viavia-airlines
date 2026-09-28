@@ -1852,6 +1852,255 @@ async function updateViaviaAcarsMessageStatus(id,status){
 }
 
 /* ============================================================
+   DISPATCH RELEASES + PIC ACCEPTANCE
+   ============================================================ */
+
+const VIAVIA_DISPATCH_RELEASE_FIELDS = `
+  id,
+  trip_id,
+  flight_number,
+  operating_date,
+  origin,
+  destination,
+  aircraft_type,
+  aircraft_registration,
+  release_number,
+  status,
+  route,
+  alternate_airport,
+  taxi_fuel_lb,
+  trip_fuel_lb,
+  contingency_fuel_lb,
+  alternate_fuel_lb,
+  reserve_fuel_lb,
+  extra_fuel_lb,
+  block_fuel_lb,
+  dispatcher_name,
+  dispatcher_signed_at,
+  remarks,
+  created_at,
+  updated_at
+`;
+
+async function getViaviaDispatchRelease(
+  flightNumber,
+  operatingDate
+) {
+  const flight =
+    normalizeViaviaFlightNumber(
+      flightNumber
+    );
+
+  const date =
+    normalizeViaviaOperatingDate(
+      operatingDate
+    );
+
+  const { data, error } =
+    await viaviaSupabase
+      .from("dispatch_releases")
+      .select(
+        VIAVIA_DISPATCH_RELEASE_FIELDS
+      )
+      .eq(
+        "flight_number",
+        flight
+      )
+      .eq(
+        "operating_date",
+        date
+      )
+      .eq(
+        "status",
+        "released"
+      )
+      .order(
+        "release_number",
+        { ascending:false }
+      )
+      .limit(1)
+      .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data || null;
+}
+
+async function getViaviaDispatchReleaseById(
+  releaseId
+) {
+  const id = Number(releaseId);
+
+  if (!Number.isFinite(id)) {
+    throw new Error(
+      "A valid dispatch release ID is required."
+    );
+  }
+
+  const { data, error } =
+    await viaviaSupabase
+      .from("dispatch_releases")
+      .select(
+        VIAVIA_DISPATCH_RELEASE_FIELDS
+      )
+      .eq("id", id)
+      .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data || null;
+}
+
+async function getMyViaviaDispatchSignature(
+  releaseId
+) {
+  const user =
+    await getViaviaUser();
+
+  if (!user) {
+    throw new Error(
+      "Pilot is not authenticated."
+    );
+  }
+
+  const id = Number(releaseId);
+
+  if (!Number.isFinite(id)) {
+    throw new Error(
+      "A valid dispatch release ID is required."
+    );
+  }
+
+  const { data, error } =
+    await viaviaSupabase
+      .from("dispatch_release_signatures")
+      .select(
+        `
+        id,
+        release_id,
+        pilot_id,
+        pic_name,
+        release_number,
+        signature_data,
+        signed_at,
+        created_at
+        `
+      )
+      .eq("release_id", id)
+      .eq("pilot_id", user.id)
+      .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  return data || null;
+}
+
+async function signViaviaDispatchRelease(
+  releaseId,
+  signatureData,
+  picName = null
+) {
+  const user =
+    await getViaviaUser();
+
+  if (!user) {
+    throw new Error(
+      "Pilot is not authenticated."
+    );
+  }
+
+  const release =
+    await getViaviaDispatchReleaseById(
+      releaseId
+    );
+
+  if (!release) {
+    throw new Error(
+      "Dispatch release could not be found."
+    );
+  }
+
+  if (release.status !== "released") {
+    throw new Error(
+      "This dispatch release is not available for PIC acceptance."
+    );
+  }
+
+  const signature =
+    String(signatureData || "").trim();
+
+  if (!signature) {
+    throw new Error(
+      "PIC signature is required."
+    );
+  }
+
+  const existing =
+    await getMyViaviaDispatchSignature(
+      release.id
+    );
+
+  if (existing) {
+    return existing;
+  }
+
+  let name =
+    String(picName || "").trim();
+
+  if (!name) {
+    const profile =
+      await getViaviaPilotProfile();
+
+    name =
+      String(
+        profile?.display_name ||
+        user.user_metadata?.display_name ||
+        user.email ||
+        "Viavia Pilot"
+      ).trim();
+  }
+
+  const row = {
+    release_id:release.id,
+    pilot_id:user.id,
+    pic_name:name,
+    release_number:release.release_number,
+    signature_data:signature
+  };
+
+  const { data, error } =
+    await viaviaSupabase
+      .from("dispatch_release_signatures")
+      .insert(row)
+      .select()
+      .single();
+
+  if (error) {
+    if (error.code === "23505") {
+      const alreadySigned =
+        await getMyViaviaDispatchSignature(
+          release.id
+        );
+
+      if (alreadySigned) {
+        return alreadySigned;
+      }
+    }
+
+    throw error;
+  }
+
+  return data;
+}
+
+
+/* ============================================================
    GLOBAL VIAVIA API
    ============================================================ */
 
@@ -1902,6 +2151,14 @@ window.ViaviaAircraft = {
   getOrAssign: getOrAssignViaviaAircraft
 };
 
+
+
+window.ViaviaDispatch = {
+  getRelease: getViaviaDispatchRelease,
+  getReleaseById: getViaviaDispatchReleaseById,
+  getMySignature: getMyViaviaDispatchSignature,
+  signRelease: signViaviaDispatchRelease
+};
 
 
 window.ViaviaACARS = {
