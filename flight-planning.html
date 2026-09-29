@@ -2150,7 +2150,7 @@ async function renderAssignment(assignment) {
       const arrival=`${flight.arrival||"—"}${flight.nextDay?"+1":""}`;
       const ac=formatAircraftAssignment(flight,date);
       const completed=isCompletedFlightLeg(flight.flightNumber,date);
-      return `<div class="leg${completed?" completed-leg":""}"><div class="leg-number">Leg ${index+1}</div><div><div class="leg-date">DAY ${group.day} · ${escapeHtml(formatDate(date))}</div><div class="leg-route">${escapeHtml(flight.flightNumber)} &nbsp; ${escapeHtml(flight.origin)} → ${escapeHtml(flight.destination)}${completed?` <span class="flight-completed-badge">FLIGHT COMPLETED</span>`:""}</div><div class="leg-time">${escapeHtml(flight.departure||"—")} – ${escapeHtml(arrival)}</div>${renderSmallGate(gates[index])}${completed?`<div class="completed-action-note">Operational closeout complete · Flight record is closed.</div>`:`<button type="button" class="btn btn-primary viacars-start-btn" data-leg-index="${index}" style="margin-top:10px">Start VIACARS</button><button type="button" class="btn btn-secondary simbrief-dispatch-btn" data-leg-index="${index}" style="margin-top:8px;margin-left:6px">Dispatch Flight</button>`}<button type="button" class="btn btn-secondary flight-docs-btn" data-leg-index="${index}">Flight Documents</button></div><div class="leg-aircraft">${escapeHtml(ac.label)}<br>${escapeHtml(formatDate(date))}</div></div>`;
+      return `<div class="leg${completed?" completed-leg":""}"><div class="leg-number">Leg ${index+1}</div><div><div class="leg-date">DAY ${group.day} · ${escapeHtml(formatDate(date))}</div><div class="leg-route">${escapeHtml(flight.flightNumber)} &nbsp; ${escapeHtml(flight.origin)} → ${escapeHtml(flight.destination)}${completed?` <span class="flight-completed-badge">FLIGHT COMPLETED</span>`:""}</div><div class="leg-time">${escapeHtml(flight.departure||"—")} – ${escapeHtml(arrival)}</div>${renderSmallGate(gates[index])}${completed?`<div class="completed-action-note">Operational closeout complete · Flight record is closed.</div>`:`<button type="button" class="btn btn-primary viacars-start-btn" data-leg-index="${index}" style="margin-top:10px">Start VIACARS</button><button type="button" class="btn btn-secondary simbrief-import-btn" data-leg-index="${index}" style="margin-top:8px;margin-left:6px">Import SimBrief OFP</button>`}<button type="button" class="btn btn-secondary flight-docs-btn" data-leg-index="${index}">Flight Documents</button></div><div class="leg-aircraft">${escapeHtml(ac.label)}<br>${escapeHtml(formatDate(date))}</div></div>`;
     }).join("");
     return `<section class="duty-day"><div class="duty-day-header"><span>DAY ${group.day} — ${escapeHtml(formatDate(group.items[0]?.date).toUpperCase())}</span><span>${escapeHtml(group.startAirport)} → ${escapeHtml(group.endAirport)}</span></div><div class="duty-day-meta"><span><strong>Show:</strong> ${escapeHtml(dutyShow(group))} · ${escapeHtml(group.startAirport)}</span><span><strong>Release:</strong> ${escapeHtml(dutyRelease(group))} · ${escapeHtml(group.endAirport)}</span><span><strong>Legs:</strong> ${group.items.length}</span></div><div style="padding:0 15px">${legs}</div><div class="duty-overnight">${final?`<strong>Trip Complete:</strong> ${escapeHtml(group.endAirport)}`:`<strong>Overnight:</strong> ${escapeHtml(group.endAirport)} · Crew hotel details are available in My Trips.`}</div></section>`;
   }).join("");
@@ -2514,160 +2514,7 @@ async function saveSimbriefSnapshot(row){
   return result.data;
 }
 
-/* ============================================================
-   DIRECT SIMBRIEF DISPATCH
-   ============================================================ */
-
-const SIMBRIEF_WORKER_URL =
-  "https://www.simbrief.com/ofp/ofp.loader.api.php";
-
-function simbriefDispatchAirport(code){
-  const value=simbriefUpper(code);
-  const map={
-    RSW:"KRSW",ATL:"KATL",BWI:"KBWI",CLT:"KCLT",CMH:"KCMH",
-    DFW:"KDFW",EYW:"KEYW",FLL:"KFLL",JAX:"KJAX",JFK:"KJFK",
-    LAS:"KLAS",LAX:"KLAX",LGA:"KLGA",LIT:"KLIT",MCO:"KMCO",
-    MFR:"KMFR",MIA:"KMIA",MKE:"KMKE",SBA:"KSBA",SEA:"KSEA",
-    SMF:"KSMF",SNA:"KSNA",TUS:"KTUS",VPS:"KVPS",
-    CTG:"SKCG",MDE:"SKRG",PTY:"MPTO",PUJ:"MDPC",SDQ:"MDSD",
-    SJU:"TJSJ",SXM:"TNCM",XPL:"MHPR"
-  };
-  return map[value]||value;
-}
-
-function simbriefDispatchType(flight){
-  const family=viaviaAircraftFamily(flight?.aircraft);
-  if(!family)throw new Error("The aircraft type for this leg is unavailable.");
-  return family.toLowerCase();
-}
-
-function simbriefDispatchDate(legDate){
-  const p=dateParts(legDate);
-  if(!p)throw new Error("The operating date for this leg is invalid.");
-  const months=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
-  return `${String(p.day).padStart(2,"0")}${months[p.month-1]}${String(p.year).slice(-2)}`;
-}
-
-function simbriefDispatchFlightIdentity(flight){
-  const raw=simbriefUpper(flight?.flightNumber);
-  const match=raw.match(/^([A-Z]{2,3})(\d+[A-Z]?)$/);
-  if(match)return {airline:match[1],fltnum:match[2]};
-  const digits=raw.match(/\d+[A-Z]?$/)?.[0]||raw;
-  return {airline:"VIA",fltnum:digits};
-}
-
-function simbriefDispatchOutputPage(){
-  return (location.origin+location.pathname).replace(/^https?:\/\//i,"");
-}
-
-/*
-  SimBrief API v1 constructs the returned OFP ID as:
-  timestamp + "_" + MD5(orig + dest + type)
-*/
-function simbriefMd5(input){
-  function add32(a,b){return(a+b)&0xffffffff}
-  function cmn(q,a,b,x,s,t){a=add32(add32(a,q),add32(x,t));return add32((a<<s)|(a>>>(32-s)),b)}
-  function ff(a,b,c,d,x,s,t){return cmn((b&c)|(~b&d),a,b,x,s,t)}
-  function gg(a,b,c,d,x,s,t){return cmn((b&d)|(c&~d),a,b,x,s,t)}
-  function hh(a,b,c,d,x,s,t){return cmn(b^c^d,a,b,x,s,t)}
-  function ii(a,b,c,d,x,s,t){return cmn(c^(b|~d),a,b,x,s,t)}
-  function cycle(x,k){
-    let[a,b,c,d]=x;
-    a=ff(a,b,c,d,k[0],7,-680876936);d=ff(d,a,b,c,k[1],12,-389564586);c=ff(c,d,a,b,k[2],17,606105819);b=ff(b,c,d,a,k[3],22,-1044525330);
-    a=ff(a,b,c,d,k[4],7,-176418897);d=ff(d,a,b,c,k[5],12,1200080426);c=ff(c,d,a,b,k[6],17,-1473231341);b=ff(b,c,d,a,k[7],22,-45705983);
-    a=ff(a,b,c,d,k[8],7,1770035416);d=ff(d,a,b,c,k[9],12,-1958414417);c=ff(c,d,a,b,k[10],17,-42063);b=ff(b,c,d,a,k[11],22,-1990404162);
-    a=ff(a,b,c,d,k[12],7,1804603682);d=ff(d,a,b,c,k[13],12,-40341101);c=ff(c,d,a,b,k[14],17,-1502002290);b=ff(b,c,d,a,k[15],22,1236535329);
-    a=gg(a,b,c,d,k[1],5,-165796510);d=gg(d,a,b,c,k[6],9,-1069501632);c=gg(c,d,a,b,k[11],14,643717713);b=gg(b,c,d,a,k[0],20,-373897302);
-    a=gg(a,b,c,d,k[5],5,-701558691);d=gg(d,a,b,c,k[10],9,38016083);c=gg(c,d,a,b,k[15],14,-660478335);b=gg(b,c,d,a,k[4],20,-405537848);
-    a=gg(a,b,c,d,k[9],5,568446438);d=gg(d,a,b,c,k[14],9,-1019803690);c=gg(c,d,a,b,k[3],14,-187363961);b=gg(b,c,d,a,k[8],20,1163531501);
-    a=gg(a,b,c,d,k[13],5,-1444681467);d=gg(d,a,b,c,k[2],9,-51403784);c=gg(c,d,a,b,k[7],14,1735328473);b=gg(b,c,d,a,k[12],20,-1926607734);
-    a=hh(a,b,c,d,k[5],4,-378558);d=hh(d,a,b,c,k[8],11,-2022574463);c=hh(c,d,a,b,k[11],16,1839030562);b=hh(b,c,d,a,k[14],23,-35309556);
-    a=hh(a,b,c,d,k[1],4,-1530992060);d=hh(d,a,b,c,k[4],11,1272893353);c=hh(c,d,a,b,k[7],16,-155497632);b=hh(b,c,d,a,k[10],23,-1094730640);
-    a=hh(a,b,c,d,k[13],4,681279174);d=hh(d,a,b,c,k[0],11,-358537222);c=hh(c,d,a,b,k[3],16,-722521979);b=hh(b,c,d,a,k[6],23,76029189);
-    a=hh(a,b,c,d,k[9],4,-640364487);d=hh(d,a,b,c,k[12],11,-421815835);c=hh(c,d,a,b,k[15],16,530742520);b=hh(b,c,d,a,k[2],23,-995338651);
-    a=ii(a,b,c,d,k[0],6,-198630844);d=ii(d,a,b,c,k[7],10,1126891415);c=ii(c,d,a,b,k[14],15,-1416354905);b=ii(b,c,d,a,k[5],21,-57434055);
-    a=ii(a,b,c,d,k[12],6,1700485571);d=ii(d,a,b,c,k[3],10,-1894986606);c=ii(c,d,a,b,k[10],15,-1051523);b=ii(b,c,d,a,k[1],21,-2054922799);
-    a=ii(a,b,c,d,k[8],6,1873313359);d=ii(d,a,b,c,k[15],10,-30611744);c=ii(c,d,a,b,k[6],15,-1560198380);b=ii(b,c,d,a,k[13],21,1309151649);
-    a=ii(a,b,c,d,k[4],6,-145523070);d=ii(d,a,b,c,k[11],10,-1120210379);c=ii(c,d,a,b,k[2],15,718787259);b=ii(b,c,d,a,k[9],21,-343485551);
-    x[0]=add32(a,x[0]);x[1]=add32(b,x[1]);x[2]=add32(c,x[2]);x[3]=add32(d,x[3]);
-  }
-  const bytes=new TextEncoder().encode(input),n=bytes.length;
-  const blocks=new Uint8Array(((n+9+63)>>6)<<6);blocks.set(bytes);blocks[n]=0x80;
-  const bits=n*8;for(let i=0;i<8;i++)blocks[blocks.length-8+i]=Math.floor(bits/Math.pow(256,i))&255;
-  const state=[1732584193,-271733879,-1732584194,271733878];
-  for(let i=0;i<blocks.length;i+=64){
-    const words=new Array(16).fill(0);
-    for(let j=0;j<64;j++)words[j>>2]|=blocks[i+j]<<((j%4)*8);
-    cycle(state,words);
-  }
-  return state.map(v=>[0,8,16,24].map(s=>((v>>>s)&255).toString(16).padStart(2,"0")).join("")).join("");
-}
-
-async function callSimbriefBridge(body){
-  const result=await viaviaSupabase.functions.invoke(
-    "simbrief-api",
-    {body}
-  );
-  if(result.error)throw result.error;
-  if(result.data?.error)throw new Error(result.data.error);
-  return result.data;
-}
-
-function simbriefXmlElementToObject(element){
-  const children=[...element.children];
-  if(!children.length)return (element.textContent||"").trim();
-
-  const result={};
-  for(const child of children){
-    const key=child.tagName;
-    const value=simbriefXmlElementToObject(child);
-    if(Object.prototype.hasOwnProperty.call(result,key)){
-      result[key]=Array.isArray(result[key])?[...result[key],value]:[result[key],value];
-    }else{
-      result[key]=value;
-    }
-  }
-  return result;
-}
-
-function simbriefXmlToObject(xml){
-  const doc=new DOMParser().parseFromString(xml,"application/xml");
-  if(doc.querySelector("parsererror"))throw new Error("The generated SimBrief OFP XML could not be read.");
-  if(!doc.documentElement)throw new Error("SimBrief returned an empty OFP XML document.");
-  return simbriefXmlElementToObject(doc.documentElement);
-}
-
-async function waitForSimbriefOfp(ofpId,attempts=20){
-  for(let attempt=0;attempt<attempts;attempt++){
-    const check=await callSimbriefBridge({action:"check",ofp_id:ofpId});
-    if(check?.available)return true;
-    await new Promise(resolve=>setTimeout(resolve,750));
-  }
-  return false;
-}
-
-function submitSimbriefWorker(fields){
-  const form=document.createElement("form");
-  form.method="GET";
-  form.action=SIMBRIEF_WORKER_URL;
-  form.target="SBworker";
-  form.style.display="none";
-
-  for(const [name,value] of Object.entries(fields)){
-    if(value===null||value===undefined||value==="")continue;
-    const input=document.createElement("input");
-    input.type="hidden";
-    input.name=name;
-    input.value=String(value);
-    form.appendChild(input);
-  }
-
-  document.body.appendChild(form);
-  form.submit();
-  form.remove();
-}
-
-async function dispatchSimbriefFlight(index){
+async function importSimbriefOfp(index){
   const ctx=currentFlightPlanningContext;
   if(!ctx)throw new Error("Flight Planning data is not ready.");
 
@@ -2675,153 +2522,56 @@ async function dispatchSimbriefFlight(index){
   const legDate=ctx.legDates[index];
   if(!flight||!legDate)throw new Error("This flight leg could not be found.");
 
-  if(isCompletedFlightLeg(flight.flightNumber,legDate)){
-    throw new Error("This flight has already been completed and closed.");
+  const pilotId=simbriefText(currentPilot?.simbrief_pilot_id);
+  if(!pilotId){
+    throw new Error("No SimBrief Pilot ID is saved on your Viavia pilot profile.");
+  }
+  if(!/^\d{1,7}$/.test(pilotId)){
+    throw new Error("Your saved SimBrief Pilot ID is invalid.");
   }
 
-  const existing=await getLatestImportedOfp(flight.flightNumber,legDate);
-  if(existing){
-    const replace=confirm(
-      `A SimBrief OFP is already saved for ${flight.flightNumber} on ${formatDate(legDate)}.\n\nGenerate and save a new OFP snapshot?`
-    );
-    if(!replace)return existing;
+  const url=
+    `https://www.simbrief.com/api/xml.fetcher.php?userid=${encodeURIComponent(pilotId)}&json=v2`;
+
+  const response=await fetch(url,{method:"GET",cache:"no-store"});
+  if(!response.ok){
+    throw new Error(`SimBrief returned HTTP ${response.status}. Generate an OFP in SimBrief and try again.`);
   }
 
-  const orig=simbriefDispatchAirport(flight.origin);
-  const dest=simbriefDispatchAirport(flight.destination);
-  const type=simbriefDispatchType(flight);
-  const timestamp=Math.round(Date.now()/1000);
-  const outputpage=simbriefDispatchOutputPage();
-  const apiReq=`${orig}${dest}${type}${timestamp}${outputpage}`;
-
-  const auth=await callSimbriefBridge({
-    action:"authorize",
-    api_req:apiReq
-  });
-
-  if(!auth?.api_code){
-    throw new Error("Viavia Dispatch did not receive a SimBrief authorization code.");
+  const ofp=await response.json();
+  if(!ofp||typeof ofp!=="object"){
+    throw new Error("SimBrief did not return a valid OFP.");
   }
 
-  const worker=window.open(
-    "about:blank",
-    "SBworker",
-    "width=600,height=315"
-  );
-
-  if(!worker){
-    throw new Error("Your browser blocked the SimBrief popup. Allow popups for the Viavia website and try again.");
-  }
-
-  const identity=simbriefDispatchFlightIdentity(flight);
-  const clock=normalizeTime(flight.departure);
-  const aircraft=formatAircraftAssignment(flight,legDate);
-
-  const fields={
-    orig,
-    dest,
-    type,
-    airline:identity.airline,
-    fltnum:identity.fltnum,
-    date:simbriefDispatchDate(legDate),
-    deph:clock?String(clock.hour).padStart(2,"0"):null,
-    depm:clock?String(clock.minute).padStart(2,"0"):null,
-    reg:aircraft.registration||null,
-    units:"LBS",
-    apicode:auth.api_code,
-    outputpage,
-    timestamp
-  };
-
-  submitSimbriefWorker(fields);
-
-  const ofpId=`${timestamp}_${simbriefMd5(orig+dest+type)}`;
-
-  await new Promise((resolve,reject)=>{
-    const started=Date.now();
-    const timer=setInterval(()=>{
-      if(worker.closed){
-        clearInterval(timer);
-        resolve();
-        return;
-      }
-      if(Date.now()-started>20*60*1000){
-        clearInterval(timer);
-        try{worker.close()}catch(_){}
-        reject(new Error("The SimBrief dispatch window timed out."));
-      }
-    },500);
-  });
-
-  const available=await waitForSimbriefOfp(ofpId);
-  if(!available){
-    throw new Error("SimBrief did not return a completed OFP. The generation window may have been closed before dispatch finished.");
-  }
-
-  const fetched=await callSimbriefBridge({
-    action:"fetch",
-    ofp_id:ofpId
-  });
-
-  if(!fetched?.xml){
-    throw new Error("Viavia Dispatch could not retrieve the generated SimBrief OFP.");
-  }
-
-  const ofp=simbriefXmlToObject(fetched.xml);
   validateSimbriefOfp(ofp,flight,legDate);
 
   const row=buildSimbriefSnapshot(ofp,flight,legDate,index);
-  row.raw_ofp={
-    ...ofp,
-    viavia_simbrief_api:{
-      ofp_id:ofpId,
-      source:"SimBrief API v1",
-      fetched_at:new Date().toISOString()
-    }
-  };
-
   const saved=await saveSimbriefSnapshot(row);
 
-  /*
-    Create Release 01 immediately from the exact immutable snapshot
-    returned by this dispatch request. If a release already exists,
-    the existing Flight Documents logic remains authoritative.
-  */
-  let release=null;
-  if(window.ViaviaDispatch){
-    release=await ViaviaDispatch.getRelease(flight.flightNumber,legDate);
-    if(!release){
-      release=await createDispatchReleaseFromOfp(saved.id);
-    }
-  }
-
   alert(
-    `Flight dispatched successfully.\n\n` +
+    `SimBrief OFP imported successfully.\n\n` +
     `${flight.flightNumber} · ${flight.origin} → ${flight.destination}\n` +
     `${formatDate(legDate)}\n` +
-    `SimBrief OFP: ${ofpId}\n` +
-    `Snapshot ID: ${saved.id}` +
-    (release?`\nDispatch Release: ${release.release_number}`:"")
+    `Snapshot ID: ${saved.id}`
   );
 
   return saved;
 }
 
 document.addEventListener("click",async event=>{
-  const button=event.target.closest(".simbrief-dispatch-btn");
+  const button=event.target.closest(".simbrief-import-btn");
   if(!button)return;
 
   const original=button.textContent;
   button.disabled=true;
-  button.textContent="Opening SimBrief…";
+  button.textContent="Importing SimBrief…";
 
   try{
-    const saved=await dispatchSimbriefFlight(Number(button.dataset.legIndex));
-    if(saved)button.textContent="Flight Dispatched";
-    else button.textContent=original;
+    await importSimbriefOfp(Number(button.dataset.legIndex));
+    button.textContent="SimBrief OFP Imported";
   }catch(error){
-    console.error("SimBrief dispatch failed:",error);
-    alert(error?.message||"Unable to dispatch the flight through SimBrief.");
+    console.error("SimBrief OFP import failed:",error);
+    alert(error?.message||"Unable to import the SimBrief OFP.");
     button.textContent=original;
   }finally{
     button.disabled=false;
@@ -2892,7 +2642,7 @@ function renderImportedOfpSection(ofp,flight,legDate){
     return `<div class="dispatch-section">
       <h3>SimBrief OFP</h3>
       <div class="dispatch-status pending">NO OFP IMPORTED</div>
-      <p class="signature-help">No dispatched SimBrief OFP snapshot was found for ${escapeHtml(flight.flightNumber)} on ${escapeHtml(formatDate(legDate))}. Use <strong>Import SimBrief OFP</strong> on the flight leg first.</p>
+      <p class="signature-help">No imported SimBrief OFP snapshot was found for ${escapeHtml(flight.flightNumber)} on ${escapeHtml(formatDate(legDate))}. Use <strong>Import SimBrief OFP</strong> on the flight leg first.</p>
     </div>`;
   }
 
@@ -3505,7 +3255,7 @@ async function openFlightDocuments(index){
 
   modal.classList.add("open");
   modal.setAttribute("aria-hidden","false");
-  body.innerHTML=`<div class="empty"><h2>Loading Flight Documents</h2><p>Checking the dispatched OFP and Viavia dispatch release for ${escapeHtml(flight.flightNumber)}...</p></div>`;
+  body.innerHTML=`<div class="empty"><h2>Loading Flight Documents</h2><p>Checking the imported OFP and Viavia dispatch release for ${escapeHtml(flight.flightNumber)}...</p></div>`;
 
   try{
     const ofp=await getLatestImportedOfp(flight.flightNumber,legDate);
@@ -3513,15 +3263,15 @@ async function openFlightDocuments(index){
 
     /*
       No existing release:
-      create Release 01 only from the pilot's dispatched immutable OFP snapshot.
+      create Release 01 only from the pilot's imported immutable OFP snapshot.
     */
     if(!release&&ofp){
-      body.innerHTML=`<div class="empty"><h2>Preparing Release 01</h2><p>Creating the Viavia Dispatch Release from dispatched OFP snapshot ${escapeHtml(ofp.id)}...</p></div>`;
+      body.innerHTML=`<div class="empty"><h2>Preparing Release 01</h2><p>Creating the Viavia Dispatch Release from imported OFP snapshot ${escapeHtml(ofp.id)}...</p></div>`;
       release=await createDispatchReleaseFromOfp(ofp.id);
     }
 
     /*
-      There is still no release because no OFP has been dispatched.
+      There is still no release because no OFP has been imported.
     */
     if(!release){
       activeDispatchRelease=null;
@@ -3533,7 +3283,7 @@ async function openFlightDocuments(index){
         <div class="dispatch-section">
           <h3>Dispatch Release</h3>
           <div class="dispatch-status pending">NO RELEASE AVAILABLE</div>
-          <p class="signature-help">Dispatch this flight through SimBrief first. Viavia will then generate Release 01 from that OFP snapshot.</p>
+          <p class="signature-help">Import the SimBrief OFP for this flight first. Viavia will then generate Release 01 from that OFP snapshot.</p>
         </div>`;
       return;
     }
