@@ -106,6 +106,8 @@
             height: 550px;
             border-radius: 15px;
             overflow: hidden;
+            background: #e6d6f5;
+            border: 1px solid #d7c3e7;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
 
@@ -446,9 +448,23 @@
 
         /* MAP TILES */
 
+        /* Light Viavia lavender map */
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
+
+        /*
+           Tint the base map with Viavia's lighter lavender while preserving
+           roads, borders, labels, markers and route lines.
+        */
+        const mapPane = document.querySelector('#route-map .leaflet-tile-pane');
+        if (mapPane) {
+            mapPane.style.filter =
+                'grayscale(1) sepia(.16) hue-rotate(225deg) saturate(.55) brightness(1.10)';
+            mapPane.style.opacity = '0.82';
+        }
+
+        document.getElementById('route-map').style.background = '#e6d6f5';
 
     </script>
 
