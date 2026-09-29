@@ -1773,7 +1773,7 @@ async function loadAircraftAssignmentsForMyTrips() {
     if (
         typeof ViaviaAircraft === "undefined" ||
         !ViaviaAircraft ||
-        typeof ViaviaAircraft.getOrAssign !== "function"
+        typeof ViaviaAircraft.getAssignment !== "function"
     ) {
         console.warn(
             "Viavia My Trips: aircraft helper unavailable."
@@ -1826,7 +1826,7 @@ async function loadAircraftAssignmentsForMyTrips() {
 
                             const assignment =
                                 await ViaviaAircraft
-                                    .getOrAssign(
+                                    .getAssignment(
                                         flightNumber,
                                         operatingDate
                                     );
@@ -1888,6 +1888,53 @@ function getMyTripAircraftDisplay(
             flight
         );
 
+    const family =
+        getAircraft(flight);
+
+    const variant =
+        aircraftVariantForMyTrips(
+            family
+        );
+
+    /*
+     * Strict T-24 protection:
+     * My Trips never reveals a registration more than 24 hours
+     * before the leg's scheduled departure, even if an assignment
+     * row already exists in Supabase.
+     */
+    const departureMinutes =
+        parseClockMinutes(
+            getDeparture(flight)
+        );
+
+    if (departureMinutes !== null) {
+
+        const [year, month, day] =
+            String(operatingDate)
+                .split("-")
+                .map(Number);
+
+        const departure =
+            new Date(
+                year,
+                month - 1,
+                day,
+                Math.floor(departureMinutes / 60),
+                departureMinutes % 60,
+                0,
+                0
+            );
+
+        const hoursUntilDeparture =
+            (departure.getTime() - Date.now()) /
+            3600000;
+
+        if (hoursUntilDeparture > 24) {
+            return `${variant} · Registration pending`;
+        }
+
+    }
+
     const display =
         myTripAircraftAssignments.get(
             getMyTripAircraftKey(
@@ -1896,15 +1943,9 @@ function getMyTripAircraftDisplay(
             )
         ) || null;
 
-    const family =
-        display?.family ||
-        getAircraft(flight);
-
-    const variant =
+    const assignedVariant =
         display?.variant ||
-        aircraftVariantForMyTrips(
-            family
-        );
+        variant;
 
     const registration =
         display?.registration
@@ -1917,7 +1958,7 @@ function getMyTripAircraftDisplay(
     if (registration) {
 
         return (
-            `${variant} · ${registration}`
+            `${assignedVariant} · ${registration}`
         );
 
     }
