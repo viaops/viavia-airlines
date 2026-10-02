@@ -1,0 +1,2610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>My Trips — Viavia Airlines</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Maven+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --purple: #3d2d5a;
+    --purple-dark: #302244;
+    --purple-light: #bcaace;
+    --purple-pale: #f4eff8;
+    --purple-border: #e3d9eb;
+    --text: #24142f;
+    --muted: #716778;
+    --background: #f7f4fa;
+    --white: #ffffff;
+    --green: #36a765;
+    --green-dark: #21844d;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Maven Pro", sans-serif;
+    background: var(--background);
+    color: var(--text);
+}
+
+button,
+input {
+    font: inherit;
+}
+
+header {
+    min-height: 126px;
+    background: var(--purple-light);
+    padding: 20px 4.5%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    color: var(--purple);
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.brand img {
+    height: 82px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+}
+
+.brand-title {
+    display: none;
+}
+
+nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+nav a,
+nav button {
+    color: var(--purple);
+    text-decoration: none;
+    padding: 11px 14px;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    transition: background .18s ease, color .18s ease;
+}
+
+nav a:hover,
+nav button:hover {
+    background: rgba(61,45,90,.10);
+}
+
+nav a.active {
+    background: var(--purple);
+    color: white;
+}
+
+.hero {
+    position: relative;
+    background:
+        linear-gradient(rgba(61,45,90,.30),rgba(61,45,90,.30)),
+        url("./crew-portal-bg.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: white;
+    padding: 68px 6%;
+    overflow: hidden;
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg,rgba(45,32,64,.22),rgba(61,45,90,.04));
+    pointer-events: none;
+}
+
+.hero-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.hero-inner::before {
+    content: "VIAVIA OPERATIONS";
+    display: block;
+    margin-bottom: 10px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: .14em;
+}
+
+.hero h1 {
+    margin: 0 0 10px;
+    font-size: clamp(38px, 5vw, 58px);
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: -.035em;
+}
+
+.hero p {
+    margin: 0;
+    max-width: 650px;
+    font-size: 17px;
+    line-height: 1.55;
+    color: rgba(255,255,255,.95);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 32px auto;
+    padding: 0 20px;
+}
+
+.connection-status {
+    background: white;
+    border: 1px solid var(--purple-border);
+    border-radius: 14px;
+    padding: 15px 18px;
+    margin-bottom: 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    color: var(--muted);
+    font-size: 13px;
+    box-shadow: 0 4px 14px rgba(61,45,90,.035);
+}
+
+.connection-left {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+.connection-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #b8afbd;
+}
+
+.connection-dot.connected {
+    background: var(--green);
+    box-shadow: 0 0 0 4px rgba(54,167,101,.12);
+}
+
+.connection-status strong {
+    color: var(--purple);
+}
+
+.summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.summary-card {
+    background: white;
+    border: 1px solid var(--purple-border);
+    border-radius: 15px;
+    padding: 21px;
+    box-shadow: 0 5px 18px rgba(61,45,90,.045);
+}
+
+.summary-label {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 8px;
+}
+
+.summary-value {
+    font-size: 29px;
+    font-weight: 800;
+    color: var(--purple);
+}
+
+.notice {
+    background: var(--purple-pale);
+    border: 1px solid var(--purple-border);
+    border-radius: 13px;
+    padding: 16px 18px;
+    margin-bottom: 24px;
+    color: #554662;
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.error-box {
+    display: none;
+    background: #fff0f0;
+    border: 1px solid #efc6c6;
+    color: #922f2f;
+    border-radius: 12px;
+    padding: 15px 18px;
+    margin-bottom: 24px;
+    font-size: 14px;
+}
+
+.loading,
+.empty {
+    background: white;
+    border: 1px solid var(--purple-border);
+    border-radius: 16px;
+    padding: 50px 25px;
+    text-align: center;
+    box-shadow: 0 5px 18px rgba(61,45,90,.045);
+}
+
+.loading {
+    color: var(--muted);
+}
+
+.empty h2 {
+    margin: 0 0 10px;
+    color: var(--purple);
+}
+
+.empty p {
+    color: var(--muted);
+    margin-bottom: 22px;
+    line-height: 1.55;
+}
+
+.button {
+    display: inline-block;
+    background: var(--purple);
+    color: white;
+    text-decoration: none;
+    border: none;
+    border-radius: 9px;
+    padding: 11px 17px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.button:hover {
+    background: var(--purple-dark);
+}
+
+.trip-card {
+    background: white;
+    border: 1px solid var(--purple-border);
+    border-radius: 16px;
+    margin-bottom: 22px;
+    overflow: hidden;
+    box-shadow: 0 5px 18px rgba(61,45,90,.05);
+}
+
+.trip-header {
+    background: #fbf9fd;
+    border-bottom: 1px solid var(--purple-border);
+    padding: 21px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.trip-code {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--purple);
+}
+
+.trip-route {
+    margin-top: 5px;
+    color: #5f5366;
+    font-size: 14px;
+}
+
+.trip-date {
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.status {
+    background: #e8f7ed;
+    color: var(--green-dark);
+    border: 1px solid #bfe5cc;
+    border-radius: 999px;
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.status.completed {
+    background: var(--purple-pale);
+    color: var(--purple);
+    border-color: var(--purple-border);
+}
+
+.trip-body {
+    padding: 22px;
+}
+
+.trip-meta {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.meta-box {
+    background: #faf8fc;
+    border: 1px solid #e8e1ed;
+    border-radius: 10px;
+    padding: 13px;
+}
+
+.meta-label {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 5px;
+}
+
+.meta-value {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.section-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--purple);
+    margin: 0 0 12px;
+}
+
+.flight-leg {
+    border: 1px solid var(--purple-border);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
+}
+
+.flight-main {
+    padding: 17px;
+    display: grid;
+    grid-template-columns: 115px 1fr 180px;
+    gap: 18px;
+    align-items: center;
+}
+
+.flight-number {
+    font-weight: 800;
+    color: var(--purple);
+    font-size: 16px;
+}
+
+.aircraft {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.route {
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.times {
+    margin-top: 5px;
+    font-size: 13px;
+    color: #66586c;
+}
+
+.flight-actions {
+    text-align: right;
+}
+
+.small-button {
+    display: inline-block;
+    padding: 8px 11px;
+    border-radius: 7px;
+    background: var(--purple-pale);
+    color: var(--purple);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 800;
+    margin-left: 5px;
+}
+
+.small-button:hover {
+    background: #e8def0;
+}
+
+
+.trip-footer {
+    border-top: 1px solid var(--purple-border);
+    padding: 17px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.award-info {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.footer-links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.drop-trip-button {
+    display: inline-block;
+    padding: 8px 11px;
+    border-radius: 7px;
+    border: 1px solid #e1bcbc;
+    background: #fff3f3;
+    color: #9a3030;
+    font-size: 12px;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.drop-trip-button:hover {
+    background: #fbe2e2;
+}
+
+.drop-trip-button:disabled,
+.modal-button:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+.drop-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(36,20,47,.58);
+}
+
+.drop-modal-backdrop.open {
+    display: flex;
+}
+
+.drop-modal {
+    width: min(480px, 100%);
+    background: white;
+    border: 1px solid var(--purple-border);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(36,20,47,.24);
+    overflow: hidden;
+}
+
+.drop-modal-header {
+    padding: 22px 24px 12px;
+}
+
+.drop-modal-header h2 {
+    margin: 0;
+    color: var(--purple);
+    font-size: 22px;
+}
+
+.drop-modal-body {
+    padding: 0 24px 22px;
+    color: #66586c;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.drop-modal-trip {
+    margin-top: 14px;
+    padding: 13px 15px;
+    border-radius: 10px;
+    background: #faf8fc;
+    border: 1px solid #e8e1ed;
+    color: var(--text);
+    font-weight: 800;
+}
+
+.drop-modal-error {
+    display: none;
+    margin-top: 14px;
+    padding: 11px 13px;
+    border-radius: 9px;
+    background: #fff0f0;
+    border: 1px solid #efc6c6;
+    color: #922f2f;
+    font-size: 13px;
+}
+
+.drop-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px 22px;
+    border-top: 1px solid #ece6f0;
+}
+
+.modal-button {
+    border: 0;
+    border-radius: 9px;
+    padding: 10px 15px;
+    font-family: inherit;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.modal-button.keep {
+    background: var(--purple-pale);
+    color: var(--purple);
+}
+
+.modal-button.drop {
+    background: #a43b3b;
+    color: white;
+}
+
+.modal-button.drop:hover {
+    background: #892f2f;
+}
+
+/* Multi-day pairing / pay / layover presentation */
+.trip-meta { grid-template-columns: repeat(4, 1fr); }
+.trip-day { border:1px solid var(--purple-border); border-radius:13px; overflow:hidden; margin:0 0 18px; background:#fff; }
+.trip-day-header { background:var(--purple-pale); padding:13px 16px; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; font-size:13px; font-weight:800; color:var(--purple); }
+.trip-day-meta { padding:11px 16px; display:flex; gap:18px; flex-wrap:wrap; border-bottom:1px solid #eee8f1; color:var(--muted); font-size:12px; }
+.trip-day-meta strong { color:var(--purple); }
+.trip-day .flight-leg { margin:12px 14px; }
+.overnight { margin:12px 14px 14px; padding:13px 14px; border-radius:10px; background:#faf8fc; border:1px solid var(--purple-border); color:var(--muted); font-size:13px; line-height:1.6; }
+.overnight strong { color:var(--purple); }
+.pay-note { margin-top:4px; color:var(--muted); font-size:11px; line-height:1.4; }
+@media (max-width:950px) { .trip-meta { grid-template-columns:repeat(2,1fr); } }
+@media (max-width:550px) { .trip-meta { grid-template-columns:1fr; } }
+
+footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    padding: 28px 20px 40px;
+}
+
+@media (max-width: 1050px) {
+    header {
+        padding: 18px 24px;
+    }
+
+    .brand img {
+        height: 68px;
+    }
+
+    nav a,
+    nav button {
+        padding: 9px 10px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 950px) {
+    .trip-meta {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 850px) {
+    header {
+        min-height: auto;
+        padding: 18px 20px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    nav {
+        justify-content: flex-start;
+    }
+
+    .hero {
+        padding: 50px 20px;
+    }
+
+    .container {
+        padding: 0 15px;
+    }
+
+    .summary {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .flight-main {
+        grid-template-columns: 1fr;
+    }
+
+    .flight-actions {
+        text-align: left;
+    }
+
+    .small-button {
+        margin-left: 0;
+        margin-right: 5px;
+        margin-top: 5px;
+    }
+}
+
+@media (max-width: 550px) {
+    .summary,
+    .trip-meta {
+        grid-template-columns: 1fr;
+    }
+
+    .trip-header {
+        flex-direction: column;
+    }
+
+    .brand img {
+        height: 58px;
+    }
+}
+
+.completed-flight-row{background:#f2f8f4}
+.completed-flight-badge{display:inline-block;margin-left:6px;padding:3px 7px;border-radius:999px;background:#e7f5ec;color:#21844d;font-size:10px;font-weight:800}
+.trip-completed-badge{background:#f4eff8!important;color:#3d2d5a!important}
+</style>
+</head>
+
+<body>
+
+<header>
+
+    <a class="brand" href="pilot-center.html">
+        <img src="viavia-logo.png" alt="Viavia Airlines">
+        <div class="brand-title">Viavia Airlines</div>
+    </a>
+
+    <nav>
+        <a href="pilot-center.html">Crew Portal</a>
+        <a href="available-bids.html">Available Trips</a>
+        <a href="my-trips.html" class="active">My Trips</a>
+        <a href="crew-calendar.html">Crew Calendar</a>
+        <a href="flight-planning.html">Flight Planning</a>
+        <a href="index.html">Main Site</a>
+
+        <button
+            type="button"
+            id="signOutButton"
+        >
+            Sign Out
+        </button>
+    </nav>
+
+</header>
+
+
+<section class="hero">
+
+    <div class="hero-inner">
+
+        <h1>My Trips</h1>
+
+        <p>
+            Your awarded Viavia Airlines pairings and flight assignments.
+        </p>
+
+    </div>
+
+</section>
+
+
+<main class="container">
+
+    <div class="connection-status">
+
+        <div class="connection-left">
+
+            <span
+                id="connectionDot"
+                class="connection-dot"
+            ></span>
+
+            <span>
+                <strong>Viavia Operations:</strong>
+                <span id="connectionText">
+                    Connecting...
+                </span>
+            </span>
+
+        </div>
+
+        <span id="pilotDisplay">
+            Checking pilot account...
+        </span>
+
+    </div>
+
+
+    <div
+        id="errorBox"
+        class="error-box"
+    ></div>
+
+
+    <div class="summary">
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Awarded Trips
+            </div>
+
+            <div
+                class="summary-value"
+                id="tripCount"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Flight Legs
+            </div>
+
+            <div
+                class="summary-value"
+                id="legCount"
+            >
+                0
+            </div>
+
+        </div>
+
+
+        <div class="summary-card">
+
+            <div class="summary-label">
+                Pilot Base
+            </div>
+
+            <div
+                class="summary-value"
+                id="pilotBase"
+            >
+                —
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="notice">
+
+        Trips appear here immediately after they are
+        <strong>claimed and automatically awarded</strong>
+        through Available Trips.
+
+    </div>
+
+
+    <div id="tripsContainer">
+
+        <div class="loading">
+            Loading your awarded trips...
+        </div>
+
+    </div>
+
+</main>
+
+
+<div
+    id="dropTripModal"
+    class="drop-modal-backdrop"
+    aria-hidden="true"
+>
+    <div
+        class="drop-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dropTripModalTitle"
+    >
+
+        <div class="drop-modal-header">
+            <h2 id="dropTripModalTitle">
+                Drop Trip?
+            </h2>
+        </div>
+
+        <div class="drop-modal-body">
+
+            You are about to drop this awarded trip.
+            The assignment will be released and may immediately
+            become available to another Viavia pilot.
+
+            <div
+                id="dropTripModalTrip"
+                class="drop-modal-trip"
+            ></div>
+
+            <div
+                id="dropTripModalError"
+                class="drop-modal-error"
+            ></div>
+
+        </div>
+
+        <div class="drop-modal-actions">
+
+            <button
+                type="button"
+                id="keepTripButton"
+                class="modal-button keep"
+            >
+                Keep Trip
+            </button>
+
+            <button
+                type="button"
+                id="confirmDropTripButton"
+                class="modal-button drop"
+            >
+                Drop Trip
+            </button>
+
+        </div>
+
+    </div>
+</div>
+
+
+<footer>
+    Viavia Airlines · Crew Portal · Your destination, via us!
+</footer>
+
+
+<script src="viavia-schedule.js?v=20260927-multiday"></script>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="viavia-supabase.js?v=20260927"></script>
+
+
+<script>
+"use strict";
+
+
+/* ============================================================
+   VIAVIA MY TRIPS
+   Supabase Assignment System
+   Version: 2026-09-27
+   ============================================================ */
+
+
+let currentUser = null;
+let currentPilot = null;
+let completedFlightKeys = new Set();
+let masterPairings = [];
+let myAssignments = [];
+let myTripAircraftAssignments = new Map();
+
+let pendingDropAssignment = null;
+let dropTripInProgress = false;
+
+
+/* ============================================================
+   HTML
+   ============================================================ */
+
+function escapeHTML(value) {
+
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+
+/* ============================================================
+   DATE
+   ============================================================ */
+
+function formatOperatingDate(value) {
+
+    if (!value) {
+        return "—";
+    }
+
+    const parts =
+        String(value).split("-");
+
+    if (parts.length !== 3) {
+        return value;
+    }
+
+    const date =
+        new Date(
+            Number(parts[0]),
+            Number(parts[1]) - 1,
+            Number(parts[2])
+        );
+
+    return date.toLocaleDateString(
+        undefined,
+        {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            year: "numeric"
+        }
+    );
+
+}
+
+
+function formatAwardTime(value) {
+
+    if (!value) {
+        return "—";
+    }
+
+    const date =
+        new Date(value);
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+        return "—";
+    }
+
+    return date.toLocaleString(
+        undefined,
+        {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit"
+        }
+    );
+
+}
+
+
+/* ============================================================
+   MASTER SCHEDULE
+   ============================================================ */
+
+function getAllPairings() {
+
+    if (
+        typeof generateViaviaPairings !==
+        "function"
+    ) {
+
+        throw new Error(
+            "Viavia master schedule could not generate pairings."
+        );
+
+    }
+
+    return generateViaviaPairings({
+        maxDays: 4
+    }) || [];
+
+}
+
+
+function getPairingId(pairing) {
+
+    return String(
+        pairing?.pairingId || ""
+    ).trim();
+
+}
+
+
+function findMasterPairing(tripId) {
+
+    return masterPairings.find(
+        pairing =>
+            getPairingId(pairing) ===
+            String(tripId)
+    ) || null;
+
+}
+
+
+/* ============================================================
+   FLIGHT HELPERS
+   ============================================================ */
+
+function getFlightNumber(flight) {
+
+    return (
+        flight?.flightNumber ||
+        "—"
+    );
+
+}
+
+
+function getAircraft(flight) {
+
+    return (
+        flight?.aircraft ||
+        "—"
+    );
+
+}
+
+
+function getDeparture(flight) {
+
+    return (
+        flight?.departure ||
+        "—"
+    );
+
+}
+
+
+function getArrival(flight) {
+
+    return (
+        flight?.arrival ||
+        "—"
+    );
+
+}
+
+
+function getOrigin(flight) {
+
+    return (
+        flight?.origin ||
+        "—"
+    );
+
+}
+
+
+function getDestination(flight) {
+
+    return (
+        flight?.destination ||
+        "—"
+    );
+
+}
+
+
+/* ============================================================
+   RECONSTRUCT TRIP
+
+   The database stores the assignment.
+   viavia-schedule.js remains the authoritative source for
+   scheduled flight details.
+   ============================================================ */
+
+function normalizeAssignmentFlightNumbers(value) {
+
+    if (Array.isArray(value)) {
+
+        return value
+            .map(number =>
+                String(number || "")
+                    .trim()
+                    .toUpperCase()
+            )
+            .filter(Boolean);
+
+    }
+
+
+    if (typeof value === "string") {
+
+        const trimmed =
+            value.trim();
+
+
+        if (!trimmed) {
+            return [];
+        }
+
+
+        try {
+
+            const parsed =
+                JSON.parse(trimmed);
+
+
+            if (Array.isArray(parsed)) {
+
+                return parsed
+                    .map(number =>
+                        String(number || "")
+                            .trim()
+                            .toUpperCase()
+                    )
+                    .filter(Boolean);
+
+            }
+
+        } catch (error) {
+            /* Not JSON; continue with delimited-text parsing. */
+        }
+
+
+        return trimmed
+            .split(/[\s,;|]+/)
+            .map(number =>
+                String(number || "")
+                    .trim()
+                    .toUpperCase()
+            )
+            .filter(Boolean);
+
+    }
+
+
+    return [];
+}
+
+
+function buildTripData(assignment) {
+
+    /*
+     * The awarded Supabase assignment is authoritative.
+     *
+     * Trip IDs can change when pairings are regenerated, so an
+     * already-awarded trip must never depend on the current
+     * pairing generator to reconstruct its flights.
+     */
+
+    const flightNumbers =
+        normalizeAssignmentFlightNumbers(
+            assignment.flight_numbers
+        );
+
+
+    const flights =
+        flightNumbers
+            .map(number => {
+
+                if (
+                    typeof getViaviaFlight !==
+                    "function"
+                ) {
+                    return null;
+                }
+
+
+                return getViaviaFlight(
+                    number
+                );
+
+            })
+            .filter(Boolean);
+
+
+    /*
+     * Only use the current pairing as a fallback for older
+     * assignment rows that do not contain flight_numbers.
+     */
+
+    let pairing = null;
+
+
+    if (
+        typeof generateViaviaPairings ===
+            "function"
+    ) {
+
+        try {
+
+            const pairings =
+                generateViaviaPairings({
+                    maxDays: 4
+                }) || [];
+
+
+            pairing =
+                pairings.find(
+                    item =>
+                        String(
+                            item?.pairingId || ""
+                        ).trim() ===
+                        String(
+                            assignment.trip_id || ""
+                        ).trim()
+                ) || null;
+
+        } catch (error) {
+
+            console.warn(
+                "Viavia My Trips: Pairing fallback was unavailable.",
+                error
+            );
+
+        }
+
+    }
+
+
+    const resolvedFlights =
+        flights.length
+            ? flights
+            : (
+                Array.isArray(
+                    pairing?.flights
+                )
+                    ? pairing.flights
+                    : []
+            );
+
+
+    const assignmentAircraft =
+        Array.isArray(
+            assignment.aircraft
+        )
+            ? assignment.aircraft
+            : (
+                typeof assignment.aircraft ===
+                    "string" &&
+                assignment.aircraft.trim()
+                    ? assignment.aircraft
+                        .split(/[\s,;|/]+/)
+                        .map(value =>
+                            value.trim()
+                        )
+                        .filter(Boolean)
+                    : []
+            );
+
+
+    return {
+
+        pairing,
+
+        flights:
+            resolvedFlights,
+
+        route:
+            assignment.route ||
+            pairing?.route ||
+            "—",
+
+        base:
+            assignment.base ||
+            pairing?.base ||
+            "—",
+
+        aircraft:
+            assignmentAircraft.length
+                ? assignmentAircraft
+                : (
+                    Array.isArray(
+                        pairing?.aircraft
+                    )
+                        ? pairing.aircraft
+                        : []
+                )
+
+    };
+
+}
+
+
+/* ============================================================
+   MULTI-DAY / DUTY / CREDIT / PAY / HOTEL HELPERS
+   ============================================================ */
+
+const VIAVIA_MONTHLY_GUARANTEE_HOURS = 75;
+const VIAVIA_PILOT_PAY_SCALE = Object.freeze({
+    captain: Object.freeze([227.12,237.06,240.41,244.37,247.20,250.06,253.60,258.88,263.69,270.35,276.43,285.03]),
+    first_officer: Object.freeze([78.48,127.85,140.38,150.03,156.35,160.12,165.06,168.95,174.13,178.99,182.29,186.49])
+});
+
+const VIAVIA_CREW_HOTELS = Object.freeze({
+    ATL:Object.freeze(["Hyatt Place Atlanta Airport-South","Embassy Suites by Hilton Atlanta Airport","Hotel Indigo Atlanta Airport - College Park"]),
+    BWI:Object.freeze(["Holiday Inn Baltimore BWI Airport","Aloft BWI Baltimore Washington International Airport","Hilton Baltimore BWI Airport"]),
+    CLT:Object.freeze(["Hilton Charlotte Airport","Hyatt Place Charlotte Airport","Hampton Inn & Suites Charlotte-Airport"]),
+    CMH:Object.freeze(["Fairfield Inn & Suites Columbus Airport","Hampton Inn Columbus-Airport","Hilton Garden Inn Columbus Airport"]),
+    CTG:Object.freeze(["Varanasi Hotel Boutique Aeropuerto","Charme 64 Casa Boutique Aeropuerto"]),
+    DFW:Object.freeze(["Hyatt Regency DFW International Airport","Hyatt Place DFW","The Westin Dallas Fort Worth Airport"]),
+    EYW:Object.freeze(["Hampton Inn Key West","DoubleTree Resort by Hilton Hotel Grand Key - Key West","Fairfield Inn & Suites Key West at The Keys Collection"]),
+    FLL:Object.freeze(["Le Méridien Dania Beach at Fort Lauderdale Airport","Courtyard Fort Lauderdale Airport & Cruise Port","Homewood Suites by Hilton Ft. Lauderdale Airport-Cruise Port"]),
+    JAX:Object.freeze(["Tru by Hilton Jacksonville Airport I-95","DoubleTree by Hilton Hotel Jacksonville Airport","Hampton Inn & Suites Jacksonville-Airport"]),
+    JFK:Object.freeze(["Marriott New York JFK Airport","Residence Inn by Marriott New York JFK Airport","Hampton Inn NY-JFK"]),
+    LAS:Object.freeze(["DoubleTree by Hilton Las Vegas Airport","Hampton Inn & Suites Las Vegas Airport","La Quinta Inn & Suites by Wyndham Las Vegas Airport South"]),
+    LAX:Object.freeze(["Hyatt Regency Los Angeles International Airport","Los Angeles Airport Marriott","Hilton Los Angeles Airport"]),
+    LGA:Object.freeze(["DoubleTree by Hilton New York LaGuardia Airport","LaGuardia Plaza Hotel","Hampton Inn New York - LaGuardia Airport"]),
+    LIT:Object.freeze(["Fairfield Inn & Suites Little Rock Airport","Holiday Inn Express Little Rock-Airport","Comfort Inn & Suites Airport"]),
+    MCO:Object.freeze(["Hyatt House Orlando Airport","Hilton Garden Inn Orlando Airport","Hampton Inn & Suites Orlando Airport at Gateway Village"]),
+    MDE:Object.freeze(["Hotel Movich Las Lomas","Hotel Santiago de Arma - Rionegro - Aeropuerto"]),
+    MFR:Object.freeze(["Courtyard Medford Airport","SpringHill Suites Medford Airport","My Place Hotel-Medford, OR"]),
+    MIA:Object.freeze(["Courtyard Miami Airport","Fairfield Inn & Suites Miami Airport South","Embassy Suites by Hilton Miami International Airport"]),
+    MKE:Object.freeze(["Home2 Suites by Hilton Milwaukee Airport","Hilton Garden Inn Milwaukee Airport","Hyatt Place Milwaukee Airport"]),
+    PTY:Object.freeze(["Riande Aeropuerto Hotel & Casino","Crowne Plaza Panama Airport"]),
+    PUJ:Object.freeze(["Four Points by Sheraton Puntacana","AC Hotel by Marriott Punta Cana"]),
+    RSW:Object.freeze(["Drury Inn & Suites Fort Myers Airport FGCU","Crowne Plaza Ft. Myers Gulf Coast","SpringHill Suites Fort Myers Airport"]),
+    SBA:Object.freeze(["Hampton Inn Santa Barbara/Goleta","Residence Inn Santa Barbara Goleta","Hilton Garden Inn Santa Barbara/Goleta"]),
+    SDQ:Object.freeze(["Hampton by Hilton Santo Domingo Airport","Quality Hotel Real Aeropuerto Santo Domingo"]),
+    SEA:Object.freeze(["Hilton Garden Inn Seattle Airport","Coast Gateway Hotel","Cedarbrook Lodge"]),
+    SJU:Object.freeze(["San Juan Airport Hotel","Courtyard by Marriott Isla Verde Beach Resort","Hampton Inn & Suites San Juan"]),
+    SMF:Object.freeze(["Hilton Garden Inn Sacramento Airport Natomas","Hampton Inn & Suites Sacramento-Airport-Natomas","Holiday Inn Express & Suites Sacramento Airport Natomas"]),
+    SNA:Object.freeze(["Irvine Marriott","Hilton Irvine/Orange County Airport","Hampton Inn & Suites Irvine-Orange County Airport"]),
+    SXM:Object.freeze(["The Morgan Resort & Spa","Royal Islander Club Resort La Plage","Sonesta Maho Beach Resort, Casino & Spa"]),
+    TUS:Object.freeze(["Hampton Inn Tucson-Airport","Hilton Garden Inn Tucson Airport","Four Points by Sheraton Tucson Airport"]),
+    VPS:Object.freeze(["Holiday Inn Express & Suites Niceville - Eglin Area","Comfort Suites Niceville Near Eglin Air Force Base","Best Western Niceville - Eglin AFB Hotel"]),
+    XPL:Object.freeze(["Tru by Hilton Distrito Palmerola","Stay Express • Palmerola - XPL"])
+});
+
+function parseClockMinutes(value) {
+    const match = String(value || "").match(/^(\d{1,2}):(\d{2})$/);
+    return match ? Number(match[1]) * 60 + Number(match[2]) : null;
+}
+function formatClockMinutes(value) {
+    if (!Number.isFinite(value)) return "—";
+    value = Math.round(value) % 1440;
+    if (value < 0) value += 1440;
+    return `${String(Math.floor(value / 60)).padStart(2,"0")}:${String(value % 60).padStart(2,"0")}`;
+}
+function addDaysToOperatingDate(value, days) {
+    const p = String(value || "").split("-").map(Number);
+    if (p.length !== 3 || p.some(Number.isNaN)) return value;
+    const d = new Date(p[0], p[1]-1, p[2]);
+    d.setDate(d.getDate() + Number(days || 0));
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function formatShortOperatingDate(value) {
+    const p = String(value || "").split("-").map(Number);
+    if (p.length !== 3 || p.some(Number.isNaN)) return value || "—";
+    return new Date(p[0],p[1]-1,p[2]).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric",year:"numeric"});
+}
+function getPairingDayForFlight(trip, flight, index) {
+    const direct = Number(flight?.pairingDay);
+    if (Number.isFinite(direct) && direct > 0) return direct;
+    const match = trip?.pairing?.flights?.find(f => String(getFlightNumber(f)) === String(getFlightNumber(flight)));
+    const fromPairing = Number(match?.pairingDay);
+    if (Number.isFinite(fromPairing) && fromPairing > 0) return fromPairing;
+    return 1;
+}
+function getDutyDaysForTrip(trip) {
+    const map = new Map();
+    trip.flights.forEach((flight,index) => {
+        const day = getPairingDayForFlight(trip,flight,index);
+        if (!map.has(day)) map.set(day,[]);
+        map.get(day).push(flight);
+    });
+    return [...map.entries()].sort((a,b)=>a[0]-b[0]).map(([day,flights]) => ({
+        day, flights,
+        startAirport:getOrigin(flights[0]),
+        endAirport:getDestination(flights[flights.length-1])
+    }));
+}
+function getTripDays(trip) {
+    const pairingDays = Number(trip?.pairing?.days);
+    if (Number.isFinite(pairingDays) && pairingDays > 0) return pairingDays;
+    const duties = getDutyDaysForTrip(trip);
+    return duties.length ? Math.max(...duties.map(d=>d.day)) : 1;
+}
+function getDutyShowTime(duty) {
+    const dep = parseClockMinutes(getDeparture(duty?.flights?.[0]));
+    return dep === null ? "—" : formatClockMinutes(dep - 60);
+}
+function getDutyReleaseTime(duty) {
+    const arr = parseClockMinutes(getArrival(duty?.flights?.[duty.flights.length-1]));
+    return arr === null ? "—" : formatClockMinutes(arr + 15);
+}
+function getFlightBlockMinutes(flight) {
+    const dep=parseClockMinutes(getDeparture(flight)), arr=parseClockMinutes(getArrival(flight));
+    if (dep===null || arr===null) return 0;
+    let minutes=arr-dep;
+    if (flight?.nextDay || minutes<0) minutes += 1440;
+    return Math.max(0,minutes);
+}
+function getPairingBlockMinutes(trip) { return trip.flights.reduce((sum,f)=>sum+getFlightBlockMinutes(f),0); }
+function getPairingCreditMinutes(trip) { return Math.max(getPairingBlockMinutes(trip),getTripDays(trip)*300); }
+function formatDuration(minutes) {
+    const v=Math.max(0,Math.round(Number(minutes)||0));
+    return `${Math.floor(v/60)}:${String(v%60).padStart(2,"0")}`;
+}
+function getDutyMinutes(duty) {
+    const show=parseClockMinutes(getDutyShowTime(duty)), release=parseClockMinutes(getDutyReleaseTime(duty));
+    if(show===null||release===null)return 0;
+    let v=release-show; if(v<0)v+=1440; return v;
+}
+function getTAFBMinutes(trip) {
+    const duties=getDutyDaysForTrip(trip); if(!duties.length)return 0;
+    const first=duties[0], last=duties[duties.length-1];
+    const show=parseClockMinutes(getDutyShowTime(first)), release=parseClockMinutes(getDutyReleaseTime(last));
+    if(show===null||release===null)return 0;
+    return (last.day-first.day)*1440 + release-show + (release<show && last.day===first.day ? 1440 : 0);
+}
+function normalizePilotPosition() {
+    const r=String(currentPilot?.position||currentPilot?.rank||currentPilot?.pilot_position||"Captain").toLowerCase();
+    return r.includes("first")||r==="fo"||r.includes("officer") ? "first_officer" : "captain";
+}
+function getPilotLongevityYear() {
+    const y=[currentPilot?.longevity_year,currentPilot?.pay_year,currentPilot?.years_of_service].map(Number).find(v=>Number.isFinite(v)&&v>=1);
+    return Math.min(12,Math.max(1,Math.floor(y||1)));
+}
+function getPilotHourlyRate() { return VIAVIA_PILOT_PAY_SCALE[normalizePilotPosition()][getPilotLongevityYear()-1]; }
+function getEstimatedTripPay(trip) { return getPairingCreditMinutes(trip)/60*getPilotHourlyRate(); }
+function getCrewHotel(airport, tripCode, day) {
+    const hotels=VIAVIA_CREW_HOTELS[String(airport||"").toUpperCase()];
+    if(!hotels?.length)return "Crew hotel assignment pending — contact Viavia Crew Scheduling";
+    const seed=`${tripCode}-${airport}-${day}`; let hash=0;
+    for(let i=0;i<seed.length;i++)hash=((hash<<5)-hash+seed.charCodeAt(i))|0;
+    return hotels[Math.abs(hash)%hotels.length];
+}
+function getTripDateRange(assignment,trip) {
+    const start=assignment.operating_date, days=getTripDays(trip);
+    if(days<=1)return formatOperatingDate(start);
+    const end=addDaysToOperatingDate(start,days-1);
+    const a=start.split("-").map(Number), b=end.split("-").map(Number);
+    const sd=new Date(a[0],a[1]-1,a[2]), ed=new Date(b[0],b[1]-1,b[2]);
+    return `${sd.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"})} – ${ed.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric",year:"numeric"})}`;
+}
+function getOvernightRestMinutes(currentDuty,nextDuty) {
+    const release=parseClockMinutes(getDutyReleaseTime(currentDuty)), show=parseClockMinutes(getDutyShowTime(nextDuty));
+    if(release===null||show===null)return null;
+    return (nextDuty.day-currentDuty.day)*1440 + show-release;
+}
+
+function getFlightOperatingDate(assignment, trip, flight, index) {
+    const day = getPairingDayForFlight(trip, flight, index);
+
+    return addDaysToOperatingDate(
+        assignment.operating_date,
+        Math.max(0, day - 1)
+    );
+}
+
+/* ============================================================
+   AIRCRAFT DISPLAY — PERSISTED AIRCRAFT ASSIGNMENTS
+
+   My Trips reads the same ViaviaAircraft assignment used by
+   Flight Planning. Registration release remains controlled by
+   the existing T-24 aircraft-assignment logic.
+   ============================================================ */
+
+function getMyTripAircraftKey(
+    flightNumber,
+    operatingDate
+) {
+    return [
+        String(flightNumber || "").trim().toUpperCase(),
+        String(operatingDate || "").trim()
+    ].join("|");
+}
+
+
+function aircraftVariantForMyTrips(family) {
+
+    const variants = {
+        A319: "A319-132",
+        A320: "A320-232",
+        A321: "A321-231"
+    };
+
+    const value =
+        String(family || "")
+            .trim()
+            .toUpperCase();
+
+    return variants[value] || value || "—";
+}
+
+
+async function loadAircraftAssignmentsForMyTrips() {
+
+    myTripAircraftAssignments = new Map();
+
+    if (
+        typeof ViaviaAircraft === "undefined" ||
+        !ViaviaAircraft ||
+        typeof ViaviaAircraft.getAssignment !== "function"
+    ) {
+        console.warn(
+            "Viavia My Trips: aircraft assignment reader unavailable."
+        );
+        return;
+    }
+
+    const requests = [];
+
+    for (const tripAssignment of myAssignments) {
+
+        const trip = buildTripData(tripAssignment);
+
+        trip.flights.forEach((flight, index) => {
+
+            const flightNumber = getFlightNumber(flight);
+
+            const operatingDate = getFlightOperatingDate(
+                tripAssignment,
+                trip,
+                flight,
+                index
+            );
+
+            if (
+                !flightNumber ||
+                flightNumber === "—" ||
+                !operatingDate
+            ) {
+                return;
+            }
+
+            requests.push(
+                (async () => {
+                    try {
+                        /*
+                         * My Trips is read-only for aircraft rotations.
+                         * Aircraft assignments are created centrally by the
+                         * chronological rotation generator, not by page loads.
+                         */
+                        const aircraftAssignment =
+                            await ViaviaAircraft.getAssignment(
+                                flightNumber,
+                                operatingDate
+                            );
+
+                        if (!aircraftAssignment) {
+                            return;
+                        }
+
+                        myTripAircraftAssignments.set(
+                            getMyTripAircraftKey(
+                                flightNumber,
+                                operatingDate
+                            ),
+                            {
+                                family: aircraftAssignment.aircraft_family,
+                                variant: aircraftVariantForMyTrips(
+                                    aircraftAssignment.aircraft_family
+                                ),
+                                registration: aircraftAssignment.registration,
+                                scheduledDeparture:
+                                    aircraftAssignment.scheduled_departure || null
+                            }
+                        );
+
+                    } catch (error) {
+                        console.error(
+                            `Viavia My Trips: could not read aircraft assignment for ${flightNumber} on ${operatingDate}.`,
+                            error
+                        );
+                    }
+                })()
+            );
+        });
+    }
+
+    await Promise.all(requests);
+}
+
+
+function getMyTripAircraftDisplay(
+    flight,
+    operatingDate
+) {
+
+    const flightNumber = getFlightNumber(flight);
+    const family = getAircraft(flight);
+    const variant = aircraftVariantForMyTrips(family);
+
+    const display =
+        myTripAircraftAssignments.get(
+            getMyTripAircraftKey(
+                flightNumber,
+                operatingDate
+            )
+        ) || null;
+
+    const assignedVariant = display?.variant || variant;
+
+    /*
+     * Keep the T-24 registration-release rule, but use the exact
+     * UTC scheduled_departure stored with the persisted aircraft
+     * assignment. This avoids treating an airport-local departure
+     * time as if it were the browser's local timezone.
+     */
+    if (display?.scheduledDeparture) {
+        const departure = new Date(display.scheduledDeparture);
+
+        if (!Number.isNaN(departure.getTime())) {
+            const hoursUntilDeparture =
+                (departure.getTime() - Date.now()) / 3600000;
+
+            if (hoursUntilDeparture > 24) {
+                return `${assignedVariant} · Registration pending`;
+            }
+        }
+    }
+
+    const registration =
+        display?.registration
+            ? String(display.registration)
+                .trim()
+                .toUpperCase()
+            : null;
+
+    if (registration) {
+        return `${assignedVariant} · ${registration}`;
+    }
+
+    return `${variant} · Registration pending`;
+}
+
+
+/* ============================================================
+   RENDER ONE TRIP
+   ============================================================ */
+
+function renderTrip(assignment) {
+    const trip = buildTripData(assignment);
+    const flights = trip.flights;
+    const aircraft = trip.aircraft.length
+        ? [...new Set(trip.aircraft)].join(" / ")
+        : flights.length ? [...new Set(flights.map(getAircraft).filter(Boolean))].join(" / ") : "—";
+    const status = String(assignment.status || "awarded").toLowerCase();
+    const statusText = status === "completed" ? "Completed" : "Awarded";
+    const statusClass = status === "completed" ? "status completed" : "status";
+    const duties = getDutyDaysForTrip(trip);
+    const tripDays = getTripDays(trip);
+    const block = getPairingBlockMinutes(trip);
+    const credit = getPairingCreditMinutes(trip);
+    const tafb = getTAFBMinutes(trip);
+    const rate = getPilotHourlyRate();
+    const pay = getEstimatedTripPay(trip);
+    const position = normalizePilotPosition() === "captain" ? "Captain" : "First Officer";
+    const year = getPilotLongevityYear();
+
+    let daysHTML = "";
+    if (!flights.length) {
+        daysHTML = `<div style="padding:20px;border:1px solid #eadfeb;border-radius:10px;color:#75627f;">Flight details could not be reconstructed from the current master schedule.</div>`;
+    } else {
+        daysHTML = duties.map((duty,dutyIndex) => {
+            const actualDate = addDaysToOperatingDate(assignment.operating_date,duty.day-1);
+            const finalDay = dutyIndex === duties.length-1;
+            const nextDuty = duties[dutyIndex+1];
+            const hotel = !finalDay ? getCrewHotel(duty.endAirport,assignment.trip_id,duty.day) : null;
+            const rest = !finalDay ? getOvernightRestMinutes(duty,nextDuty) : null;
+            const legRows = duty.flights.map((flight,index) => {
+                const flightNumber=getFlightNumber(flight);
+                return `<div class="flight-leg"><div class="flight-main"><div><div class="flight-number">${escapeHTML(flightNumber)}</div><div class="aircraft">${escapeHTML(getMyTripAircraftDisplay(flight,actualDate))}</div></div><div><div class="route">${escapeHTML(getOrigin(flight))} → ${escapeHTML(getDestination(flight))}</div><div class="times">${escapeHTML(getDeparture(flight))} — ${escapeHTML(getArrival(flight))}${flight.nextDay?" +1":""}</div></div><div class="flight-actions"><a class="small-button" href="flight-planning.html?flight=${encodeURIComponent(flightNumber)}&date=${encodeURIComponent(actualDate)}&trip=${encodeURIComponent(assignment.trip_id)}&tripdate=${encodeURIComponent(assignment.operating_date)}">Flight Planning</a>${index===0&&duty.day===1&&assignment.trip_id==="TRIP-001"?`<a class="small-button" href="trip-001.html">Trip Details</a>`:""}</div></div></div>`;
+            }).join("");
+            return `<section class="trip-day"><div class="trip-day-header"><span>DAY ${duty.day} — ${escapeHTML(formatShortOperatingDate(actualDate).toUpperCase())}</span><span>${escapeHTML(duty.startAirport)} → ${escapeHTML(duty.endAirport)}</span></div><div class="trip-day-meta"><span><strong>Show:</strong> ${escapeHTML(getDutyShowTime(duty))} · ${escapeHTML(duty.startAirport)}</span><span><strong>Release:</strong> ${escapeHTML(getDutyReleaseTime(duty))} · ${escapeHTML(duty.endAirport)}</span><span><strong>Duty:</strong> ${formatDuration(getDutyMinutes(duty))}</span><span><strong>Legs:</strong> ${duty.flights.length}</span></div>${legRows}${!finalDay?`<div class="overnight"><strong>Overnight:</strong> ${escapeHTML(duty.endAirport)}<br><strong>Crew Hotel:</strong> ${escapeHTML(hotel)}${rest!==null?`<br><strong>Scheduled Rest:</strong> ${formatDuration(rest)}`:""}</div>`:`<div class="overnight"><strong>Trip Complete:</strong> ${escapeHTML(duty.endAirport)} · Release ${escapeHTML(getDutyReleaseTime(duty))}</div>`}</section>`;
+        }).join("");
+    }
+
+    return `<article class="trip-card"><div class="trip-header"><div><div class="trip-code">${escapeHTML(assignment.trip_id)}</div><div class="trip-route">${escapeHTML(trip.route)}</div><div class="trip-date">${escapeHTML(trip.base)} Base · ${flights.length} Legs · ${tripDays} ${tripDays===1?"Day":"Days"} · ${escapeHTML(getTripDateRange(assignment,trip))}</div></div><div class="${statusClass}">${statusText}</div></div><div class="trip-body"><div class="trip-meta">
+    <div class="meta-box"><div class="meta-label">Trip Length</div><div class="meta-value">${tripDays} ${tripDays===1?"Day":"Days"}</div></div>
+    <div class="meta-box"><div class="meta-label">Block</div><div class="meta-value">${formatDuration(block)}</div></div>
+    <div class="meta-box"><div class="meta-label">Trip Credit</div><div class="meta-value">${formatDuration(credit)}</div></div>
+    <div class="meta-box"><div class="meta-label">TAFB</div><div class="meta-value">${formatDuration(tafb)}</div></div>
+    <div class="meta-box"><div class="meta-label">Estimated Trip Pay</div><div class="meta-value">$${pay.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div class="pay-note">${escapeHTML(position)} · Year ${year} · $${rate.toFixed(2)}/credit hr · ${VIAVIA_MONTHLY_GUARANTEE_HOURS}:00 monthly guarantee</div></div>
+    <div class="meta-box"><div class="meta-label">Aircraft</div><div class="meta-value">${escapeHTML(aircraft)}</div></div>
+    <div class="meta-box"><div class="meta-label">Base</div><div class="meta-value">${escapeHTML(trip.base)}</div></div>
+    </div><h3 class="section-title">Pairing Schedule</h3>${daysHTML}</div><div class="trip-footer"><div class="award-info">Automatically awarded${assignment.awarded_at?` · ${escapeHTML(formatAwardTime(assignment.awarded_at))}`:""}</div><div class="footer-links">${status!=="completed"?`<button type="button" class="drop-trip-button" data-drop-trip="true" data-trip-id="${escapeHTML(assignment.trip_id)}" data-operating-date="${escapeHTML(assignment.operating_date)}">Drop Trip</button>`:""}<a class="small-button" href="crew-calendar.html">Crew Calendar</a><a class="small-button" href="flight-planning.html?trip=${encodeURIComponent(assignment.trip_id)}&date=${encodeURIComponent(assignment.operating_date)}">Trip Flight Planning</a></div></div></article>`;
+}
+
+
+/* ============================================================
+   DROP TRIP
+   ============================================================ */
+
+function openDropTripModal(
+    tripId,
+    operatingDate
+) {
+
+    const assignment =
+        myAssignments.find(
+            item =>
+                String(item.trip_id) ===
+                    String(tripId) &&
+                String(item.operating_date) ===
+                    String(operatingDate) &&
+                item.status !== "cancelled"
+        );
+
+
+    if (!assignment) {
+
+        showError(
+            "This trip is no longer assigned to your account."
+        );
+
+        return;
+
+    }
+
+
+    pendingDropAssignment =
+        assignment;
+
+
+    const modal =
+        document.getElementById(
+            "dropTripModal"
+        );
+
+
+    const tripDisplay =
+        document.getElementById(
+            "dropTripModalTrip"
+        );
+
+
+    const errorBox =
+        document.getElementById(
+            "dropTripModalError"
+        );
+
+
+    tripDisplay.textContent =
+        `${assignment.trip_id} · ` +
+        `${formatOperatingDate(
+            assignment.operating_date
+        )}`;
+
+
+    errorBox.style.display =
+        "none";
+
+    errorBox.textContent =
+        "";
+
+
+    modal.classList.add(
+        "open"
+    );
+
+    modal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+
+    document
+        .getElementById(
+            "keepTripButton"
+        )
+        .focus();
+
+}
+
+
+function closeDropTripModal() {
+
+    if (dropTripInProgress) {
+        return;
+    }
+
+
+    const modal =
+        document.getElementById(
+            "dropTripModal"
+        );
+
+
+    modal.classList.remove(
+        "open"
+    );
+
+    modal.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+
+    pendingDropAssignment =
+        null;
+
+}
+
+
+async function confirmDropTrip() {
+
+    if (
+        dropTripInProgress ||
+        !pendingDropAssignment
+    ) {
+        return;
+    }
+
+
+    const assignment =
+        pendingDropAssignment;
+
+
+    const keepButton =
+        document.getElementById(
+            "keepTripButton"
+        );
+
+
+    const dropButton =
+        document.getElementById(
+            "confirmDropTripButton"
+        );
+
+
+    const errorBox =
+        document.getElementById(
+            "dropTripModalError"
+        );
+
+
+    dropTripInProgress =
+        true;
+
+
+    keepButton.disabled =
+        true;
+
+    dropButton.disabled =
+        true;
+
+    dropButton.textContent =
+        "Dropping...";
+
+
+    errorBox.style.display =
+        "none";
+
+    errorBox.textContent =
+        "";
+
+
+    try {
+
+        if (
+            !window.ViaviaTrips ||
+            typeof ViaviaTrips.drop !==
+                "function"
+        ) {
+
+            throw new Error(
+                "Drop Trip is not available. Make sure the updated viavia-supabase.js is loaded."
+            );
+
+        }
+
+
+        await ViaviaTrips.drop(
+            assignment.trip_id,
+            assignment.operating_date
+        );
+
+
+        pendingDropAssignment =
+            null;
+
+
+        document
+            .getElementById(
+                "dropTripModal"
+            )
+            .classList.remove(
+                "open"
+            );
+
+
+        document
+            .getElementById(
+                "dropTripModal"
+            )
+            .setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+
+        /*
+         * Reload directly from Supabase.
+         * getMyTrips() excludes cancelled assignments,
+         * so the dropped trip disappears immediately.
+         */
+
+        await loadMyTrips();
+
+        await loadCompletedFlights();
+
+
+    } catch (error) {
+
+        console.error(
+            "Viavia My Trips: Drop Trip failed:",
+            error
+        );
+
+
+        errorBox.textContent =
+            error?.message ||
+            "Unable to drop this trip.";
+
+        errorBox.style.display =
+            "block";
+
+
+    } finally {
+
+        dropTripInProgress =
+            false;
+
+
+        keepButton.disabled =
+            false;
+
+        dropButton.disabled =
+            false;
+
+        dropButton.textContent =
+            "Drop Trip";
+
+    }
+
+}
+
+
+/* ============================================================
+   DROP TRIP EVENTS
+   ============================================================ */
+
+document
+    .getElementById(
+        "tripsContainer"
+    )
+    .addEventListener(
+        "click",
+        event => {
+
+            const button =
+                event.target.closest(
+                    "[data-drop-trip='true']"
+                );
+
+
+            if (!button) {
+                return;
+            }
+
+
+            openDropTripModal(
+                button.dataset.tripId,
+                button.dataset.operatingDate
+            );
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "keepTripButton"
+    )
+    .addEventListener(
+        "click",
+        closeDropTripModal
+    );
+
+
+document
+    .getElementById(
+        "confirmDropTripButton"
+    )
+    .addEventListener(
+        "click",
+        confirmDropTrip
+    );
+
+
+document
+    .getElementById(
+        "dropTripModal"
+    )
+    .addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target.id ===
+                    "dropTripModal"
+            ) {
+
+                closeDropTripModal();
+
+            }
+
+        }
+    );
+
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "Escape" &&
+            document
+                .getElementById(
+                    "dropTripModal"
+                )
+                .classList.contains(
+                    "open"
+                )
+        ) {
+
+            closeDropTripModal();
+
+        }
+
+    }
+);
+
+
+/* ============================================================
+   SUMMARY
+   ============================================================ */
+
+function renderSummary() {
+
+    const activeAssignments =
+        myAssignments.filter(
+            assignment =>
+                assignment.status !==
+                "cancelled"
+        );
+
+
+    document
+        .getElementById(
+            "tripCount"
+        )
+        .textContent =
+        activeAssignments.length;
+
+
+    const totalLegs =
+        activeAssignments.reduce(
+            (total, assignment) => {
+
+                return (
+                    total +
+                    Number(
+                        assignment.leg_count ||
+                        0
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    document
+        .getElementById(
+            "legCount"
+        )
+        .textContent =
+        totalLegs;
+
+
+    const bases =
+        [
+            ...new Set(
+                activeAssignments
+                    .map(
+                        assignment =>
+                            assignment.base
+                    )
+                    .filter(Boolean)
+            )
+        ];
+
+
+    let baseText = "—";
+
+
+    if (currentPilot?.base) {
+
+        baseText =
+            currentPilot.base;
+
+    } else if (
+        bases.length === 1
+    ) {
+
+        baseText =
+            bases[0];
+
+    } else if (
+        bases.length > 1
+    ) {
+
+        baseText =
+            "Multiple";
+
+    }
+
+
+    document
+        .getElementById(
+            "pilotBase"
+        )
+        .textContent =
+        baseText;
+
+}
+
+
+/* ============================================================
+   RENDER PAGE
+   ============================================================ */
+
+function renderTrips() {
+
+    const container =
+        document.getElementById(
+            "tripsContainer"
+        );
+
+
+    const assignments =
+        myAssignments
+            .filter(
+                assignment =>
+                    assignment.status !==
+                    "cancelled"
+            )
+            .sort(
+                (a, b) => {
+
+                    const dateCompare =
+                        String(
+                            a.operating_date
+                        ).localeCompare(
+                            String(
+                                b.operating_date
+                            )
+                        );
+
+
+                    if (
+                        dateCompare !== 0
+                    ) {
+
+                        return dateCompare;
+
+                    }
+
+
+                    return String(
+                        a.trip_id
+                    ).localeCompare(
+                        String(
+                            b.trip_id
+                        )
+                    );
+
+                }
+            );
+
+
+    if (!assignments.length) {
+
+        container.innerHTML = `
+
+            <div class="empty">
+
+                <h2>
+                    No Awarded Trips
+                </h2>
+
+                <p>
+                    You do not currently have any
+                    Viavia trip assignments.
+                    Claim an available pairing and
+                    it will appear here automatically.
+                </p>
+
+                <a
+                    class="button"
+                    href="available-bids.html"
+                >
+                    View Available Trips
+                </a>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    container.innerHTML =
+        assignments
+            .map(renderTrip)
+            .join("");
+
+}
+
+
+/* ============================================================
+   CONNECTION
+   ============================================================ */
+
+function showConnected() {
+
+    document
+        .getElementById(
+            "connectionDot"
+        )
+        .classList.add(
+            "connected"
+        );
+
+
+    document
+        .getElementById(
+            "connectionText"
+        )
+        .textContent =
+        "Connected";
+
+}
+
+
+function updatePilotDisplay() {
+
+    const element =
+        document.getElementById(
+            "pilotDisplay"
+        );
+
+
+    if (
+        currentPilot?.display_name
+    ) {
+
+        element.textContent =
+            currentPilot.display_name;
+
+        return;
+
+    }
+
+
+    if (currentUser?.email) {
+
+        element.textContent =
+            currentUser.email;
+
+        return;
+
+    }
+
+
+    element.textContent =
+        "Viavia Pilot";
+
+}
+
+
+/* ============================================================
+   ERROR
+   ============================================================ */
+
+function showError(message) {
+
+    const box =
+        document.getElementById(
+            "errorBox"
+        );
+
+    box.style.display =
+        "block";
+
+    box.textContent =
+        message;
+
+}
+
+
+/* ============================================================
+   LOAD ASSIGNMENTS
+   ============================================================ */
+
+async function loadMyTrips() {
+
+    myAssignments =
+        await ViaviaTrips.getMyTrips();
+
+
+    if (
+        !Array.isArray(
+            myAssignments
+        )
+    ) {
+
+        myAssignments = [];
+
+    }
+
+
+    await loadAircraftAssignmentsForMyTrips();
+
+    renderSummary();
+
+    renderTrips();
+
+}
+
+
+
+
+function completionAddDays(value, days) {
+    const parts=String(value||"").split("-").map(Number);
+    if(parts.length!==3||parts.some(Number.isNaN))return value;
+    const d=new Date(parts[0],parts[1]-1,parts[2]);
+    d.setDate(d.getDate()+Number(days||0));
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+
+function tripCompletionInfo(trip) {
+    const flights=Array.isArray(trip?.flights)?trip.flights:[];
+    let completed=0;
+    flights.forEach(f=>{
+        const day=Math.max(1,Number(f?.pairingDay)||1);
+        const date=completionAddDays(trip.operatingDate,day-1);
+        if(isFlightCompleted(f.flightNumber,date))completed++;
+    });
+    return {completed,total:flights.length,all:flights.length>0&&completed===flights.length};
+}
+
+/* ============================================================
+   POSTFLIGHT COMPLETION STATUS
+   ============================================================ */
+
+function completedFlightKey(flightNumber, operatingDate) {
+    return `${String(flightNumber || "").trim().toUpperCase()}|${String(operatingDate || "").trim()}`;
+}
+
+function isFlightCompleted(flightNumber, operatingDate) {
+    return completedFlightKeys.has(
+        completedFlightKey(flightNumber, operatingDate)
+    );
+}
+
+async function loadCompletedFlights() {
+    completedFlightKeys = new Set();
+
+    if (!currentUser?.id || typeof viaviaSupabase === "undefined") {
+        return;
+    }
+
+    const result = await viaviaSupabase
+        .from("postflight_reports")
+        .select("flight_number, operating_date")
+        .eq("pilot_id", currentUser.id);
+
+    if (result.error) {
+        throw result.error;
+    }
+
+    (result.data || []).forEach(report => {
+        completedFlightKeys.add(
+            completedFlightKey(
+                report.flight_number,
+                report.operating_date
+            )
+        );
+    });
+}
+
+/* ============================================================
+   SIGN OUT
+   ============================================================ */
+
+document
+    .getElementById(
+        "signOutButton"
+    )
+    .addEventListener(
+        "click",
+        async () => {
+
+            try {
+
+                await ViaviaAuth.signOut();
+
+            } catch (error) {
+
+                console.error(
+                    "Viavia sign out error:",
+                    error
+                );
+
+            }
+
+
+            window.location.replace(
+                "login.html"
+            );
+
+        }
+    );
+
+
+/* ============================================================
+   INITIALIZATION
+   ============================================================ */
+
+async function initializeMyTrips() {
+
+    try {
+
+        currentUser =
+            await ViaviaAuth.requireAuth();
+
+
+        if (!currentUser) {
+            return;
+        }
+
+
+        currentPilot =
+            await ViaviaPilots.getProfile();
+
+
+        updatePilotDisplay();
+
+
+        /*
+         * My Trips is driven by awarded Supabase assignments.
+         * Do not block the page on regenerated pairing IDs.
+         */
+
+        masterPairings = [];
+
+
+        await loadMyTrips();
+
+
+        showConnected();
+
+
+    } catch (error) {
+
+        console.error(
+            "Viavia My Trips initialization failed:",
+            error
+        );
+
+
+        showError(
+            error?.message ||
+            "Unable to load your Viavia trips."
+        );
+
+
+        document
+            .getElementById(
+                "tripsContainer"
+            )
+            .innerHTML = `
+
+                <div class="empty">
+
+                    <h2>
+                        Unable to Load Trips
+                    </h2>
+
+                    <p>
+                        Viavia Operations could not
+                        retrieve your assignments.
+                    </p>
+
+                </div>
+
+            `;
+
+    }
+
+}
+
+
+/* ============================================================
+   REFRESH WHEN RETURNING TO PAGE
+   ============================================================ */
+
+window.addEventListener(
+    "pageshow",
+    async event => {
+
+        if (
+            event.persisted &&
+            currentUser
+        ) {
+
+            try {
+
+                await loadMyTrips();
+
+            } catch (error) {
+
+                console.error(
+                    "Unable to refresh My Trips:",
+                    error
+                );
+
+            }
+
+        }
+
+    }
+);
+
+
+/* ============================================================
+   START
+   ============================================================ */
+
+initializeMyTrips();
+
+</script>
+
+</body>
+</html>
